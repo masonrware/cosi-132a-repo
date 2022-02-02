@@ -4,7 +4,10 @@ from typing import Dict, Union
 
 
 def title_match(query: str, title: str) -> bool:
-    raise NotImplementedError
+    if query in title:
+        return True
+    else:
+        return False
 
 
 def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Dict[str, Dict]:
