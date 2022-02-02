@@ -1,13 +1,15 @@
 from pathlib import Path
 from flask import Flask, render_template, request
+
 from utils import title_match, load_wapo
 
 app = Flask(__name__)
 
+# hello
+
 DATA_DIR = Path(__file__).parent.joinpath("pa2_data")
 wapo_path = DATA_DIR.joinpath("wapo_pa2.jl")
 wapo_docs = load_wapo(wapo_path)  # load and process WAPO documents
-
 
 @app.route("/")
 def home():
@@ -25,7 +27,11 @@ def results():
     :return:
     """
     query_text = request.form["query"]  # Get the raw user query from home page
-    return render_template("results.html", query=query_text)  # add variables as you wish
+    corpra = []
+    for document_image in wapo_docs.values():
+        if title_match(query_text, document_image['title']):
+            corpra.append(document_image)
+    return render_template("results.html", query=corpra)  # add variables as you wish
 
 
 @app.route("/results/<int:page_id>", methods=["POST"])
