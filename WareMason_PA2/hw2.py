@@ -29,11 +29,12 @@ def results():
     res = []
     for document_image in wapo_docs.values():
         if title_match(query_text, document_image['title']):
-            # if len(res) >= 2:
-            #     res.append('-------')
-            res.append((document_image['title'], limit_content(document_image['content_str'])))
-            # titles.append(document_image['title'])
-            # bodies.append(limit_content(document_image['content_str']))
+            item_dict = {
+                'title': document_image['title'],
+                'content': limit_content(document_image['content_str']),
+                'id': document_image['id']
+            }
+            res.append(item_dict)
     return render_template("results.html", query=res)  # add variables as you wish
 
 
