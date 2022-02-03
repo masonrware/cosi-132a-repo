@@ -15,11 +15,13 @@
     <input type="submit" value="Search">
 </form>
 
-<p>
+<ol>
+    <!-- maybe make res a passed dictionary then create different html elements for each component of the dict -->
+    <!-- no need to use an <a> tag, instead can use the action modifier like on line 12 for doc creation -->
     {% for res in query %}
-        <p>{{ res }}</p>
+        <li>{{ res }}</li>
     {% endfor %}
-</p>
+</ol>
 
 </body>
 </html>
