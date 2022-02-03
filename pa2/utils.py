@@ -4,6 +4,8 @@ from typing import Dict, Union
 
 
 def title_match(query: str, title: str) -> bool:
+    query = query.lower()
+    title = title.lower()
     if query in title:
         return True
     else:

@@ -2,11 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <style>
-        body {
-            background-color: lightskyblue;
-        }
-    </style>
+    <link rel='stylesheet' type='text/css' href='./style.css'/>
     <title>Washington Post Search</title>
 </head>
 <body>
@@ -19,7 +15,11 @@
     <input type="submit" value="Search">
 </form>
 
-<p><strong>{{ query }}</strong></p>
+<p>
+    {% for res in query %}
+        <p>{{ res }}</p>
+    {% endfor %}
+</p>
 
 </body>
 </html>
