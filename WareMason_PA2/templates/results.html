@@ -17,15 +17,19 @@
 
 
 <!-- start of doc -->
-<ol>
+<ul>
     {% for res in query %}
         <li><a href="{{ url_for('doc_data', doc_id=res['id'])}}">{{ res['title'] }}</a></li><br>
         <sli>{{ res['content'] }}</sli>
         <br><br>
     {% endfor %}
-</ol>
+</ul>
+<p>Page {{ PAGE_NUM }} / {{ TOTAL_PAGES }}</p>
 {% if PAGE_NUM != TOTAL_PAGES %}
-    <button>hello</button>
+
+    <a href="{{ url_for('next_page', page_id=PAGE_NUM+1, total_pages=TOTAL_PAGES) }}">
+        <input type="button" value="Next Page" />
+    </a>
 {% endif %}
 
 
