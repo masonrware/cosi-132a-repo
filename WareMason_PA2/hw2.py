@@ -1,13 +1,17 @@
 from pathlib import Path
 from flask import Flask, render_template, request
+import math
+import utils as u
 
-from utils import title_match, load_wapo
+utils = u.Utils()
+pages = {int: [{}]}
+PAGE_NUM, TOTAL_PAGES = 0, 0
 
 app = Flask(__name__)
 
 DATA_DIR = Path(__file__).parent.joinpath("pa2_data")
 wapo_path = DATA_DIR.joinpath("wapo_pa2.jl")
-wapo_docs = load_wapo(wapo_path)  # load and process WAPO documents
+wapo_docs = utils.load_wapo(wapo_path)  # load and process WAPO documents
 
 
 @app.route("/")
@@ -27,15 +31,26 @@ def results():
     """
     query_text = request.form["query"]  # Get the raw user query from home page'
     res = []
+    dict_ind = 1
     for document_image in wapo_docs.values():
-        if title_match(query_text, document_image['title']):
+        if utils.title_match(query_text, document_image['title']):
             item_dict = {
                 'title': document_image['title'],
                 'content': limit_content(document_image['content_str']),
                 'id': document_image['id']
             }
             res.append(item_dict)
-    return render_template("results.html", query=res)  # add variables as you wish
+            if len(res) == 8:
+                pages[dict_ind] = res
+                res = []
+                dict_ind += 1
+    if len(res) != 0:
+        pages[dict_ind] = res
+    TOTAL_PAGES = dict_ind
+    return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
+    ##TODO:
+    # pass a variable for page number and overall page number and then have if statement that checks if they're equal or
+    # not and then render the new thing with page number
 
 
 def limit_content(content: str) -> str:
@@ -49,7 +64,7 @@ def next_page(page_id):
     :param page_id:
     :return:
     """
-    return render_template("results.html")  # add variables as you wish
+    return render_template("results.html", query=pages[page_id])  # add variables as you wish
 
 
 @app.route("/doc_data/<doc_id>")
@@ -59,7 +74,10 @@ def doc_data(doc_id):
     :param doc_id:
     :return:
     """
-    return render_template("doc.html")  # add variables as you wish
+    doc_dict = utils.look_up_by_id(doc_id)
+    ##TODO:
+    ##maybe get a bootswatch background
+    return render_template("doc.html", here=doc_dict)  # add variables as you wish
 
 
 if __name__ == "__main__":
