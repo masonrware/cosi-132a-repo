@@ -15,14 +15,20 @@
     <input type="submit" value="Search">
 </form>
 
+
+<!-- start of doc -->
 <ol>
-    <!-- no need to use an <a> tag, instead can use the action modifier like on line 12 for doc creation, pass second paramter (i.e. id) potentially with a key word -->
-    <!-- can index with []-->
     {% for res in query %}
-        <li>{{ res['title'] }}</li><br>
-        <sli>{{ res['content'] }}</sli><br><br>
+        <li><a href="{{ url_for('doc_data', doc_id=res['id'])}}">{{ res['title'] }}</a></li><br>
+        <sli>{{ res['content'] }}</sli>
+        <br><br>
     {% endfor %}
 </ol>
+{% if PAGE_NUM != TOTAL_PAGES %}
+    <button>hello</button>
+{% endif %}
+
+
 
 </body>
 </html>
