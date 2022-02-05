@@ -5,7 +5,7 @@ import utils as u
 
 utils = u.Utils()
 pages = {int: [{}]}
-PAGE_NUM, TOTAL_PAGES = 0, 0
+PAGE_NUM, TOTAL_PAGES = 1, 0
 
 app = Flask(__name__)
 
@@ -46,6 +46,9 @@ def results():
                 dict_ind += 1
     if len(res) != 0:
         pages[dict_ind] = res
+
+    print(pages.keys())
+
     TOTAL_PAGES = dict_ind
     return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
     ##TODO:
@@ -57,14 +60,18 @@ def limit_content(content: str) -> str:
     return content[:150] if len(content) > 150 else content
 
 
-@app.route("/results/<int:page_id>", methods=["POST"])
-def next_page(page_id):
+@app.route("/results/<int:page_id>/<int:total_pages>", methods=["GET", "POST"])
+def next_page(page_id, total_pages):
     """
     "next page" to show more results
     :param page_id:
     :return:
     """
-    return render_template("results.html", query=pages[page_id])  # add variables as you wish
+    PAGE_NUM = page_id
+    TOTAL_PAGES = total_pages
+    print(TOTAL_PAGES)
+
+    return render_template("results.html", query=pages[PAGE_NUM], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
 
 
 @app.route("/doc_data/<doc_id>")
