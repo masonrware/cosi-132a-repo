@@ -47,10 +47,9 @@ def results():
     if len(res) != 0:
         pages[dict_ind] = res
 
-    print(pages.keys())
-
     TOTAL_PAGES = dict_ind
-    return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
+    return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM,
+                           TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
     ##TODO:
     # pass a variable for page number and overall page number and then have if statement that checks if they're equal or
     # not and then render the new thing with page number
@@ -58,6 +57,20 @@ def results():
 
 def limit_content(content: str) -> str:
     return content[:150] if len(content) > 150 else content
+
+
+##CUSTOM ADDED METHOD
+@app.route("/results/<int:page_id>/<int:total_pages>", methods=["GET", "POST"])
+def prev_page(page_id, total_pages):
+    """
+    "previous page" to show more results
+    :param page_id:
+    :return:
+    """
+    PAGE_NUM = page_id
+    TOTAL_PAGES = total_pages
+    return render_template("results.html", query=pages[PAGE_NUM], PAGE_NUM=PAGE_NUM,
+                           TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
 
 
 @app.route("/results/<int:page_id>/<int:total_pages>", methods=["GET", "POST"])
@@ -69,9 +82,8 @@ def next_page(page_id, total_pages):
     """
     PAGE_NUM = page_id
     TOTAL_PAGES = total_pages
-    print(TOTAL_PAGES)
-
-    return render_template("results.html", query=pages[PAGE_NUM], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
+    return render_template("results.html", query=pages[PAGE_NUM], PAGE_NUM=PAGE_NUM,
+                           TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
 
 
 @app.route("/doc_data/<doc_id>")
