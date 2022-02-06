@@ -3,19 +3,23 @@ from flask import Flask, render_template, request
 import math
 import utils as u
 
-utils = u.Utils()
+app = Flask(__name__)
+
+
+def limit_content(content: str) -> str:
+    return content[:150] if len(content) > 150 else content
+
+
 pages = {int: [{}]}
 PAGE_NUM, TOTAL_PAGES = 1, 0
 
-app = Flask(__name__)
-
 DATA_DIR = Path(__file__).parent.joinpath("pa2_data")
 wapo_path = DATA_DIR.joinpath("wapo_pa2.jl")
-wapo_docs = utils.load_wapo(wapo_path)  # load and process WAPO documents
+wapo_docs = u.load_wapo(wapo_path)  # load and process WAPO documents
 
 
 @app.route("/")
-def home():
+def home() -> str:
     """
     home page
     :return:
@@ -24,7 +28,7 @@ def home():
 
 
 @app.route("/results", methods=["POST"])
-def results():
+def results() -> str:
     """
     result page
     :return:
@@ -33,7 +37,7 @@ def results():
     res = []
     dict_ind = 1
     for document_image in wapo_docs.values():
-        if utils.title_match(query_text, document_image['title']):
+        if u.title_match(query_text, document_image['title']):
             item_dict = {
                 'title': document_image['title'],
                 'content': limit_content(document_image['content_str']),
@@ -50,21 +54,15 @@ def results():
     TOTAL_PAGES = dict_ind
     return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM,
                            TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
-    ##TODO:
-    # pass a variable for page number and overall page number and then have if statement that checks if they're equal or
-    # not and then render the new thing with page number
 
 
-def limit_content(content: str) -> str:
-    return content[:150] if len(content) > 150 else content
-
-
-##CUSTOM ADDED METHOD
+# CUSTOM ADDED METHOD
 @app.route("/results/<int:page_id>/<int:total_pages>", methods=["GET", "POST"])
-def prev_page(page_id, total_pages):
+def prev_page(page_id: int, total_pages: int) -> str:
     """
     "previous page" to show more results
     :param page_id:
+    :param total_pages:
     :return:
     """
     PAGE_NUM = page_id
@@ -74,10 +72,11 @@ def prev_page(page_id, total_pages):
 
 
 @app.route("/results/<int:page_id>/<int:total_pages>", methods=["GET", "POST"])
-def next_page(page_id, total_pages):
+def next_page(page_id: int, total_pages: int) -> str:
     """
     "next page" to show more results
     :param page_id:
+    :param total_pages:
     :return:
     """
     PAGE_NUM = page_id
@@ -87,15 +86,15 @@ def next_page(page_id, total_pages):
 
 
 @app.route("/doc_data/<doc_id>")
-def doc_data(doc_id):
+def doc_data(doc_id: int) -> str:
     """
     document page
     :param doc_id:
     :return:
     """
-    doc_dict = utils.look_up_by_id(doc_id)
-    ##TODO:
-    ##maybe get a bootswatch background
+    doc_dict = u.look_up_by_id(doc_id)
+    # TODO:
+    # maybe get a bootswatch background
     return render_template("doc.html", here=doc_dict)  # add variables as you wish
 
 
