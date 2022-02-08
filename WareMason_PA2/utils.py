@@ -41,9 +41,9 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Dict[str, Dict]:
 
 def look_up_by_id(doc_id: int) -> Dict[str, Dict]:
     """
-    verify id
-    :doc_id:
-    :return:
+    verify the given id
+    :doc_id: int of the desired id
+    :return: the obj associated with the id
     """
     try:
         return articles_dict[doc_id]
@@ -54,9 +54,9 @@ def look_up_by_id(doc_id: int) -> Dict[str, Dict]:
 def title_match(query: str, title: str) -> bool:
     """
     check id in title
-    :query:
-    :title:
-    :return:
+    :query: str of the search value
+    :title: str of title to match
+    :return: bool of if str is in title
     """
     query = query.lower()
     title = title.lower()
