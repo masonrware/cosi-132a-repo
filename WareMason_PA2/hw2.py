@@ -33,7 +33,7 @@ def results() -> str:
     result page
     :return:
     """
-    query_text = request.form["query"]  # Get the raw user query from home page'
+    query_text = request.form["query"]  # Get the raw user query from home page
     res = []
     dict_ind = 1
     for document_image in wapo_docs.values():

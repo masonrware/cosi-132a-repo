@@ -1,0 +1,7 @@
+name: cs132a
+channels:
+  - nodedefaults
+dependencies:
+  - python=3.9
+  - flask=2.0.2
+  - pip
