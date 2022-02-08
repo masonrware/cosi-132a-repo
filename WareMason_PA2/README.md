@@ -6,12 +6,6 @@
         <meta name="keywords" content="ReadMe">
         <meta name="author" content="Mason Ware">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>PA2 ReadMe</title>
-        <style>
-            code {
-                border: solid black 1px;
-            }
-        </style>
     </head>
     <body style='font-family:Arial, Helvetica, sans-serif'>
         <h1 style='border: 0; padding: 0; margin: 0;'>PA2</h1>
@@ -89,7 +83,7 @@
             <div id ='Run Instrcutions'>
                 <h3>Run Instrcutions</h3>
                 <p>Now, in order to run the program after having built the environment and ensured the conditions, the python script in <code>hw2.py</code>
-                needs to be run. To do so, either run the program in a debug environment by running the file via an editor's GUI or via the shell using the
+                needs to be run. To do so, run the program in a debug environment either by running the file via an editor's GUI or via the shell using the
                 command, <code>python hw2.py</code> from the root of the project. Once you've done that, the project should be running locally. If you navigate
                 to the correct localhost port in a browser, you should see the home page and a search bar prompting for a query. As a note,
                 there is no typing correction or start end matching on the query keyword, which means whatever the user enters will be mathced across the
