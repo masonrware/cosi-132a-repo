@@ -93,7 +93,13 @@
         <hr>
         <div id='Testing'>
             <h3>Testing</h3>
-            <p>Testing Info.</p>
+            <p>In lieu of unit tests, I tested this program by entering the following inputs: </p>
+            <ul>
+                <li>"" <p>To recieve a result of all 50 documents on 7 pages</p></li> 
+                <li>"d.c." <p>To recieve a result of 3 documents on 1 page</p></li>
+                <li>"prince" <p>To recieve a result of 1 document on 1 page</p></li>
+                <li>"b" <p>To recieve a result of 22 documents on 3 pages</p></li>
+            </ul>
         </div>
     </body>
 </html>
