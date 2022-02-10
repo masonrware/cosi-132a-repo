@@ -33,14 +33,14 @@
                     The method opens the file using a <code>with open</code> statment and jsonifys it using the <code>json</code>
                     built-in python package.</p>
                     <p>Reading through the data line by line, or dictionary item by dictionary item, 
-                    the program first grabs the content, that is represented in each article's dictionary by a list of separate
-                    dictionaries of html ssections. Using the list comprehension, <code> [item['content'] for item in contents 
-                    if item['type'] == 'sanitized_html']</code> , to retain all the proper html items as specified by the instructions
-                    and join them together to create a string of all the contents.</p>
+                    the program first grabs the content which is represented in each article's dictionary by a list of separate
+                    dictionaries of html sections. Using the list comprehension, <code> [item['content'] for item in contents 
+                    if item['type'] == 'sanitized_html']</code> , the program retains all the proper html items as specified by 
+                    the instructions and joins them together to create a string of all the contents.</p>
                     <p>Next, the program creates a dictionary object containing all of the relevant data fields within an article.
                     Once it has built this dictionary, it then saves it as a value in another dictonary with the id of the article as
-                    the key. What is left is a dictionary, called <code>articles_dict</code> in the code that is ids to dictionary items
-                    of articles.</p>
+                    the key. What is left is a dictionary, called <code>articles_dict</code>, that has keys of string ids to dictionary 
+                    item articles.</p>
                 <br>
                 <li><code>look_up_by_id(doc_id: int) -> Dict[str, Dict]</code></li>
                     <p>This method is far shorter than the others in the file. It works to search for a given id in the overall dictionary
@@ -53,7 +53,9 @@
                     given title of one of the articles in the data. Should a match be found, True is returned and otherwise, False.
                     </p>
                     <p>This method is used in <code>./hw2.py</code> to find the titles among the data set overall that match the user's
-                    query</p>
+                    query.</p>
+                    <p>Should the return value be False, <code>/templates/errorResults.html</code> will be displayed instead of the usual
+                    <code>/templates/results.html</code></p>
             </ol>
         </div>
         <br>
@@ -75,7 +77,7 @@
                 <h3>Build Instrcutions</h3>
                 <p>As priorly mentioned, the first command to run in the terminal for this project's build is <code>pip install -r requirements.txt</code>.
                 Once all packages are installed, the next step in the build process is to ensure that the data is located at <code>/pa2_data/wapo.jl</code>
-                and is named properly. Due to the local scope of this project, if the file is not located and named correctly, the data will not be processed
+                and is named properly. Due to the local scope of this project, if the file is not located and named correctly, the data will not be processed.
                 The last step is to ensure that an environment is active on your machine to allow python to execute. In the development of this project, a
                 conda environment was used. You can create your own, use a ported venv from an editor like PyCharm, or create the one specified in the 
                 <code>./environment.yml</code> file using the command <code>conda env create -f environment.yml</code>.</p> 
@@ -97,8 +99,9 @@
             <ul>
                 <li>"" <p>To recieve a result of all 50 documents on 7 pages</p></li> 
                 <li>"d.c." <p>To recieve a result of 3 documents on 1 page</p></li>
-                <li>"prince" <p>To recieve a result of 1 document on 1 page</p></li>
                 <li>"b" <p>To recieve a result of 22 documents on 3 pages</p></li>
+                <li>"zdjznczdc" <p>To recieve a result of 0 documents on 1 page with 
+                the message, "No Results Found For That Query :("</p></li>
             </ul>
         </div>
     </body>

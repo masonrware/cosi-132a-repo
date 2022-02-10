@@ -38,6 +38,7 @@ def results() -> str:
     dict_ind = 1
     for document_image in wapo_docs.values():
         if u.title_match(query_text, document_image['title']):
+            print('HELLO')
             item_dict = {
                 'title': document_image['title'],
                 'content': limit_content(document_image['content_str']),
@@ -48,12 +49,12 @@ def results() -> str:
                 pages[dict_ind] = res
                 res = []
                 dict_ind += 1
+    TOTAL_PAGES = dict_ind
     if len(res) != 0:
         pages[dict_ind] = res
-
-    TOTAL_PAGES = dict_ind
-    return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM,
-                           TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
+        return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
+    else:
+        return render_template("errorResults.html", PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
 
 
 # CUSTOM ADDED METHOD
