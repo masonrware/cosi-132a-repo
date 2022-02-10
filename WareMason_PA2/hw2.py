@@ -38,7 +38,6 @@ def results() -> str:
     dict_ind = 1
     for document_image in wapo_docs.values():
         if u.title_match(query_text, document_image['title']):
-            print('HELLO')
             item_dict = {
                 'title': document_image['title'],
                 'content': limit_content(document_image['content_str']),
