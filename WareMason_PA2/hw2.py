@@ -51,6 +51,8 @@ def results() -> str:
     TOTAL_PAGES = dict_ind
     if len(res) != 0:
         pages[dict_ind] = res
+    if len(list(pages.keys())) != 1:
+        print('hel')
         return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
     else:
         return render_template("errorResults.html", PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
