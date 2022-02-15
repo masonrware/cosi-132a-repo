@@ -25,7 +25,7 @@
 </ul>
 <p>Page {{ PAGE_NUM }} / {{ TOTAL_PAGES }}</p>
 {% if PAGE_NUM != 1 %}
-    <a href="{{ url_for('prev_page', page_id=PAGE_NUM-1, total_pages=TOTAL_PAGES) }}">
+    <a href="{{ url_for('prev_page', page_id=PAGE_NUM-1, total_pages=TOTAL_PAGES, pages=query) }}">
         <input type="button" class="btn btn-secondary"value="Prev Page" />
     </a>
 {% endif %}

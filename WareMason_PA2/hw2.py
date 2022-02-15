@@ -1,14 +1,11 @@
 from pathlib import Path
 from flask import Flask, render_template, request
-import math
 import utils as u
-from collections import defaultdict
 app = Flask(__name__)
 
 
 def limit_content(content: str) -> str:
     return content[:150] if len(content) > 150 else content
-
 
 pages = {}
 PAGE_NUM, TOTAL_PAGES = 1, 0
@@ -33,12 +30,13 @@ def results() -> str:
     result page
     :return:
     """
-    pages = {}
     query_text = request.form["query"]  # Get the raw user query from home page
-    res = []
+    res = [0]
     dict_ind = 1
     for document_image in wapo_docs.values():
         if u.title_match(query_text, document_image['title']):
+            if len(res)>0 and res[0]==0:
+                res = []
             item_dict = {
                 'title': document_image['title'],
                 'content': limit_content(document_image['content_str']),
@@ -52,7 +50,8 @@ def results() -> str:
     TOTAL_PAGES = dict_ind
     if len(res) != 0:
         pages[dict_ind] = res
-    if not pages:
+    print(query_text, len(pages))
+    if res[0] == 0:
         return render_template("errorResults.html", PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
     else:
         return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
@@ -83,6 +82,7 @@ def next_page(page_id: int, total_pages: int) -> str:
     """
     PAGE_NUM = page_id
     TOTAL_PAGES = total_pages
+    pages = pages
     return render_template("results.html", query=pages[PAGE_NUM], PAGE_NUM=PAGE_NUM,
                            TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
 
