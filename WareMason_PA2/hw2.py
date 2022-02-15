@@ -2,7 +2,7 @@ from pathlib import Path
 from flask import Flask, render_template, request
 import math
 import utils as u
-
+from collections import defaultdict
 app = Flask(__name__)
 
 
@@ -10,7 +10,7 @@ def limit_content(content: str) -> str:
     return content[:150] if len(content) > 150 else content
 
 
-pages = {int: [{}]}
+pages = {}
 PAGE_NUM, TOTAL_PAGES = 1, 0
 
 DATA_DIR = Path(__file__).parent.joinpath("pa2_data")
@@ -33,6 +33,7 @@ def results() -> str:
     result page
     :return:
     """
+    pages = {}
     query_text = request.form["query"]  # Get the raw user query from home page
     res = []
     dict_ind = 1
@@ -51,10 +52,10 @@ def results() -> str:
     TOTAL_PAGES = dict_ind
     if len(res) != 0:
         pages[dict_ind] = res
-    if len(list(pages.keys())) != 1:
-        return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
-    else:
+    if not pages:
         return render_template("errorResults.html", PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
+    else:
+        return render_template("results.html", query=pages[1], PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # add variables as you wish
 
 
 # CUSTOM ADDED METHOD
@@ -94,8 +95,6 @@ def doc_data(doc_id: int) -> str:
     :return:
     """
     doc_dict = u.look_up_by_id(doc_id)
-    # TODO:
-    # maybe get a bootswatch background
     return render_template("doc.html", here=doc_dict)  # add variables as you wish
 
 
