@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Union, Generator
 import functools
 import os
@@ -15,7 +16,6 @@ def timer(func):
             f"'{func.__name__}' elapsed time: {mins} minutes, {elapsed_t - mins * 60:0.2f} seconds"
         )
         return f_value
-
     return wrapper_timer
 
 
@@ -44,8 +44,23 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
     :param wapo_jl_path:
     :return:
     """
-    # TODO:
-    raise NotImplementedError
+    with open(wapo_jl_path, 'r', encoding='UTF-8') as file:
+        for line in file:
+            id = 0
+            conv = json.loads(line)
+            contents = conv['contents']
+            ##need to clean up the below to remove all html tags
+            content_str_ = " ".join([item['content'] for item in contents if item['type'] == 'sanitized_html'])
+            ##need to convert date to readable format
+            res = {
+                'id': id,
+                'title': conv['title'],
+                'author': conv['author'],
+                'published_date': conv['published_date'],
+                'content_str': content_str_
+            }
+            id+=1
+            yield res
 
 
 if __name__ == "__main__":

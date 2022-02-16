@@ -5,6 +5,7 @@ from nltk.tokenize import word_tokenize  # type: ignore
 from nltk.stem.porter import PorterStemmer  # type: ignore
 from nltk.corpus import stopwords  # type: ignore
 
+stop_words = set(stopwords.words('english'))
 
 class TextProcessing:
     def __init__(self, stemmer, stop_words, *args):
@@ -18,11 +19,7 @@ class TextProcessing:
         self.STOP_WORDS = stop_words
 
     @classmethod
-    def from_nltk(
-        cls,
-        stemmer: Any = PorterStemmer().stem,
-        stop_words: List[str] = stopwords.words("english"),
-    ) -> "TextProcessing":
+    def from_nltk(cls, stemmer: Any = PorterStemmer().stem, stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
         """
         initialize from nltk
         :param stemmer:
@@ -41,8 +38,14 @@ class TextProcessing:
         :param token:
         :return:
         """
-        # TODO:
-        raise NotImplementedError
+        ps = PorterStemmer()
+        token = token.lower()
+        token = re.sub('[^a-zA-Z0-9 -]', '', token)
+        if token in stop_words:
+            return ''
+        elif token not in stop_words and len(token)>1:
+            return ps.stem(token)
+
 
     def get_normalized_tokens(self, title: str, content: str) -> Set[str]:
         """
@@ -52,6 +55,10 @@ class TextProcessing:
         :param content:
         :return:
         """
+        token_title = word_tokenize(title)
+        token_content = word_tokenize(content)
+
+        
         # TODO:
         raise NotImplementedError
 
