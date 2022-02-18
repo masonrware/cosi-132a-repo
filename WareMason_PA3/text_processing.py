@@ -38,13 +38,12 @@ class TextProcessing:
         :param token:
         :return:
         """
-        ps = PorterStemmer()
         token = token.lower()
         token = re.sub('[^a-zA-Z0-9 -]', '', token)
-        if token in stop_words:
+        if token in stop_words or len(token)==1:
             return ''
         elif token not in stop_words and len(token)>1:
-            return ps.stem(token)
+            return self.stemmer.stem(token)
 
 
     def get_normalized_tokens(self, title: str, content: str) -> Set[str]:
@@ -57,8 +56,8 @@ class TextProcessing:
         """
         token_title = word_tokenize(title)
         token_content = word_tokenize(content)
+        ##call normalize on each term of each
 
-        
         # TODO:
         raise NotImplementedError
 
