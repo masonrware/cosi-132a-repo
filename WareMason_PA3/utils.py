@@ -45,13 +45,18 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
     :return:
     """
     with open(wapo_jl_path, 'r', encoding='UTF-8') as file:
+        id = 0
         for line in file:
-            id = 0
             conv = json.loads(line)
             contents = conv['contents']
-            ##need to clean up the below to remove all html tags
+
+            #!! need to clean up the below to remove all html tags
             content_str_ = " ".join([item['content'] for item in contents if item['type'] == 'sanitized_html'])
-            ##need to convert date to readable format
+            #!! need to convert date to readable format
+            #!! This one is given as follows, so just sure you apply it in your implementation
+            #!! %: from datetime import datetime
+            #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
+
             res = {
                 'id': id,
                 'title': conv['title'],
@@ -59,6 +64,7 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
                 'published_date': conv['published_date'],
                 'content_str': content_str_
             }
+            
             id+=1
             yield res
 

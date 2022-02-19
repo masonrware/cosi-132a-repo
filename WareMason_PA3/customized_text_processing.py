@@ -2,19 +2,26 @@ from typing import Set
 import pandas as pd
 import re
 
-#using the feauture_extraction package from sklearn, I import the TfidVectorizer
-#using this, I can get a list of stopwords and can create a vecotrizer to give me the 
-#informative ratings of any words input
+# #using the feauture_extraction package from sklearn, I import the TfidVectorizer
+# #using this, I can get a list of stopwords and can create a vecotrizer to give me the 
+# #informative ratings of any words input
 from sklearn.feature_extraction import text
-from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.tokenize import word_tokenize
+# from sklearn.feature_extraction.text import TfidfVectorizer
 
 stop_words = text.ENGLISH_STOP_WORDS.union(["book"])
-vectorizer = TfidfVectorizer(ngram_range=(1,1), stop_words=stop_words)
+# vectorizer = TfidfVectorizer(ngram_range=(1,1), stop_words=stop_words)
 
 
-##use case
-X = vectorizer.fit_transform(["this is an apple.","this is a book."])
-idf_values = dict(zip(vectorizer.get_feature_names(), vectorizer.idf_))
+# ##use case
+# X = vectorizer.fit_transform(["this is an apple.","this is a book."])
+# idf_values = dict(zip(vectorizer.get_feature_names(), vectorizer.idf_))
+
+import spacy
+nlp = spacy.load('en_core_web_sm')
+
+
+doc = nlp(Example_Sentence)
 
 
 class CustomizedTextProcessing:
@@ -32,6 +39,7 @@ class CustomizedTextProcessing:
         :param args:
         :param kwargs:
         """
+        pass
 
     @classmethod
     def from_customized(cls, *args, **kwargs) -> "CustomizedTextProcessing":
@@ -41,7 +49,7 @@ class CustomizedTextProcessing:
         :param kwargs:
         :return:
         """
-        raise NotImplementedError
+        pass
 
     def normalize(self, token: str) -> str:
         """
@@ -50,20 +58,14 @@ class CustomizedTextProcessing:
         :return:
         """
         token = token.lower()
-        # remove numbers
-        no_number_string = re.sub(r'\d+','',token)
-        # remove all punctuation except words and space
-        no_punc_string = re.sub(r'[^\w\s]','', no_number_string)
-        # remove white spaces
-        no_wspace_string = no_punc_string.strip()
-        lst_string = [no_wspace_string][0].split()
-        no_stpwords_string=''
-        for i in lst_string:
-            if not i in stop_words:
-                no_stpwords_string += i+' '
-        # removing last space
-        no_stpwords_string = no_stpwords_string[:-1]
-        return no_stpwords_string
+        no_number_token = re.sub('\d+','',token)
+        no_punc_token = re.sub('[^\w\s]','', no_number_token)
+        no_wspace_token = no_punc_token.strip()
+        if not no_wspace_token in stop_words:
+            return ''
+        else:
+            return no_wspace_token
+        ## alt to stem or lem
 
 
     def get_normalized_tokens(self, title: str, content: str) -> Set[str]:
@@ -73,9 +75,18 @@ class CustomizedTextProcessing:
         :param content:
         :return:
         """
-
-        # TODO:
-        raise NotImplementedError
+        tokenized_words = set()
+        token_title = word_tokenize(title)
+        token_content = word_tokenize(content)
+        for token in token_title:
+            token = str(token)
+            if self.normalize(token) != '':
+                tokenized_words.add(self.normalize(token))
+        for token in token_content:
+            token = str(token)
+            if self.normalize(token) != '':
+                tokenized_words.add(self.normalize(token))
+        return tokenized_words
 
 
 if __name__ == "__main__":

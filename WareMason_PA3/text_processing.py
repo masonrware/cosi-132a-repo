@@ -1,13 +1,16 @@
 import re
-from typing import Set, Any, List
-
-from nltk.tokenize import word_tokenize  # type: ignore
-from nltk.stem.porter import PorterStemmer  # type: ignore
-from nltk.corpus import stopwords  # type: ignore
+#TODO: move below imports to where they will be called for both the index terms loading and for the query normalization
+from nltk.tokenize import word_tokenize
+from nltk.stem.porter import PorterStemmer
+from nltk.corpus import stopwords
 
 stop_words = set(stopwords.words('english'))
 
 class TextProcessing:
+    """
+    Class to process text
+    """
+
     def __init__(self, stemmer, stop_words, *args):
         """
         class TextProcessing is used to tokenize and normalize tokens that will be further used to build inverted index.
@@ -19,14 +22,14 @@ class TextProcessing:
         self.STOP_WORDS = stop_words
 
     @classmethod
-    def from_nltk(cls, stemmer: Any = PorterStemmer().stem, stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
+    def from_nltk(self, cls, stemmer: Any = PorterStemmer().stem, stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
         """
         initialize from nltk
         :param stemmer:
         :param stop_words:
         :return:
         """
-        return cls(stemmer, set(stop_words))
+        return cls(self, stemmer, stop_words)
 
     def normalize(self, token: str) -> str:
         """
@@ -40,11 +43,10 @@ class TextProcessing:
         """
         token = token.lower()
         token = re.sub('[^a-zA-Z0-9 -]', '', token)
-        if token in stop_words or len(token)==1:
+        if token in stop_words or len(token)<=1:
             return ''
         elif token not in stop_words and len(token)>1:
             return self.stemmer.stem(token)
-
 
     def get_normalized_tokens(self, title: str, content: str) -> Set[str]:
         """
@@ -54,13 +56,22 @@ class TextProcessing:
         :param content:
         :return:
         """
+        tokenized_words = set()
         token_title = word_tokenize(title)
         token_content = word_tokenize(content)
-        ##call normalize on each term of each
-
-        # TODO:
-        raise NotImplementedError
+        for token in token_title:
+            token = str(token)
+            if self.normalize(token) != '':
+                tokenized_words.add(self.normalize(token))
+        for token in token_content:
+            token = str(token)
+            if self.normalize(token) != '':
+                tokenized_words.add(self.normalize(token))
+        return tokenized_words
 
 
 if __name__ == "__main__":
-    pass
+    tpObj = TextProcessing(PorterStemmer(), stop_words)
+    title = ''
+    content = ''
+    print(tpObj.get_normalized_tokens(title, content))
