@@ -3,6 +3,8 @@ from typing import Dict, Union, Generator
 import functools
 import os
 import time
+import re
+from datetime import datetime
 
 
 def timer(func):
@@ -49,24 +51,22 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
         for line in file:
             conv = json.loads(line)
             contents = conv['contents']
-
-            #!! need to clean up the below to remove all html tags
-            content_str_ = " ".join([item['content'] for item in contents if item['type'] == 'sanitized_html'])
-            #!! need to convert date to readable format
-            #!! This one is given as follows, so just sure you apply it in your implementation
-            #!! %: from datetime import datetime
-            #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
-
-            res = {
-                'id': id,
-                'title': conv['title'],
-                'author': conv['author'],
-                'published_date': conv['published_date'],
-                'content_str': content_str_
-            }
+            if(contents):
+                content_str_ = " ".join([item['content'] for item in contents if item['type'] == 'sanitized_html'])
+                content_str_ = re.sub("<[^>]*>", "", content_str_)
+                #!! This one is given as follows, so just sure you apply it in your implementation
+                #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
             
-            id+=1
-            yield res
+                res = {
+                    'id': id,
+                    'title': conv['title'],
+                    'author': conv['author'],
+                    'published_date': conv['published_date'],
+                    'content_str': content_str_
+                }
+            
+                id+=1
+                yield res
 
 
 if __name__ == "__main__":

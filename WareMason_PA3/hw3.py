@@ -11,9 +11,7 @@ data_dir = Path(__file__).parent.joinpath("pa3_data")
 wapo_path = data_dir.joinpath("wapo_pa3.jl")
 
 if not "wapo_docs" in db.list_collection_names():
-    # if wapo_docs collection is not existed, create a new one and insert docs into it
     insert_docs(load_wapo(wapo_path))
-    
 
 # home page
 @app.route("/")

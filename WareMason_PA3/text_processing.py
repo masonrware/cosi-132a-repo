@@ -1,6 +1,5 @@
 import re
-from typing import Set
-#TODO: move below imports to where they will be called for both the index terms loading and for the query normalization
+from typing import List, Set
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
@@ -23,7 +22,7 @@ class TextProcessing:
         self.STOP_WORDS = stop_words
 
     @classmethod
-    def from_nltk(self, cls, stemmer: Any = PorterStemmer().stem, stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
+    def from_nltk(self, cls, stemmer = PorterStemmer().stem, stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
         """
         initialize from nltk
         :param stemmer:

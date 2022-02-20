@@ -1,15 +1,13 @@
-import re
-from typing import Union, List, Tuple, Iterable
+from typing import List, Tuple, Iterable
 
-from numpy import insert
-
-from utils import timer, load_wapo
+from utils import timer
 from text_processing import TextProcessing
+
 from mongo_db import insert_db_index, query_db_index
 
-text_processor = TextProcessing.from_nltk()
 
-#!!! Sort listings (i.e. values of index) by size shortest->longest
+text_processor = TextProcessing.from_nltk(TextProcessing)
+
 
 class InvertedIndex:
     """
@@ -34,6 +32,8 @@ class InvertedIndex:
                 self.appearances_dict[term] = [document['id']]
     
     def load_index_postings_list(self) -> None:
+        """
+        """
         for term in self.appearances_dict:
             self.index.append({
                 'token': term,
@@ -41,6 +41,8 @@ class InvertedIndex:
             })
 
     def get_index(self) -> List:
+        """
+        """
         return self.index
 
 
@@ -55,7 +57,8 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     for doc_image in wapo_docs:
         inv_ind.index_document(doc_image)
     inv_ind.load_index_postings_list()
-    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids'])))
+    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']))) #might need a reverse=True
+    #* ^ This is the sorting - it gets sorted before being inserted into the DB
 
 def intersection(posting_lists: List[List[int]]) -> List[int]:
     """
@@ -72,6 +75,13 @@ def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     :param query: user input query
     :return:
     """
-    # TODO: search based on a query
-    #! maybe also normalize query text - alr have the text processor
-    raise NotImplementedError
+    normalized_query = text_processor.get_normalized_text(query)
+    stop_words = [token for token in query if not token in normalized_query]
+    #TODO: unknown words?
+    unknown_words = []
+    posting_lists = []
+    for token in normalized_query:
+        posting_lists.append(query_db_index(token)['doc_ids'])
+    intersect_posting_lists = intersection(posting_lists)
+
+    return (intersect_posting_lists, stop_words, unknown_words)
