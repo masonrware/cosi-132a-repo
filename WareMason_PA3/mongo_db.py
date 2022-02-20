@@ -16,8 +16,7 @@ def insert_docs(docs: Iterable) -> None:
     :param docs: WAPO docs iterator (utils.load_wapo(...))
     :return:
     """
-    #? I think using utils?
-    #! no^, the utils is called pre-pass
+    
     # TODO: give all the docs to reference and render when I need to in hw3.py
     #iterate of the param
     raise NotImplementedError
@@ -31,7 +30,6 @@ def insert_db_index(index_list: List[Dict]) -> None:
     :param index_list: posting lists in the format of [{"token": "post", "doc_ids": [0, 3, 113, 444, ...]}, {...}, ...]
     :return:
     """
-    #! param recieved from query_doc? - i.e. method called in query_doc
     raise NotImplementedError
 
 

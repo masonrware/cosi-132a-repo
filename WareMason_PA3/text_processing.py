@@ -1,4 +1,5 @@
 import re
+from typing import Set
 #TODO: move below imports to where they will be called for both the index terms loading and for the query normalization
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
@@ -48,7 +49,7 @@ class TextProcessing:
         elif token not in stop_words and len(token)>1:
             return self.stemmer.stem(token)
 
-    def get_normalized_tokens(self, title: str, content: str) -> Set[str]:
+    def get_normalized_tokens(self, title: str = '', content: str = '') -> Set[str]:
         """
         pass in the title and content_str of each document, and return a set of normalized tokens (exclude the empty string)
         you may want to apply word_tokenize first to get un-normalized tokens first

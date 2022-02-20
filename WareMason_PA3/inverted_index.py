@@ -1,4 +1,7 @@
+import re
 from typing import Union, List, Tuple, Iterable
+
+from numpy import insert
 
 from utils import timer, load_wapo
 from text_processing import TextProcessing
@@ -8,6 +11,38 @@ text_processor = TextProcessing.from_nltk()
 
 #!!! Sort listings (i.e. values of index) by size shortest->longest
 
+class InvertedIndex:
+    """
+    Inverted Index class.
+    """
+
+    def __init__(self):
+        self.index = []
+        self.appearances_dict = dict()
+        
+    def index_document(self, document: dict) -> None:
+        """
+        Process a given document and update the index.
+        :return: a dictionary item of the format:
+        
+        """
+        terms = text_processor.get_normalized_tokens(document['title'], document['content_str'])
+        for term in terms:
+            if term in self.appearances_dict:
+                self.appearances_dict[term].append(document['id'])
+            else:
+                self.appearances_dict[term] = [document['id']]
+    
+    def load_index_postings_list(self) -> None:
+        for term in self.appearances_dict:
+            self.index.append({
+                'token': term,
+                'doc_ids': self.appearances_dict[term]
+            })
+
+    def get_index(self) -> List:
+        return self.index
+
 
 @timer
 def build_inverted_index(wapo_docs: Iterable) -> None:
@@ -16,8 +51,11 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     :param wapo_docs:
     :return:
     """
-    # TODO: reload the wapo_docs with load_wapo to get a list back and then ...
-    # TODO: call insert_db_index and put the documents into the database as a dictionary with ids?? idk yet
+    inv_ind = InvertedIndex()
+    for doc_image in wapo_docs:
+        inv_ind.index_document(doc_image)
+    inv_ind.load_index_postings_list()
+    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids'])))
 
 def intersection(posting_lists: List[List[int]]) -> List[int]:
     """
@@ -25,9 +63,7 @@ def intersection(posting_lists: List[List[int]]) -> List[int]:
     :param posting_lists:
     :return:
     """
-    # TODO: get all documents for a given term set's list of posting lists
-    raise NotImplementedError
-
+    return list(set.intersection(*[set(x) for x in posting_lists]))
 
 def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     """
