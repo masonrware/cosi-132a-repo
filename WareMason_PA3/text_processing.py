@@ -11,7 +11,7 @@ class TextProcessing:
     Class to process text
     """
 
-    def __init__(self, stemmer, stop_words, *args):
+    def __init__(self, stemmer = PorterStemmer(), stop_words = stop_words, *args):
         """
         class TextProcessing is used to tokenize and normalize tokens that will be further used to build inverted index.
         :param stemmer:
@@ -21,15 +21,15 @@ class TextProcessing:
         self.stemmer = stemmer
         self.STOP_WORDS = stop_words
 
-    @classmethod
-    def from_nltk(self, cls, stemmer = PorterStemmer().stem, stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
-        """
-        initialize from nltk
-        :param stemmer:
-        :param stop_words:
-        :return:
-        """
-        return cls(self, stemmer, stop_words)
+    # @classmethod
+    # def from_nltk(self, cls, stemmer = PorterStemmer(), stop_words: List[str] = stopwords.words("english")) -> "TextProcessing":
+    #     """
+    #     initialize from nltk
+    #     :param stemmer:
+    #     :param stop_words:
+    #     :return:
+    #     """
+    #     return cls(self, stemmer, stop_words)
 
     def normalize(self, token: str) -> str:
         """
@@ -48,7 +48,7 @@ class TextProcessing:
         elif token not in stop_words and len(token)>1:
             return self.stemmer.stem(token)
 
-    def get_normalized_tokens(self, title: str = '', content: str = '') -> Set[str]:
+    def get_normalized_tokens(self, title: str = "", content: str = "") -> Set[str]:
         """
         pass in the title and content_str of each document, and return a set of normalized tokens (exclude the empty string)
         you may want to apply word_tokenize first to get un-normalized tokens first

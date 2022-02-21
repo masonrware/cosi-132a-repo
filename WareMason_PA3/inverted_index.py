@@ -6,7 +6,7 @@ from text_processing import TextProcessing
 from mongo_db import insert_db_index, query_db_index
 
 
-text_processor = TextProcessing.from_nltk(TextProcessing)
+text_processor = TextProcessing()
 
 
 class InvertedIndex:

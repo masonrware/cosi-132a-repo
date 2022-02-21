@@ -13,6 +13,7 @@ wapo_path = data_dir.joinpath("wapo_pa3.jl")
 if not "wapo_docs" in db.list_collection_names():
     insert_docs(load_wapo(wapo_path))
 
+
 # home page
 @app.route("/")
 def home():

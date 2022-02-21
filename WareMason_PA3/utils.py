@@ -51,8 +51,10 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
         for line in file:
             conv = json.loads(line)
             contents = conv['contents']
-            if(contents):
-                content_str_ = " ".join([item['content'] for item in contents if item['type'] == 'sanitized_html'])
+            if(conv['title']):
+                res = [item['content'] for item in contents if item['type']=='sanitized_html' and item['content'] is not None]
+                print(conv['id'])
+                content_str_ = " ".join(res)
                 content_str_ = re.sub("<[^>]*>", "", content_str_)
                 #!! This one is given as follows, so just sure you apply it in your implementation
                 #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
