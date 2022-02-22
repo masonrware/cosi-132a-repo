@@ -51,31 +51,29 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
         for line in file:
             conv = json.loads(line)
             contents = conv['contents']
-            if(conv['title']):
+            # res = []
+            # for item in contents:
+            #     if item['type'] == 'sanitized_html':
+            #         res.append(item['content'])
+            #         print('- - - - adding', item['content'])
 
-                # res = []
-                # for item in contents:
-                #     if item['type'] == 'sanitized_html':
-                #         res.append(item['content'])
-                #         print('- - - - adding', item['content'])
-
-                res = [item['content'] for item in contents if item and item['type']=='sanitized_html']
-                print(conv['id'], '        ...        ', id)
-                content_str_ = " ".join(res)
-                content_str_ = re.sub("<[^>]*>", "", content_str_)
-                #!! This one is given as follows, so just sure you apply it in your implementation
-                #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
+            res = [item['content'] for item in contents if item and item['type']=='sanitized_html']
+            print(conv['id'], '        ...        ', id)
+            content_str_ = " ".join(res)
+            content_str_ = re.sub("<[^>]*>", "", content_str_)
+            #!! This one is given as follows, so just sure you apply it in your implementation
+            #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
+        
+            res = {
+                'id': id,
+                'title': conv['title'],
+                'author': conv['author'],
+                'published_date': conv['published_date'],
+                'content_str': content_str_
+            }
             
-                res = {
-                    'id': id,
-                    'title': conv['title'],
-                    'author': conv['author'],
-                    'published_date': conv['published_date'],
-                    'content_str': content_str_
-                }
-            
-                id+=1
-                yield res
+            id+=1
+            yield res
 
 
 if __name__ == "__main__":

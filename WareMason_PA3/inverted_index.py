@@ -1,4 +1,5 @@
 from typing import List, Tuple, Iterable
+import re
 
 from utils import timer
 from text_processing import TextProcessing
@@ -34,7 +35,6 @@ class InvertedIndex:
     def load_index_postings_list(self) -> None:
         """
         """
-        #TODO: rewrite in comprehension?
         for term in self.appearances_dict:
             self.index.append({
                 'token': term,
@@ -58,8 +58,7 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     for doc_image in wapo_docs:
         inv_ind.index_document(doc_image)
     inv_ind.load_index_postings_list()
-    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) #might need a reverse=True
-    #* ^ This is the sorting - it gets sorted before being inserted into the DB
+    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) #gets inserted into the db largest->smallest
 
 def intersection(posting_lists: List[List[int]]) -> List[int]:
     """
@@ -67,7 +66,7 @@ def intersection(posting_lists: List[List[int]]) -> List[int]:
     :param posting_lists:
     :return:
     """
-    return list(set.intersection(*[set(x) for x in posting_lists]))
+    return list(set.intersection(*[set(x) for x in posting_lists])) if posting_lists else []
 
 def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     """
@@ -76,13 +75,14 @@ def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     :param query: user input query
     :return:
     """
-    normalized_query = text_processor.get_normalized_text(query)
-    stop_words = [token for token in query if not token in normalized_query]
+    normalized_query = text_processor.get_normalized_tokens(query)
+    query_list = query.split(' ')
+    query_list = re.findall(r"[\w']+|[.,!?;]", query)
+    stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     #TODO: unknown words?
     unknown_words = []
     posting_lists = []
     for token in normalized_query:
         posting_lists.append(query_db_index(token)['doc_ids'])
     intersect_posting_lists = intersection(posting_lists)
-
     return (intersect_posting_lists, stop_words, unknown_words)

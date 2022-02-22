@@ -1,10 +1,12 @@
 import re
 from typing import List, Set
+
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
 
 stop_words = set(stopwords.words('english'))
+unkown_words = set()
 
 class TextProcessing:
     """
@@ -60,11 +62,9 @@ class TextProcessing:
         token_title = word_tokenize(title)
         token_content = word_tokenize(content)
         for token in token_title:
-            token = str(token)
             if self.normalize(token) != '':
                 tokenized_words.add(self.normalize(token))
         for token in token_content:
-            token = str(token)
             if self.normalize(token) != '':
                 tokenized_words.add(self.normalize(token))
         return tokenized_words
