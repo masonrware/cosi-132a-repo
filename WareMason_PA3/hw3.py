@@ -101,7 +101,6 @@ def next_page(page_id: int, passed_values: Tuple) -> str:
                             PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # add variables as you wish
 
 
-#! needs fixing
 @app.route("/doc_data/<int:doc_id>")
 def doc_data(doc_id):
     """
@@ -109,8 +108,8 @@ def doc_data(doc_id):
     :param doc_id:
     :return:
     """
-    doc_dict = u.look_up_by_id(doc_id)
-    return render_template("doc.html", here=doc_dict) 
+    doc_image = query_doc(doc_id)
+    return render_template("doc.html", document=doc_image) 
 
 
 
