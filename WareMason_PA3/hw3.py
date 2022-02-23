@@ -1,5 +1,6 @@
 from pathlib import Path
 import argparse
+from typing import Tuple
 
 from flask import Flask, render_template, request
 
@@ -46,14 +47,12 @@ def results():
 
     postings_list, stop_words, unknown_words = query_inverted_index(query_text)
 
-    print(postings_list, stop_words, unknown_words)
-
     if len(postings_list) != 0:
         for posting in postings_list:
             document = query_doc(posting)
             item_dict = {
                 'title': document['title'],
-                'content': limit_content(document['content_str']),
+                'content': limit_content(document['content_str']) + '...',
                 'id': document['id']
             }
             res.append(item_dict)
@@ -71,7 +70,7 @@ def results():
         
 
 @app.route("/results/<int:page_id>/prev", methods=["GET", "POST"])
-def prev_page(page_id: int) -> str:
+def prev_page(page_id: int, passed_values: Tuple) -> str:
     """
     "previous page" to show more results
     :param page_id:
@@ -80,14 +79,14 @@ def prev_page(page_id: int) -> str:
     """
     ##!need stop words and unkown words to persist
     PAGE_NUM = page_id
-    # stop_words = stop_words_
-    # unknown_words = unknown_words_
+    stop_words = passed_values[0]
+    unknown_words = passed_values[1]
     return render_template("results.html", response=pages[PAGE_NUM], stop_words = stop_words, unknown_words = unknown_words,
                             PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # add variables as you wish
 
 
 @app.route("/results/<int:page_id>/next", methods=["GET", "POST"])
-def next_page(page_id: int) -> str:
+def next_page(page_id: int, passed_values: Tuple) -> str:
     """
     "next page" to show more results
     :param page_id:
@@ -96,8 +95,8 @@ def next_page(page_id: int) -> str:
     """
     ##!need stop words and unkown words to persist
     PAGE_NUM = page_id
-    # stop_words = stop_words_
-    # unknown_words = unknown_words_
+    stop_words = passed_values[0]
+    unknown_words = passed_values[1]
     return render_template("results.html", response=pages[PAGE_NUM], stop_words = stop_words, unknown_words = unknown_words,
                             PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # add variables as you wish
 
