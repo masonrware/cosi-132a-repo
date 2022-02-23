@@ -18,6 +18,7 @@
 <!-- Stop words and Unknown words -->
 <br>
 <table style='width:30%; border:1px solid black'>
+    <caption><b style="text-align: left;">QUERY:</b> <i>{{ query }}</i></caption>
     <tr>
         <th><i>Ignored Term(s)</i></th>
         {% for item in stop_words %}
@@ -43,12 +44,12 @@
 
 <p>Page {{ PAGE_NUM }} / {{ TOTAL_PAGES }}</p>
 {% if PAGE_NUM != 1 %}
-    <a href="{{ url_for('prev_page', page_id=PAGE_NUM-1, passed_values=(stop_words, unknown_words)) }}">
+    <a href="{{ url_for('prev_page', page_id=PAGE_NUM-1) }}">
         <input type="button" class="btn btn-secondary"value="Prev Page"/>
     </a>
 {% endif %}
 {% if PAGE_NUM != TOTAL_PAGES %}
-    <a href="{{ url_for('next_page', page_id=PAGE_NUM+1, passed_values=(stop_words, unknown_words)) }}">
+    <a href="{{ url_for('.next_page', page_id=PAGE_NUM+1) }}">
         <input type="button" class="btn btn-secondary" value="Next Page" />
     </a>
 {% endif %}

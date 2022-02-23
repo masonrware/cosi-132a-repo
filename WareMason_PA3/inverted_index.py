@@ -11,20 +11,14 @@ text_processor = TextProcessing()
 
 
 class InvertedIndex:
-    """
-    Inverted Index class.
-    """
+    """Inverted Index class."""
 
     def __init__(self):
         self.index = []
         self.appearances_dict = dict()
         
     def index_document(self, document: dict) -> None:
-        """
-        Process a given document and update the index.
-        :return: a dictionary item of the format:
-        
-        """
+        """Process a given document and update the index."""
         terms = text_processor.get_normalized_tokens(document['title'], document['content_str'])
         for term in terms:
             if term in self.appearances_dict:
@@ -33,8 +27,6 @@ class InvertedIndex:
                 self.appearances_dict[term] = [document['id']]
     
     def load_index_postings_list(self) -> None:
-        """
-        """
         for term in self.appearances_dict:
             self.index.append({
                 'token': term,
@@ -42,8 +34,6 @@ class InvertedIndex:
             })
 
     def get_index(self) -> List:
-        """
-        """
         return self.index
 
 
@@ -60,20 +50,18 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     inv_ind.load_index_postings_list()
     insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) #gets inserted into the db largest->smallest
 
+
 def intersection(posting_lists: List[List[int]]) -> List[int]:
     """
     implementation of the intersection of a list of posting lists that have been ordered from the shortest to the longest
-    :param posting_lists:
-    :return:
     """
     return list(set.intersection(*[set(x) for x in posting_lists])) if posting_lists else []
+
 
 def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     """
     conjunctive query over the built index by using mongo_db.query_db_index method
     return a list of matched document ids, a list of stop words and a list of unknown words separately
-    :param query: user input query
-    :return:
     """
     normalized_query = text_processor.get_normalized_tokens(query)
     query_list = query.split(' ')

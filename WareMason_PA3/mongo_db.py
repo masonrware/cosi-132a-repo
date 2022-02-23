@@ -47,6 +47,7 @@ def query_doc(doc_id: int) -> Dict:
     except ValueError as v:
         return v
 
+
 def query_db_index(token: str) -> Dict:
     """
     query the posting list from "inverted_index" collection based on the token
