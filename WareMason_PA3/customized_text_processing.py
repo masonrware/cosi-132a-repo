@@ -35,7 +35,7 @@ class CustomizedTextProcessing:
     #     :param kwargs:
     #     :return:
     #     """
-    #     pass
+    #     return cls(*args, **kwargs)
 
 
     def normalize(self, token: str) -> str:

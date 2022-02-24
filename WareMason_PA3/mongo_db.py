@@ -45,7 +45,7 @@ def query_doc(doc_id: int) -> Dict:
     try:
         return db.wapo_docs.find_one({'id': doc_id})
     except ValueError as v:
-        return v
+        return ''
 
 
 def query_db_index(token: str) -> Dict:
@@ -54,7 +54,4 @@ def query_db_index(token: str) -> Dict:
     :param token:
     :return:
     """
-    try:
-        return db.inverted_index.find_one({'token': token})
-    except ValueError as v:
-        return v
+    return db.inverted_index.find_one({'token': token})

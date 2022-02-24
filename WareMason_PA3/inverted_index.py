@@ -66,11 +66,13 @@ def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     normalized_query = text_processor.get_normalized_tokens(query)
     query_list = query.split(' ')
     query_list = re.findall(r"[\w']+|[.,!?;]", query)
+    
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
-    #TODO: unknown words?
-    unknown_words = []
+    unknown_words = {token for token in query_list if isinstance(query_db_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
+
     posting_lists = []
     for token in normalized_query:
-        posting_lists.append(query_db_index(token)['doc_ids'])
+        if not token in unknown_words:
+            posting_lists.append(query_db_index(token)['doc_ids'])
     intersect_posting_lists = intersection(posting_lists)
     return (intersect_posting_lists, stop_words, unknown_words)
