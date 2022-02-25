@@ -1,8 +1,13 @@
+#!/usr/bin/env python3
+
+# mongo_db.py
+# Version 1.0
+# 2/24/2022
+
 from typing import Dict, List, Iterable
 
 import pymongo
 import pprint
-
 
 client = pymongo.MongoClient("localhost", 27017)  # connect to the mongodb server running on your localhost
 db = client["ir_2022_wapo"]  # create a new database called "ir_2022_wapo"
@@ -19,7 +24,7 @@ def insert_docs(docs: Iterable) -> None:
     wapo_docs = db.wapo_docs
     for doc in docs:
         wapo_docs.insert_one(doc)
-        pprint.pprint('---added ' + (doc['title'] if doc['title']!=None else 'null title') + ' to the DB')
+        pprint.pprint('---added ' + (doc['title'] if doc['title'] is not None else 'null title') + ' to the DB')
 
 
 def insert_db_index(index_list: List[Dict]) -> None:
@@ -42,10 +47,7 @@ def query_doc(doc_id: int) -> Dict:
     :param doc_id:
     :return:
     """
-    try:
-        return db.wapo_docs.find_one({'id': doc_id})
-    except ValueError as v:
-        return ''
+    return db.wapo_docs.find_one({'id': doc_id})
 
 
 def query_db_index(token: str) -> Dict:

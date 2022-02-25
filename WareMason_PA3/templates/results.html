@@ -37,6 +37,7 @@
 <ul>
     {% for item in response %}
         <li><a href="{{ url_for('doc_data', doc_id=item['id'])}}">{{ item['title'] }}</a></li><br>
+        <sli style='display: block;'><small><i>{{ item['published_date'] }}</i></small></sli>
         <sli>{{ item['content'] }}</sli>
         <br><br>
     {% endfor %}

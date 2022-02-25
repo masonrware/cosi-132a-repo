@@ -24,33 +24,21 @@ class CustomizedTextProcessing:
         be based on heuristics, the usage of a tool from nltk or some new feature you implemented using Python. Be creative!
         """
         self.stop_words = text.ENGLISH_STOP_WORDS.union(["book"])
-        self.vectorizer = TfidfVectorizer(ngram_range=(1,1), stop_words=self.stop_words)
+        self.vectorizer = TfidfVectorizer(ngram_range=(1, 1), stop_words=self.stop_words)
 
-
-    # @classmethod
-    # def from_customized(cls, *args, **kwargs) -> "CustomizedTextProcessing":
-    #     """
-    #     You don't necessarily need to implement a class method, but if you do, please use this boilerplate.
-    #     :param args:
-    #     :param kwargs:
-    #     :return:
-    #     """
-    #     return cls(*args, **kwargs)
-
-
-    def normalize(self, token: str) -> str:
+    @staticmethod
+    def normalize(token: str) -> str:
         """
         your approach to normalize a token. You can still adopt the criterion and methods from TextProcessing along with your own approaches
         """
         token = token.lower()
-        no_number_token = re.sub('\d+','',token)
-        no_punc_token = re.sub('[^\w\s]','', no_number_token)
+        no_number_token = re.sub('\d+', '', token)
+        no_punc_token = re.sub('[^\w\s]', '', no_number_token)
         no_wspace_token = no_punc_token.strip()
-        if len(no_wspace_token)<=1:
+        if len(no_wspace_token) <= 1:
             return ''
         else:
             return no_wspace_token
-
 
     def get_normalized_tokens(self, title: str, content: str) -> Set[str]:
         """
@@ -69,8 +57,8 @@ class CustomizedTextProcessing:
                 tokenized_words.add(self.normalize(token))
 
         X = self.vectorizer.fit_transform(tokenized_words)
-        idf_values = dict(zip(self.vectorizer.get_feature_names_out(), self.vectorizer.idf_)) 
-        return [idf_values.keys()]
+        idf_values = dict(zip(self.vectorizer.get_feature_names_out(), self.vectorizer.idf_))
+        return set(list(idf_values.keys()))
 
 
 if __name__ == "__main__":

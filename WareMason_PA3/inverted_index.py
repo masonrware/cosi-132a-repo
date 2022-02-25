@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+# inverted_index.py
+# Version 1.0
+# 2/24/2022
+
 from typing import List, Tuple, Iterable
 import re
 
@@ -11,14 +17,13 @@ text_processor = TextProcessing()
 
 
 class InvertedIndex:
-    """Inverted Index class."""
-
+    """Inverted Index Data Structure to map tokens to their postings."""
     def __init__(self):
         self.index = []
         self.appearances_dict = dict()
         
     def index_document(self, document: dict) -> None:
-        """Process a given document and update the index."""
+        """Process a given document and update the appearances dict."""
         terms = text_processor.get_normalized_tokens(document['title'], document['content_str'])
         for term in terms:
             if term in self.appearances_dict:
@@ -39,24 +44,16 @@ class InvertedIndex:
 
 @timer
 def build_inverted_index(wapo_docs: Iterable) -> None:
-    """
-    load wapo_pa3.jl to build the inverted index and insert the index by using mongo_db.insert_db_index method
-    :param wapo_docs:
-    :return:
-    """
+    """load wapo_pa3.jl to build the inverted index and insert the index by using mongo_db.insert_db_index method."""
     inv_ind = InvertedIndex()
     for doc_image in wapo_docs:
         inv_ind.index_document(doc_image)
     inv_ind.load_index_postings_list()
-    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) #gets inserted into the db largest->smallest
-
+    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) # gets inserted into the db largest->smallest
 
 def intersection(posting_lists: List[List[int]]) -> List[int]:
-    """
-    implementation of the intersection of a list of posting lists that have been ordered from the shortest to the longest
-    """
+    """implementation of the intersection of a list of posting lists that have been ordered from the shortest to the longest."""
     return list(set.intersection(*[set(x) for x in posting_lists])) if posting_lists else []
-
 
 def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     """
@@ -66,7 +63,7 @@ def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     normalized_query = text_processor.get_normalized_tokens(query)
     query_list = query.split(' ')
     query_list = re.findall(r"[\w']+|[.,!?;]", query)
-    
+
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_db_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
 

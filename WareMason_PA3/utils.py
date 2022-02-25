@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+# text_processing.py
+# Version 1.0
+# 2/23/2022
+
 import json
 from typing import Dict, Union, Generator
 import functools
@@ -18,6 +24,7 @@ def timer(func):
             f"'{func.__name__}' elapsed time: {mins} minutes, {elapsed_t - mins * 60:0.2f} seconds"
         )
         return f_value
+
     return wrapper_timer
 
 
@@ -41,33 +48,25 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
     - convert the value of "published_date" to a readable format.
       This one is given as follows, so just sure you apply it in your implementation
             %: from datetime import datetime
-            %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
-
-    :param wapo_jl_path:
-    :return:
-    """
+            %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)"""
     with open(wapo_jl_path, 'r', encoding='UTF-8') as file:
-        id = 0
+        id_ = 0
         for line in file:
             conv = json.loads(line)
             contents = conv['contents']
             if conv['title']:
-                res = [item['content'] for item in contents if item and item['type']=='sanitized_html']
-                print(conv['id'], '        ...        ', id)
+                res = [item['content'] for item in contents if item and item['type'] == 'sanitized_html']
+                print(conv['id'], '        ...        ', id_)
                 content_str_ = " ".join(res)
                 content_str_ = re.sub("<[^>]*>", "", content_str_)
-                #!! This one is given as follows, so just sure you apply it in your implementation
-                #!! %: doc["published_date"] = datetime.fromtimestamp(doc["published_date"] / 1000.0)
-            
                 res = {
-                    'id': id,
+                    'id': id_,
                     'title': conv['title'],
                     'author': conv['author'],
-                    'published_date': conv['published_date'],
+                    'published_date': datetime.fromtimestamp(int(conv['published_date']/1000)),
                     'content_str': content_str_
                 }
-                
-                id+=1
+                id_ += 1
                 yield res
 
 
