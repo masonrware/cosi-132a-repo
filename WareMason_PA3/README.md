@@ -20,7 +20,7 @@ This program is a search engine that uses Washington Post articles stored in `pa
 
 The program has two different classes for term processing:
 
-***   `term_processing.py`**
+###   `term_processing.py`
 
 This class houses the following methods:
 
