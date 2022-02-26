@@ -16,7 +16,7 @@ COSI 132A -- Brandeis University
 
 This program is a search engine that uses Washington Post articles stored in `pa3_data/wapo_pa3.jl`. Utilizing a Flask backend, the engine takes a user query, normalizes, stems, and tokenizes the text and then compares the set of words against an inverted index. Before the application can be deployable and runnable, a database containing collections of documents and the inverted index itself must be made in order for the user to be able to continually search. The program does this with the `--build` option command. Building an inverted index for every term in the corpra in about 15 minutes depending on the system, the engine then is able to find the intersection of the posting lists of each term in the query. The following are descriptions of respective relevant classes and groups of code.
 
-***   Term Processing**
+###   Term Processing
 
 The program has two different classes for term processing:
 
@@ -32,7 +32,7 @@ This method takes a token representing an individual word and normalizes it. It 
 
 This method takes both a title and content str of an article as arguments and normalizes all of the tokens in each string. Notice that the arguments are given default values of empty strings as there are instances where the same code is used to normalize, for instance, the user query and therefore, any inssuficient positional argument errors are avoided. This method first uses the nltk `word_tokenizer` class to tokenize the two strings. Next, each token in both sets are normalized and added to a set representing the desired output: a set of all normalized words in both the title and content.
 
-***   `customized_term_processing.py`**
+###   `customized_term_processing.py`
 
 This class has the same methods as the previous class, it just has some key differences:
 
@@ -44,7 +44,7 @@ This class has the same methods as the previous class, it just has some key diff
   
 
   
-***   Inverted Index**
+###   Inverted Index
 
 The program builds and maintains an inverted index using the class `inverted_index.py`.
 
@@ -74,7 +74,7 @@ This is potentially the most elegant method ever written in Python. It uses one 
 
 Finally, this method is the powerhouse of the engine. It qeuries the database for document information and returns all of the relevant documents as well as a list of stop words and unknown words. Using the user's query, the method normalizes its tokens and finds all alphanumeric and dash characters using the regex expression: `r'[\w']+|[.,!?;]'`. It retains a list of stop words by comparing the tokens in the normalzied query to the normalized tokens in the non normalized query. It retains a list of unkown words by comparing the tokens in the normalized query with the index's keys. It then builds a list of posting lists of each token in the query. Using the `intersection()` method described above, the method builds a list of the common postings and returns it to be rendered.
 
-***   Mongo Database**
+###   Mongo Database
 
 The program necessitates persistent storage so that a user may load the application, exit, and reload and still be able to access the same data. In order to do so with the most ease and transparancy, we use mongoDB's service. The methods related to building and querying from the database are housed in the file `mongo_db.py`.
 
