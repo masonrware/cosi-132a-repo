@@ -134,3 +134,6 @@ classPractice/
 .idea/
 PA1venv/
 PA3venv/
+
+.DS_Store
+.DS_Store/
