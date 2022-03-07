@@ -34,7 +34,7 @@ def insert_vs_index(index_list: List[Dict]) -> None:
     vs_index = db.vs_index
     for postings_list in index_list:
         vs_index.insert_one(postings_list)
-        pprint.pprint('PL---added the postings list for the term ' + postings_list['term'])
+        pprint.pprint('POSTINGSLIST---added the postings list for the term ' + postings_list['term'])
 
 
 def insert_doc_len_index(index_list: List[Dict]) -> None:
@@ -48,7 +48,7 @@ def insert_doc_len_index(index_list: List[Dict]) -> None:
     doc_len_index = db.doc_len_index
     for doc_vector_image in index_list:
         doc_len_index.insert_one(doc_vector_image)
-        pprint.pprint('DL---added doc length for doc #' + doc_vector_image['doc_id'])
+        pprint.pprint('DOCCOSLENGTH---added doc length for doc #' + doc_vector_image['doc_id'])
 
 
 def query_doc(doc_id: int) -> Dict:

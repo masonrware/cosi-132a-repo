@@ -9,7 +9,6 @@ from scipy import spatial
 
 text_processor = TextProcessing.from_nltk()
 
-## TODO: NEED TO REWRITE BELOW
 class InvertedIndex:
     """Inverted Index Data Structure to map tokens to their postings."""
     def __init__(self, n: int):
@@ -44,6 +43,7 @@ def get_doc_vec_norm(term_tfs: List[float]) -> float:
     :param term_tfs: a list of term weights (log tf) for one document
     :return:
     """
+    #TODO COSINE LENGTH NORMALIZATION
     pass
     
 
@@ -59,8 +59,8 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     for doc_image in wapo_docs:
 
         ##! Weight document terms using log TF formula with cosine (length) normalization
-        
         insert_doc_len_index({'doc_id': doc_image['doc_id'], 'length': get_doc_vec_norm([text_processor.tf(term) for term in doc_image['content_str']])})
+
         inv_ind.index_document(doc_image)
     inv_ind.load_index_postings_list()
     # insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) # gets inserted into the db largest->smallest
