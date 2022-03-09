@@ -100,6 +100,7 @@ if __name__ == "__main__":
 
     if args.build:
         build_inverted_index(load_wapo(wapo_path))
+        print('\n'+'='*50+'\nbuild completed successfully :)\n'+'='*50)
 
     if args.run:
         app.run(debug=True, port=5000)

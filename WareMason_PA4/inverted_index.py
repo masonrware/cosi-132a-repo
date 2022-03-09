@@ -26,6 +26,7 @@ def cosine_sim(tfidf_term: float, tf_doc: float, query_length: int, doc_length: 
 
 text_processor = TextProcessing()
 
+
 class InvertedIndex:
     """
     Inverted Index Data Structure to map tokens to their postings.
@@ -54,6 +55,7 @@ class InvertedIndex:
 
     def get_index(self) -> List:
         return self.index
+
 
 def get_doc_vec_norm(term_tfs: List[float]) -> float:
     """
@@ -86,22 +88,24 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
         ##! Weight document terms using log TF formula with cosine (length) normalization
     inv_ind.load_index_postings_list()
     index = inv_ind.get_index()
-    for term in index:
-        postings_list = index[term]
-        for document_tuple in postings_list:
-            if document_tuple[0] in doc_vec_lengths:
-                doc_vec_lengths[document_tuple[0]].append(document_tuple[1])
-            else:
-                doc_vec_lengths[document_tuple[0]] = [document_tuple[1]]
+    
+    for term_index in index:
+        if term_index['token'] in doc_vec_lengths:
+            for doc_tf_tuple in term_index['doc_tf_index']:
+                doc_vec_lengths[doc_tf_tuple[0]].append( doc_tf_tuple[1] )
+        else:
+            for doc_tf_tuple in term_index['doc_tf_index']:
+                doc_vec_lengths[doc_tf_tuple[0]] = [ doc_tf_tuple[1] ]
+                
     for key, value in doc_vec_lengths:
         doc_vec_lengths_list.append[{'id': key, 'doc-vec-length': get_doc_vec_norm(value)}]
-    insert_doc_len_index(doc_vec_lengths_list)
     
     
-    #!change to correct collection
-    if not "wapo_docs" in db.list_collection_names():
+    if not "doc_len_index" in db.list_collection_names():
+        insert_doc_len_index(doc_vec_lengths_list)
+    if not "vs_index" in db.list_collection_names():
         insert_vs_index(index)
-
+    
 ##below code is to do concurrency
 
 # executor = concurrent.futures.ProcessPoolExecutor(10)
