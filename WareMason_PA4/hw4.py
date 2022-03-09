@@ -21,7 +21,7 @@ def limit_content(content: str) -> str:
 
 
 class FlaskApp:
-    """Backend Flask App. """
+    """Backend Flask App """
 
     @app.route("/")
     def home():
@@ -41,9 +41,10 @@ class FlaskApp:
         res = []
         dict_ind = 1
 
+
         ##! the results here will be different
-        
         postings_list, stop_words, unknown_words = query_inverted_index(query_text)
+
 
         if len(postings_list) != 0:
             for posting in postings_list:

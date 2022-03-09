@@ -3,6 +3,8 @@ import functools
 import os
 import time
 import json
+import re
+from datetime import datetime
 
 
 def timer(func):
@@ -20,7 +22,7 @@ def timer(func):
     return wrapper_timer
 
 
-def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict]:
+def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, None]:
     """
     It's same with the load_wapo in HW3
     """
