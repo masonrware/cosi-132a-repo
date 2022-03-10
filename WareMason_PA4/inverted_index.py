@@ -143,10 +143,9 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     :param k:
     :return: a list of tuples, each tuple contains (score, doc_id)
     """
-    ##!!implement this using a heap
-    ##TODO doesn't work
+    ##TODO error is bc of sorting between 0.0 and 0.0 --> use heap
     doc_scores_list = list(doc_scores.items())
-    return doc_scores_list.sort(key=lambda x:x[1], reverse=True)[:k]
+    return doc_scores_list.sort(key=lambda i:i[1], reverse=True)[:k]
 
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
     """
@@ -160,7 +159,7 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
         if not term in unknown_words:
             postings_list = query_vs_index(term)['doc_tf_index']
         for doc_tf_tuple in postings_list:
-            ##TODO fix below math!
+            #todo fix math immediately below this line
             term_tf_idf_score = text_processor.tf(get_tf_value(term, query_doc(doc_tf_tuple[0])['content_str'])) * text_processor.idf(N, len(postings_list))
             print(f'==={term_tf_idf_score}')
             print(f'==={doc_tf_tuple[1]}')
