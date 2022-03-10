@@ -20,7 +20,7 @@ def insert_docs(docs: Iterable) -> None:
     wapo_docs = db.wapo_docs
     for doc in docs:
         wapo_docs.insert_one(doc)
-        pprint.pprint('DOC---added ' + (doc['title'] if doc['title'] is not None else 'null title') + ' to the DB')
+        pprint.pprint('DOC---added {}'.format((doc['title'] if doc['title'] is not None else 'null title') + ' to the DB'))
 
 
 def insert_vs_index(index_list: List[Dict]) -> None:
@@ -31,10 +31,12 @@ def insert_vs_index(index_list: List[Dict]) -> None:
     :param index_list: posting lists in the format of [{"term": "earlier", "term_tf": [[0, 1], [4, 1], ...]}, ...]
     :return:
     """
+    
+    
     vs_index = db.vs_index
     for postings_list in index_list:
         vs_index.insert_one(postings_list)
-        pprint.pprint('POSTINGSLIST---added the postings list for the term ' + postings_list['term'])
+        pprint.pprint('POSTINGSLIST---added the postings list for the term {}'.format(postings_list['token']))
 
 
 def insert_doc_len_index(index_list: List[Dict]) -> None:
@@ -45,10 +47,12 @@ def insert_doc_len_index(index_list: List[Dict]) -> None:
     :param index_list: document vector length list in the format of [{"doc_id": 0, "length": 39.53}, ...]
     :return:
     """
+    
+
     doc_len_index = db.doc_len_index
     for doc_vector_image in index_list:
         doc_len_index.insert_one(doc_vector_image)
-        pprint.pprint('DOCCOSLENGTH---added doc length for doc #' + doc_vector_image['doc_id'])
+        pprint.pprint('DOCCOSLENGTH---added doc length for doc #{}'.format(doc_vector_image['id']))
 
 
 def query_doc(doc_id: int) -> Dict:
@@ -75,7 +79,7 @@ def query_doc_len_index(doc_id: int) -> Dict:
     :param doc_id:
     :return:
     """
-    return db.wapo_docs.find_one({'doc_id': doc_id})
+    return db.wapo_docs.find_one({'id': doc_id})
 
 
 if __name__ == "__main__":

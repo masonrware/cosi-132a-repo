@@ -4,9 +4,7 @@ from typing import List, Tuple, Dict, Iterable
 
 from utils import timer
 from text_processing import TextProcessing
-from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query_vs_index
-
-from scipy import spatial
+from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query_vs_index, query_doc_len_index
 
 N = 0
 
@@ -42,15 +40,15 @@ class InvertedIndex:
         terms = text_processor.get_normalized_tokens(document['title'], document['content_str'])
         for term in terms:
             if term in self.appearances_dict:
-                self.appearances_dict[term].append((document['id'], text_processor.tf(get_tf_value(term, document['content_str']))))
+                self.appearances_dict[term].add((document['id'], text_processor.tf(get_tf_value(term, terms))))
             else:
-                self.appearances_dict[term] = [(document['id'], text_processor.tf(get_tf_value(term, document['content_str'])))]
+                self.appearances_dict[term] = {(document['id'], text_processor.tf(get_tf_value(term, terms)))}
     
     def load_index_postings_list(self) -> None:
         for term in self.appearances_dict:
             self.index.append({
                 'token': term,
-                'doc_tf_index': self.appearances_dict[term]
+                'doc_tf_index': list(self.appearances_dict[term])
             })
 
     def get_index(self) -> List:
@@ -74,7 +72,7 @@ def get_doc_vec_norm(term_tfs: List[float]) -> float:
 def build_inverted_index(wapo_docs: Iterable) -> None:
     """
     load wapo_pa4.jl to build two indices:
-        - "vs_index": for each normalized term as a key, the value should be a list of tuples; each tuple stores the doc id this term appears in and the term weight (log tf) == THIS IS EVERY INDEX OF THE INV INDEX
+        - "vs_index": for each normalized term as a key, the value should be a list of tuples; each tuple stores the doc id this term appears in and the term weight (log tf)
         - "doc_len_index": for each doc id as a key, the value should be the "length" of that document vector
     insert the indices by using mongo_db.insert_vs_index and mongo_db.insert_doc_len_index method
     """
@@ -82,29 +80,34 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     inv_ind = InvertedIndex()
     doc_vec_lengths = {}
     doc_vec_lengths_list = []
+    
     for doc_image in wapo_docs:
         N+=1        
-        inv_ind.index_document(doc_image)
-        ##! Weight document terms using log TF formula with cosine (length) normalization
+        inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization
+
+        
     inv_ind.load_index_postings_list()
     index = inv_ind.get_index()
     
-    for term_index in index:
-        if term_index['token'] in doc_vec_lengths:
-            for doc_tf_tuple in term_index['doc_tf_index']:
-                doc_vec_lengths[doc_tf_tuple[0]].append( doc_tf_tuple[1] )
-        else:
-            for doc_tf_tuple in term_index['doc_tf_index']:
-                doc_vec_lengths[doc_tf_tuple[0]] = [ doc_tf_tuple[1] ]
-                
-    for key, value in doc_vec_lengths:
-        doc_vec_lengths_list.append[{'id': key, 'doc-vec-length': get_doc_vec_norm(value)}]
-    
-    
-    if not "doc_len_index" in db.list_collection_names():
-        insert_doc_len_index(doc_vec_lengths_list)
+    #generate vs_index content
     if not "vs_index" in db.list_collection_names():
         insert_vs_index(index)
+    
+    for term_index in index:
+        for doc_tf_tuple in term_index['doc_tf_index']:
+            if doc_tf_tuple[0] in doc_vec_lengths:
+                doc_vec_lengths[doc_tf_tuple[0]].append(doc_tf_tuple[1])
+            else:
+                doc_vec_lengths[doc_tf_tuple[0]] = [ doc_tf_tuple[1] ]
+    for key, value in doc_vec_lengths.items():
+        doc_vec_lengths_list.append({'id': key, 'doc-vec-length': get_doc_vec_norm(value)})
+    ##MY DOC LENGTHS LOOK WEIRD?:
+    print(doc_vec_lengths_list)
+    
+    #generate doc_len_index content
+    if not "doc_len_index" in db.list_collection_names():
+        insert_doc_len_index(doc_vec_lengths_list)
+    
     
 ##below code is to do concurrency
 
@@ -114,8 +117,7 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
 
 
 
-#################**QUERY BELOW**######################
-
+#################**QUERY CODE BELOW**######################
 
 
 
@@ -127,10 +129,8 @@ def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     normalized_query = text_processor.get_normalized_tokens(query)
     query_list = query.split(' ')
     query_list = re.findall(r"[\w']+|[.,!?;]", query)
-
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_vs_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
-
     return (query_list, stop_words, unknown_words)
     ##! Weight query terms using logarithmic TF*IDF formula without length normalization
 
@@ -142,32 +142,32 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     :param k:
     :return: a list of tuples, each tuple contains (score, doc_id)
     """
-    #! use the below to calc cos similarity of two vectors of nums
-    # result = 1 - spatial.distance.cosine(dataSetI, dataSetII)
-    ##? HERE IS MY BIG QUESTION
-    ##? how am I getting the param for this method, is it the doc_len_index? - where is the method for cosine similarity/length normalization supposed to go?
-    pass
+    ##!!implement this using a heap
+    ##TODO doesn't work
+    doc_scores_list = list(doc_scores.items())
+    return doc_scores_list.sort(key=lambda x:x[1], reverse=True)[:k]
 
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
     """
     disjunctive query over the vs_index with the help of mongo_db.query_vs_index, mongo_db.query_doc_len_index methods
     return a list of matched documents (output from the function top_k_docs), a list of stop words and a list of unknown words separately
     """
-
     #1. get user query
-    #2. parse user query
-    #3. search index for query's tokens
-    #4. get list of postings list
-    #5. compute the tf-idf of each term in query
+    #   ...
     #6. iterate over the doc ids that were returned
     #7. compute the cosine similarity (tf-idf term * doc tf) in a nested loop over each term - for each term do each doc id
-        #s7. (tf-idf*tf)/(query-length * doc-length)
+        #7.1. (tf-idf*tf)/(query-length * doc-length)
     parsed_query, stop_words, unknown_words = parse_query(query)
     doc_scores = {}
     for term in parsed_query:
-        print('querying {} \n====\nRESULTS:\n{}'.format(term, query_vs_index(term)))
+        # print('querying {} \n====\nRESULTS:\n{}'.format(term, query_vs_index(term)))
         postings_list = query_vs_index(term)['doc_tf_index']
         for doc_tf_tuple in postings_list:
             term_tf_idf_score = text_processor.tf(get_tf_value(term, query_doc(doc_tf_tuple[0])['content_str'])) * text_processor.idf(N, len(postings_list))
-
-            cosine_similarity = term_tf_idf_score * doc_tf_tuple[1]
+            cosine_similarity = term_tf_idf_score * doc_tf_tuple[1] #numerator
+            length_dot_product = len(parse_query) * query_doc_len_index(doc_tf_tuple[0]) #denominator
+            doc_score = float(cosine_similarity/length_dot_product)
+            doc_scores[doc_tf_tuple[0]] = doc_score
+    ranked_results = top_k_docs(doc_scores, k)
+    return (ranked_results, stop_words, unknown_words)
+    

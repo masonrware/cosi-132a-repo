@@ -29,22 +29,23 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
     with open(wapo_jl_path, 'r', encoding='UTF-8') as file:
         id_ = 0
         for line in file:
-            conv = json.loads(line)
-            contents = conv['contents']
-            if conv['title']:
-                res = [item['content'] for item in contents if item and item['type'] == 'sanitized_html']
-                print(conv['id'], '        ...        ', id_)
-                content_str_ = " ".join(res)
-                content_str_ = re.sub("<[^>]*>", "", content_str_)
-                res = {
-                    'id': id_,
-                    'title': conv['title'],
-                    'author': conv['author'],
-                    'published_date': datetime.fromtimestamp(int(conv['published_date']/1000)),
-                    'content_str': content_str_
-                }
-                id_ += 1
-                yield res
+            if(line):
+                conv = json.loads(line)
+                contents = conv['contents']
+                if conv['title']:
+                    res = [item['content'] for item in contents if item and item['type'] == 'sanitized_html']
+                    print(conv['id'], '        ...        ', id_)
+                    content_str_ = " ".join(res)
+                    content_str_ = re.sub("<[^>]*>", "", content_str_)
+                    res = {
+                        'id': id_,
+                        'title': conv['title'],
+                        'author': conv['author'],
+                        'published_date': datetime.fromtimestamp(int(conv['published_date']/1000)),
+                        'content_str': content_str_
+                    }
+                    id_ += 1
+                    yield res
 
 
 if __name__ == "__main__":

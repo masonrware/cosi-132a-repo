@@ -74,9 +74,9 @@ class TextProcessing:
         :return:
         """
         if N>0 and df > 0:
-            return math.log2(N/df)
+            return float(math.log2(N/df))
         else:
-            return 0
+            return 0.0
 
     @staticmethod
     def tf(freq: int) -> float:
@@ -86,9 +86,9 @@ class TextProcessing:
         :return:
         """
         if freq>0:
-            return math.log2(freq)
+            return float(1 + math.log2(freq))
         else:
-            return 0
+            return 0.0
 
 
 if __name__ == "__main__":
