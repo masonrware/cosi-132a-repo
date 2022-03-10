@@ -1,3 +1,4 @@
+from ast import parse
 import re
 import math
 from typing import List, Tuple, Dict, Iterable
@@ -152,22 +153,26 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
     disjunctive query over the vs_index with the help of mongo_db.query_vs_index, mongo_db.query_doc_len_index methods
     return a list of matched documents (output from the function top_k_docs), a list of stop words and a list of unknown words separately
     """
-    #1. get user query
-    #   ...
-    #6. iterate over the doc ids that were returned
-    #7. compute the cosine similarity (tf-idf term * doc tf) in a nested loop over each term - for each term do each doc id
-        #7.1. (tf-idf*tf)/(query-length * doc-length)
+    postings_list = []
     parsed_query, stop_words, unknown_words = parse_query(query)
     doc_scores = {}
     for term in parsed_query:
-        # print('querying {} \n====\nRESULTS:\n{}'.format(term, query_vs_index(term)))
-        postings_list = query_vs_index(term)['doc_tf_index']
+        if not term in unknown_words:
+            postings_list = query_vs_index(term)['doc_tf_index']
         for doc_tf_tuple in postings_list:
+            ##TODO fix below math!
             term_tf_idf_score = text_processor.tf(get_tf_value(term, query_doc(doc_tf_tuple[0])['content_str'])) * text_processor.idf(N, len(postings_list))
+            print(f'==={term_tf_idf_score}')
+            print(f'==={doc_tf_tuple[1]}')
             cosine_similarity = term_tf_idf_score * doc_tf_tuple[1] #numerator
-            length_dot_product = len(parse_query) * query_doc_len_index(doc_tf_tuple[0]) #denominator
+            print(f'====cosine sim for {term} and {doc_tf_tuple[0]}: {cosine_similarity}')
+            length_dot_product = len(parsed_query) * query_doc_len_index(doc_tf_tuple[0])['doc-vec-length'] #denominator
             doc_score = float(cosine_similarity/length_dot_product)
             doc_scores[doc_tf_tuple[0]] = doc_score
-    ranked_results = top_k_docs(doc_scores, k)
-    return (ranked_results, stop_words, unknown_words)
+    print(f'====finished doc scores for the query: {parsed_query}\ngot: {list(doc_scores.items())}')
+    if postings_list:
+        ranked_results = top_k_docs(doc_scores, k)
+        return (ranked_results, stop_words, unknown_words)
+    else:
+        return ([], [], [])
     

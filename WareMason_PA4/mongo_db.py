@@ -47,8 +47,6 @@ def insert_doc_len_index(index_list: List[Dict]) -> None:
     :param index_list: document vector length list in the format of [{"doc_id": 0, "length": 39.53}, ...]
     :return:
     """
-    
-
     doc_len_index = db.doc_len_index
     for doc_vector_image in index_list:
         doc_len_index.insert_one(doc_vector_image)
@@ -70,7 +68,7 @@ def query_vs_index(term: str) -> Dict:
     :param term:
     :return:
     """
-    return db.wapo_docs.find_one({'term': term})
+    return db.vs_index.find_one({'token': term})
 
 
 def query_doc_len_index(doc_id: int) -> Dict:
@@ -79,7 +77,7 @@ def query_doc_len_index(doc_id: int) -> Dict:
     :param doc_id:
     :return:
     """
-    return db.wapo_docs.find_one({'id': doc_id})
+    return db.doc_len_index.find_one({'id': doc_id})
 
 
 if __name__ == "__main__":
