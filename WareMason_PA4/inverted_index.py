@@ -87,6 +87,7 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
         num_docs+=1        
         inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization
 
+
         
     inv_ind.load_index_postings_list()
     index = inv_ind.get_index()

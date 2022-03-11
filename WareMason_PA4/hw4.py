@@ -41,10 +41,7 @@ class FlaskApp:
         res = []
         dict_ind = 1
 
-
-        ##! the results here will be different
-        postings_list, stop_words, unknown_words = query_inverted_index(query_text)
-
+        postings_list, stop_words, unknown_words = query_inverted_index(query_text, 30) ##k = 30
 
         if len(postings_list) != 0:
             for posting in postings_list:
