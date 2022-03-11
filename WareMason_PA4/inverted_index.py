@@ -7,7 +7,7 @@ from utils import timer
 from text_processing import TextProcessing
 from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query_vs_index, query_doc_len_index
 
-N = 0
+num_docs = 0
 
 def get_tf_value(term: str, content: str) -> float:
     """ 
@@ -77,13 +77,14 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
         - "doc_len_index": for each doc id as a key, the value should be the "length" of that document vector
     insert the indices by using mongo_db.insert_vs_index and mongo_db.insert_doc_len_index method
     """
-    global N 
+    global num_docs
+    
     inv_ind = InvertedIndex()
     doc_vec_lengths = {}
     doc_vec_lengths_list = []
     
     for doc_image in wapo_docs:
-        N+=1        
+        num_docs+=1        
         inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization
 
         
@@ -109,19 +110,6 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     if not "doc_len_index" in db.list_collection_names():
         insert_doc_len_index(doc_vec_lengths_list)
     
-    
-##below code is to do concurrency
-
-# executor = concurrent.futures.ProcessPoolExecutor(10)
-# futures = [executor.submit(try_my_operation, item) for item in items]
-# concurrent.futures.wait(futures)
-
-
-
-#################**QUERY CODE BELOW**######################
-
-
-
 def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     """
     helper function, should be called in query_inverted_index
@@ -129,10 +117,9 @@ def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     """
     normalized_query = text_processor.get_normalized_tokens(query)
     query_list = query.split(' ')
-    query_list = re.findall(r"[\w']+|[.,!?;]", query)
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_vs_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
-    return (query_list, stop_words, unknown_words)
+    return (normalized_query, stop_words, unknown_words)
     ##! Weight query terms using logarithmic TF*IDF formula without length normalization
 
 def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
@@ -144,8 +131,9 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     :return: a list of tuples, each tuple contains (score, doc_id)
     """
     ##TODO error is bc of sorting between 0.0 and 0.0 --> use heap
-    doc_scores_list = list(doc_scores.items())
-    return doc_scores_list.sort(key=lambda i:i[1], reverse=True)[:k]
+    # doc_scores_list = list(doc_scores.items())
+    # return doc_scores_list.sort(key=lambda i:i[1], reverse=True)[:k]
+    return list(doc_scores.items())
 
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
     """
@@ -159,16 +147,11 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
         if not term in unknown_words:
             postings_list = query_vs_index(term)['doc_tf_index']
         for doc_tf_tuple in postings_list:
-            #todo fix math immediately below this line
-            term_tf_idf_score = text_processor.tf(get_tf_value(term, query_doc(doc_tf_tuple[0])['content_str'])) * text_processor.idf(N, len(postings_list))
-            print(f'==={term_tf_idf_score}')
-            print(f'==={doc_tf_tuple[1]}')
+            term_tf_idf_score = text_processor.tf(get_tf_value(term, query_doc(doc_tf_tuple[0])['content_str'])) * text_processor.idf(num_docs, len(postings_list))
             cosine_similarity = term_tf_idf_score * doc_tf_tuple[1] #numerator
-            print(f'====cosine sim for {term} and {doc_tf_tuple[0]}: {cosine_similarity}')
             length_dot_product = len(parsed_query) * query_doc_len_index(doc_tf_tuple[0])['doc-vec-length'] #denominator
             doc_score = float(cosine_similarity/length_dot_product)
             doc_scores[doc_tf_tuple[0]] = doc_score
-    print(f'====finished doc scores for the query: {parsed_query}\ngot: {list(doc_scores.items())}')
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)
         return (ranked_results, stop_words, unknown_words)

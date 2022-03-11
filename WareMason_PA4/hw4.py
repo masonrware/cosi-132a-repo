@@ -48,7 +48,7 @@ class FlaskApp:
 
         if len(postings_list) != 0:
             for posting in postings_list:
-                document = query_doc(posting)
+                document = query_doc(posting[0])
                 item_dict = {
                     'title': document['title'],
                     'published_date': document['published_date'],

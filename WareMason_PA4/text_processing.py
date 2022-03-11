@@ -45,7 +45,7 @@ class TextProcessing:
         4. after step 1, if the processed token is NOT in the stop words list and its length is greater than 1, return
            the stem of the token """
         token = token.lower()
-        token = re.sub('[^a-zA-Z0-9 -]', '', token)
+        token = re.sub(r'[^a-zA-Z0-9 -]', '', token)
         if token in stop_words or len(token) <= 1:
             return ''
         elif token not in stop_words and len(token) > 1:
@@ -73,7 +73,7 @@ class TextProcessing:
         :param df: document frequency
         :return:
         """
-        if N>0 and df > 0:
+        if N > 0.0 and df > 0.0:
             return float(math.log2(N/df))
         else:
             return 0.0
