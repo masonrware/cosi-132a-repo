@@ -1,13 +1,24 @@
-from ast import parse
-import re
+#!bin/usr/python3
+
+#inverted_index.py
+#Version 2.0.0
+#3-12-22
+
+
+import heapq
 import math
 from typing import List, Tuple, Dict, Iterable
 
-from utils import timer
-from text_processing import TextProcessing
 from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query_vs_index, query_doc_len_index
+from text_processing import TextProcessing
+from utils import timer
+
+
 
 num_docs = 0
+text_processor = TextProcessing()
+
+
 
 def get_tf_value(term: str, content: str) -> float:
     """ 
@@ -22,8 +33,6 @@ def cosine_sim(tfidf_term: float, tf_doc: float, query_length: int, doc_length: 
     for a given tfidf score, a given tf score, and two vector lengths 
     """
     return (tfidf_term*tf_doc)/(query_length*doc_length)
-
-text_processor = TextProcessing()
 
 
 class InvertedIndex:
@@ -82,20 +91,13 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     inv_ind = InvertedIndex()
     doc_vec_lengths = {}
     doc_vec_lengths_list = []
-    
     for doc_image in wapo_docs:
         num_docs+=1        
-        inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization
-
-
-        
+        inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization  
     inv_ind.load_index_postings_list()
     index = inv_ind.get_index()
-    
-    #generate vs_index content
     if not "vs_index" in db.list_collection_names():
         insert_vs_index(index)
-    
     for term_index in index:
         for doc_tf_tuple in term_index['doc_tf_index']:
             if doc_tf_tuple[0] in doc_vec_lengths:
@@ -104,9 +106,6 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
                 doc_vec_lengths[doc_tf_tuple[0]] = [ doc_tf_tuple[1] ]
     for key, value in doc_vec_lengths.items():
         doc_vec_lengths_list.append({'id': key, 'doc-vec-length': get_doc_vec_norm(value)})
-    ##MY DOC LENGTHS LOOK WEIRD?:
-    print(doc_vec_lengths_list)
-    
     #generate doc_len_index content
     if not "doc_len_index" in db.list_collection_names():
         insert_doc_len_index(doc_vec_lengths_list)
@@ -121,7 +120,6 @@ def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_vs_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
     return (normalized_query, stop_words, unknown_words)
-    ##! Weight query terms using logarithmic TF*IDF formula without length normalization
 
 def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     """
@@ -134,7 +132,7 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     ##TODO error is bc of sorting between 0.0 and 0.0 --> use heap
     # doc_scores_list = list(doc_scores.items())
     # return doc_scores_list.sort(key=lambda i:i[1], reverse=True)[:k]
-    return list(doc_scores.items())
+    return list(doc_scores.items())[:k]
 
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
     """
@@ -147,12 +145,17 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
     for term in parsed_query:
         if not term in unknown_words:
             postings_list = query_vs_index(term)['doc_tf_index']
-        for doc_tf_tuple in postings_list:
-            term_tf_idf_score = text_processor.tf(get_tf_value(term, query_doc(doc_tf_tuple[0])['content_str'])) * text_processor.idf(num_docs, len(postings_list))
-            cosine_similarity = term_tf_idf_score * doc_tf_tuple[1] #numerator
-            length_dot_product = len(parsed_query) * query_doc_len_index(doc_tf_tuple[0])['doc-vec-length'] #denominator
-            doc_score = float(cosine_similarity/length_dot_product)
-            doc_scores[doc_tf_tuple[0]] = doc_score
+        if postings_list:
+            if len(postings_list) < k:
+                k = len(postings_list) 
+            for i in range(k):
+                term_tf_idf_score = (text_processor.tf(get_tf_value(term, query_doc(postings_list[i][0])['content_str'])) 
+                                                    * text_processor.idf(num_docs, len(postings_list))
+                                    )           ##! Weight query terms using logarithmic TF*IDF formula without length normalization
+                cosine_similarity = term_tf_idf_score * postings_list[i][1]
+                length_dot_product = len(parsed_query) * query_doc_len_index(postings_list[i][0])['doc-vec-length']
+                doc_score = float(cosine_similarity/length_dot_product)
+                doc_scores[postings_list[i][0]] = doc_score
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)
         return (ranked_results, stop_words, unknown_words)
