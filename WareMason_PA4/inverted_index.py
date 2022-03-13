@@ -13,9 +13,6 @@ from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query
 from text_processing import TextProcessing
 from utils import timer
 
-
-
-num_docs = 0
 text_processor = TextProcessing()
 
 
@@ -78,6 +75,10 @@ def get_doc_vec_norm(term_tfs: List[float]) -> float:
     else:
         return 0.0
 
+
+num_docs=0
+
+
 @timer
 def build_inverted_index(wapo_docs: Iterable) -> None:
     """
@@ -85,9 +86,7 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
         - "vs_index": for each normalized term as a key, the value should be a list of tuples; each tuple stores the doc id this term appears in and the term weight (log tf)
         - "doc_len_index": for each doc id as a key, the value should be the "length" of that document vector
     insert the indices by using mongo_db.insert_vs_index and mongo_db.insert_doc_len_index method
-    """
-    global num_docs
-    
+    """    
     inv_ind = InvertedIndex()
     doc_vec_lengths = {}
     doc_vec_lengths_list = []
@@ -129,11 +128,13 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     :param k:
     :return: a list of tuples, each tuple contains (score, doc_id)
     """
-    ##TODO error is bc of sorting between 0.0 and 0.0 --> use heap
-    # doc_scores_list = list(doc_scores.items())
-    # return doc_scores_list.sort(key=lambda i:i[1], reverse=True)[:k]
-    return list(doc_scores.items())[:k]
-
+    print(f'-'*40, f'Creating a heap for this list: {list(doc_scores.items())}')
+    heapq.heapify(list(doc_scores.items()))
+    results = []
+    heapq.nlargest(k, results, key=lambda i:i[1])
+    print(f'results: {results}')
+    return results
+    
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
     """
     disjunctive query over the vs_index with the help of mongo_db.query_vs_index, mongo_db.query_doc_len_index methods
@@ -146,15 +147,20 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
         if not term in unknown_words:
             postings_list = query_vs_index(term)['doc_tf_index']
         if postings_list:
+            # option one - only do k calcs
             if len(postings_list) < k:
                 k = len(postings_list) 
             for i in range(k):
+            # option two - do all calcs and then comp them
+            # for doc_tuple in postings_list:
+                ##todo i dont think i need to recalc every tf - another big issue is the num_docs so i need to figure that out
                 term_tf_idf_score = (text_processor.tf(get_tf_value(term, query_doc(postings_list[i][0])['content_str'])) 
                                                     * text_processor.idf(num_docs, len(postings_list))
                                     )           ##! Weight query terms using logarithmic TF*IDF formula without length normalization
                 cosine_similarity = term_tf_idf_score * postings_list[i][1]
                 length_dot_product = len(parsed_query) * query_doc_len_index(postings_list[i][0])['doc-vec-length']
                 doc_score = float(cosine_similarity/length_dot_product)
+                
                 doc_scores[postings_list[i][0]] = doc_score
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)
