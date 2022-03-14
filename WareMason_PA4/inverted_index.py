@@ -126,11 +126,11 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     :return: a list of tuples, each tuple contains (score, doc_id)
     """
     print(f'-'*40, f'Creating a heap for this list: {list(doc_scores.items())}')
-    heapq.heapify(list(doc_scores.items()))
-    results = []
-    heapq.heappop()
-    heapq.nlargest(k, results, key=lambda i:i[1])
-    print(f'results: {results}')
+    doc_scores_list = list(doc_scores.items())
+    heapq.heapify(doc_scores_list)
+    print('='*15, f'Heap Created:{list(doc_scores_list)}')
+    results = heapq.nlargest(k, doc_scores_list, key=lambda x:x[1])
+    print('='*15, f'Top K Scores:{list(results)}')
     return results
     
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
@@ -145,11 +145,6 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
         if not term in unknown_words:
             postings_list = query_vs_index(term)['doc_tf_index']
         if postings_list:
-            # option one - only do k calcs
-            # if len(postings_list) < k:
-            #     k = len(postings_list) 
-            # for i in range(k):
-            # option two - do all calcs and then comp them
             for doc_tuple in postings_list:
                 term_tf_idf_score = (doc_tuple[1]* text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
                 cosine_similarity = term_tf_idf_score * doc_tuple[1]
