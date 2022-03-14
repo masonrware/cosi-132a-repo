@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 # text_processing.py
-# Version 1.0
-# 2/23/2022
+# Version 2.0.0
+# 3/14/2022
 
 import math
 import re

@@ -15,14 +15,15 @@ from utils import timer
 
 text_processor = TextProcessing()
 
+##TODO RERUN AND REBUILD TO INCORP NEW TF METHOD
 
 
-def get_tf_value(term: str, content: str) -> float:
+def get_raw_tf_value(term: str, content: str) -> float:
     """ 
     This is a method that takes a str representing an individual token and a str representing the set of tokens and calculates
     the number of appearances of the given term in the content 
     """
-    return float(len([token for token in content if token==term]))
+    return float(content.count(term))
 
 def cosine_sim(tfidf_term: float, tf_doc: float, query_length: int, doc_length: float) -> float:
     """ 
@@ -47,9 +48,9 @@ class InvertedIndex:
         terms = text_processor.get_normalized_tokens(document['title'], document['content_str'])
         for term in terms:
             if term in self.appearances_dict:
-                self.appearances_dict[term].add((document['id'], text_processor.tf(get_tf_value(term, terms))))
+                self.appearances_dict[term].add((document['id'], text_processor.tf(get_raw_tf_value(term, terms))))
             else:
-                self.appearances_dict[term] = {(document['id'], text_processor.tf(get_tf_value(term, terms)))}
+                self.appearances_dict[term] = {(document['id'], text_processor.tf(get_raw_tf_value(term, terms)))}
     
     def load_index_postings_list(self) -> None:
         for term in self.appearances_dict:
@@ -125,14 +126,12 @@ def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:
     :param k:
     :return: a list of tuples, each tuple contains (score, doc_id)
     """
-    print(f'-'*40, f'Creating a heap for this list: {list(doc_scores.items())}')
     doc_scores_list = list(doc_scores.items())
     heapq.heapify(doc_scores_list)
-    print('='*15, f'Heap Created:{list(doc_scores_list)}')
     results = heapq.nlargest(k, doc_scores_list, key=lambda x:x[1])
-    print('='*15, f'Top K Scores:{list(results)}')
     return results
     
+@timer
 def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int]], List[str], List[str]]:
     """
     disjunctive query over the vs_index with the help of mongo_db.query_vs_index, mongo_db.query_doc_len_index methods
@@ -146,11 +145,11 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
             postings_list = query_vs_index(term)['doc_tf_index']
         if postings_list:
             for doc_tuple in postings_list:
-                term_tf_idf_score = (doc_tuple[1]* text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
-                cosine_similarity = term_tf_idf_score * doc_tuple[1]
-                length_dot_product = len(parsed_query) * query_doc_len_index(doc_tuple[0])['doc-vec-length']
-                doc_score = float(cosine_similarity/length_dot_product)
-                
+                term_tf_idf_score = (doc_tuple[1] * text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
+                doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
+                                               tf_doc=doc_tuple[1],
+                                               query_length=len(parsed_query),
+                                               doc_length=query_doc_len_index(doc_tuple[0])['doc-vec-length'])
                 doc_scores[doc_tuple[0]] = doc_score
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)
