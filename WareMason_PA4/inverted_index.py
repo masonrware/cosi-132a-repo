@@ -149,7 +149,8 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
                 doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
                                                tf_doc=doc_tuple[1],
                                                query_length=len(parsed_query),
-                                               doc_length=query_doc_len_index(doc_tuple[0])['doc-vec-length'])
+                                               doc_length=10)
+                ##! The above line - where the doc length is queried for query_doc_len_index(doc_tuple[0])['doc-vec-length']
                 doc_scores[doc_tuple[0]] = doc_score
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)

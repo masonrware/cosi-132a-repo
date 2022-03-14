@@ -14,11 +14,15 @@ COSI 132A -- Brandeis University
 
 ### Description
 
-This program is a search engine that uses Washington Post articles stored in `pa4_data/wapo_pa4.jl`. Utilizing a Flask backend, the engine takes a user query, normalizes, stems, and tokenizes the text and then compares the set of words against an inverted index. Before the application can be deployable and runnable, a database containing collections of documents and the inverted index itself must be made in order for the user to be able to continually search. The program does this with the `--build` option command.
+This program is a search engine that uses Washington Post articles stored in `pa4_data/wapo_pa4.jl`. Utilizing a Flask backend, the engine takes a user query, normalizes, stems, and tokenizes the text and then compares the set of words against an inverted index. Before the application can be deployable and runnable, a database containing collections of documents and the inverted index itself must be made in order for the user to be able to continually search. The program does this with the `--build` option command. 
+
+Once that command is run, the program will construct an inverted index with keys of every stemmed and normalized term in the corpora and values of lists
+of tuples of every document that term appears in and the tf of that term in the document. This will be inserted into a local db under the alias vs_index
+alongside another index titled doc_length_index. This collection, as can probably be deduced, has keys of doc ids and values of cosine-normalized lengths of each document.
 
 ###   Term Processing
 
-The program has two different classes for term processing:
+The program has one class for term processing:
 
 ###   `term_processing.py`
 
@@ -32,7 +36,7 @@ This method takes a token representing an individual word and normalizes it. It 
 
 This method takes both a title and content str of an article as arguments and normalizes all of the tokens in each string. Notice that the arguments are given default values of empty strings as there are instances where the same code is used to normalize, for instance, the user query and therefore, any insufficient positional argument errors are avoided. This method first uses the nltk `word_tokenizer` class to tokenize the two strings. Next, each token in both sets are normalized and added to a set representing the desired output: a set of all normalized words in both the title and content.
   
-
+This class also houses two static methods: `def idf())`
   
 ###   Inverted Index
 
