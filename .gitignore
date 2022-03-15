@@ -137,3 +137,4 @@ PA3venv/
 
 .DS_Store
 .DS_Store/
+*.jl
