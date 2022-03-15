@@ -50,7 +50,12 @@ def insert_doc_len_index(index_list: List[Dict]) -> None:
     doc_len_index = db.doc_len_index
     doc_len_index.insert_many(index_list)
     
-
+    
+def insert_test_db_index(index_list: List[Dict]) -> None:
+    inverted_index = db.test_db_index
+    inverted_index.insert_many(index_list)
+    
+    
 def query_doc(doc_id: int) -> Dict:
     """
     query the document from "wapo_docs" collection based on the doc_id
@@ -66,7 +71,6 @@ def query_vs_index(term: str) -> Dict:
     :param term:
     :return:
     """
-    # print(f'querying {term}')
     return db.vs_index.find_one({'token': term})
 
 

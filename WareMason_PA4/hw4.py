@@ -6,10 +6,14 @@
 
 from pathlib import Path
 import argparse
+import time
+import unittest
 from flask import Flask, render_template, request
 from utils import load_wapo
 from inverted_index import build_inverted_index, query_inverted_index
 from mongo_db import db, insert_docs, query_doc
+import test_hw4
+
 
 pages = {}
 PAGE_NUM, TOTAL_PAGES = 1, 0
@@ -101,11 +105,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="VS IR system")
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--test", action="store_true")
     args = parser.parse_args()
 
     if args.build:
         build_inverted_index(load_wapo(wapo_path))
         print('\n'+'='*50+'\nbuild completed successfully :)\n'+'='*50)
-
+    if args.test:
+        suite = unittest.TestLoader().loadTestsFromModule(test_hw4)
+        unittest.TextTestRunner(verbosity=1).run(suite)
+        time.sleep(3)
+        print(f'-'*15,f'\nstarting construction of test database...\n', f'-'*15)
+        build_inverted_index(load_wapo('pa4_data/test_data_pa4.jl'), flag='test')
+        print(f'-'*15,f'\ntest database contruction finished :)\n', f'-'*15)
+        app.run(port=5001)
     if args.run:
         app.run(debug=True, port=5000)

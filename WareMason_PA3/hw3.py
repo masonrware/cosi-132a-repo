@@ -116,10 +116,10 @@ if __name__ == "__main__":
     if args.test:
         suite = unittest.TestLoader().loadTestsFromModule(test_hw3)
         unittest.TextTestRunner(verbosity=1).run(suite)
-        time.sleep(7)
+        time.sleep(3)
         print(f'-'*15,f'\nstarting construction of test database...\n', f'-'*15)
         build_inverted_index(load_wapo('pa3_data/test_data_pa3.jl'), flag='test')
         print(f'-'*15,f'\ntest database contruction finished :)\n', f'-'*15)
-        app.run(port=5001)
+        app.run(port=5003)
     if args.run:
         app.run(debug=True, port=5001)

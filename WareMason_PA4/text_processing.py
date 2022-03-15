@@ -63,7 +63,6 @@ class TextProcessing:
         for token in token_content:
             if self.normalize(token) != '':
                 tokenized_words.append(self.normalize(token))
-        print('-'*30, self.STOP_WORDS)
         return tokenized_words
 
     @staticmethod

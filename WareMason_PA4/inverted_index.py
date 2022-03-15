@@ -9,7 +9,7 @@ import heapq
 import math
 from typing import List, Tuple, Dict, Iterable
 
-from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query_vs_index, query_doc_len_index
+from mongo_db import db, insert_doc_len_index, insert_vs_index, query_doc, query_vs_index, query_doc_len_index, insert_test_db_index
 from text_processing import TextProcessing
 from utils import timer
 
@@ -77,7 +77,7 @@ def get_doc_vec_norm(term_tfs: List[float]) -> float:
         return 0.0
 
 @timer
-def build_inverted_index(wapo_docs: Iterable) -> None:
+def build_inverted_index(wapo_docs: Iterable, flag: str) -> None:
     """
     load wapo_pa4.jl to build two indices:
         - "vs_index": for each normalized term as a key, the value should be a list of tuples; each tuple stores the doc id this term appears in and the term weight (log tf)
@@ -91,8 +91,6 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
         inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization  
     inv_ind.load_index_postings_list()
     index = inv_ind.get_index()
-    if not "vs_index" in db.list_collection_names():
-        insert_vs_index(index)
     for term_index in index:
         for doc_tf_tuple in term_index['doc_tf_index']:
             if doc_tf_tuple[0] in doc_vec_lengths:
@@ -102,8 +100,16 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
     for key, value in doc_vec_lengths.items():
         doc_vec_lengths_list.append({'id': key, 'doc-vec-length': get_doc_vec_norm(value)})
     #generate doc_len_index content
-    if not "doc_len_index" in db.list_collection_names():
-        insert_doc_len_index(doc_vec_lengths_list)
+    if flag == 'build':
+        if not "vs_index" in db.list_collection_names():
+            insert_vs_index(index)
+        if not "doc_len_index" in db.list_collection_names():
+            insert_doc_len_index(doc_vec_lengths_list)
+    if flag == 'test':
+        if not "test_db_index" in db.list_collection_names():
+            insert_test_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_tf_index']), reverse=True)) # gets inserted into the db largest->smallest
+
+    
     
 def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     """
@@ -111,7 +117,6 @@ def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     given each query, return a list of normalized terms, a list of stop words and a list of unknown words separately
     """
     normalized_query = text_processor.get_normalized_tokens(query)
-    print(f'recieved {query}, returning {normalized_query}')
     query_list = query.split(' ')
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_vs_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
@@ -140,7 +145,6 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
     parsed_query, stop_words, unknown_words = parse_query(query)
     doc_scores = {}
     for term in parsed_query:
-        print(f'querying {term} from vs index; got: {query_vs_index(term)}')
         test_item = query_vs_index(term)
 
         if not term in unknown_words and test_item:
@@ -150,7 +154,7 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
                 doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
                                                 tf_doc=doc_tuple[1],
                                                 query_length=len(parsed_query),
-                                                doc_length=10.0)
+                                                doc_length=query_doc_len_index(doc_tuple[0])['doc-vec-length'])
                     ##! The above line - where the doc length is queried for query_doc_len_index(doc_tuple[0])['doc-vec-length']
                 doc_scores[doc_tuple[0]] = doc_score
     if postings_list:

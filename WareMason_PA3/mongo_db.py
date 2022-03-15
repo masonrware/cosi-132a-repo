@@ -61,3 +61,12 @@ def query_db_index(token: str) -> Dict:
     :return:
     """
     return db.inverted_index.find_one({'token': token})
+
+
+def query_test_db_index(token: str) -> Dict:
+    """
+    query the posting list from "inverted_index" collection based on the token
+    :param token:
+    :return:
+    """
+    return db.test_inverted_index.find_one({'token': token})
