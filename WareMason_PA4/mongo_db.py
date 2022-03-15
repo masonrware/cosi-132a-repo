@@ -9,7 +9,7 @@ from turtle import pos
 from typing import Dict, List, Iterable
 
 import pymongo
-import pprint
+from utils import timer
 
 client = pymongo.MongoClient("localhost", 27017)
 db = client["ir_2022_wapo"]
@@ -72,7 +72,6 @@ def query_vs_index(term: str) -> Dict:
     :return:
     """
     return db.vs_index.find_one({'token': term})
-
 
 def query_doc_len_index(doc_id: int) -> Dict:
     """

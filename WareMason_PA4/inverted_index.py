@@ -146,10 +146,11 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
     doc_scores = {}
     for term in parsed_query:
         test_item = query_vs_index(term)
-
+        print(f'====on term: {term}')
         if not term in unknown_words and test_item:
             postings_list = test_item['doc_tf_index']
             for doc_tuple in postings_list:
+                
                 term_tf_idf_score = (doc_tuple[1] * text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
                 doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
                                                 tf_doc=doc_tuple[1],
