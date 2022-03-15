@@ -36,11 +36,11 @@ This method takes a token representing an individual word and normalizes it. It 
 
 This method takes both a title and content str of an article as arguments and normalizes all of the tokens in each string. Notice that the arguments are given default values of empty strings as there are instances where the same code is used to normalize, for instance, the user query and therefore, any insufficient positional argument errors are avoided. This method first uses the nltk `word_tokenizer` class to tokenize the two strings. Next, each token in both sets are normalized and added to a set representing the desired output: a set of all normalized words in both the title and content.
   
-This class also houses two static methods: `def idf())`
+This class also houses two static methods: `def idf() and def tf()`. These methods are used to find the inverse document frequency and the term frequency, respectively. They are smoothed values, found using a logarithm base 2.
   
 ###   Inverted Index
 
-The program builds and maintains an inverted index using the class `inverted_index.py`.
+The program builds an inverted index and uses it to implement to db collections, vs_index and doc_len_index, using the class housed in `inverted_index.py`.
 
 *   `inverted_index.py`
 
@@ -48,7 +48,7 @@ This file contains a class of the same name: `InvertedIndex` that represents the
 
 *   `def index_document(self, document: dict) -> None:`
 
-This method is used to insert a document and all of its terms into the inverted index. Using the dictionary representing the document, the method utilizes the method `get_normalized_tokens()` from the `text_processing.py` file in order to normalize the title and content of the document. Then, iterating over the returned set of words, the program either adds an unseen token to the internal data structure: `appearances_dict`, as a key along with a value of a list containing only the document id of the document currently being indexed or it appends the new document id to the list belonging to an already indexed token.
+This method is used to insert a document and all of its terms into the inverted index. Using the dictionary representing the document, the method utilizes the method `get_normalized_tokens()` from the `text_processing.py` file in order to normalize the title and content of the document. Then, iterating over the returned set of words, the program either adds an unseen token to the internal data structure: `appearances_dict`, as a key along with a value of a list containing tuples of the document ids and tfs of the term currently being looked at.
 
 *   `def load_index_postings_list(self) -> None:`
 
@@ -58,16 +58,19 @@ Outside of the class, there exist the following methods for interacting with the
 
 *   `def build_inverted_index(wapo_docs: Iterable) -> None:`
 
-This method is used to construct an inverted index and insert it into the database. Using the iterable argument that represents each individual document, the program indexes each document in the collection. After this is done, the method `insert_db_index()` is used to insert the index into a mongo database. The list discussed earlier is used to represent the index and it is passed as a descendingly sorted index.
+This method is used to construct an inverted index and insert it into the database. Using the iterable argument that represents each individual document, the program indexes each document in the collection. After this is done, the method `insert_vs_index()` is used to insert the index into a mongo database. The list discussed earlier is used to represent the index and it is passed as a descendingly sorted index.
 
-*   `def intersection(posting_lists: List[List[int]]) -> List[int]:`
+*   `def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:`
 
-This is potentially the most elegant method ever written in Python. It uses one line of code to find the intersection of multiple posting\_lists of ids and returns the intersecting list. It is used to find the common documents between multiple terms, say, in a query.
+This method parses a query by utilizing the text processor built off of the TextProcessor class housed in `text_processing.py`. It also finds the stop words and unknown words and returns all three: the query, stop words, and unknown words. It retains a list of stop words by comparing the tokens in the normalized query to the normalized tokens in the non normalized query. It retains a list of unknown words by comparing the tokens in the normalized query with the index's keys.
+
+*   `def top_k_docs(doc_scores: Dict[int, float], k: int) -> List[Tuple[float, int]]:`
+
+This method implements a heapq on a list using the python package heapq. First, the method build the heap, then it heapifys it, and lastly it extracts the k largest documents, provided as an argument.
 
 *   `def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:`
 
-Finally, this method is the powerhouse of the engine. It queries the database for document information and returns all of the relevant documents as well as a list of stop words and unknown words. Using the user's query, the method normalizes its tokens and finds all alphanumeric and dash characters using the regex expression: `r'[\w']+|[.,!?;]'`. It retains a list of stop words by comparing the tokens in the normalized query to the normalized tokens in the non normalized query. It retains a list of unknown words by comparing the tokens in the normalized query with the index's keys. It then builds a list of posting lists of each token in the query. Using the `intersection()` method described above, the method builds a list of the common postings and returns it to be rendered.
-
+Finally, this method is the powerhouse of the engine. It queries the database for document information and returns all of the relevant documents as well as a list of stop words and unknown words. Using the user's query, the method normalizes its tokens and finds all alphanumeric and dash characters using the method parse_query, discussed above. It then iterates over each term in the normalized query, querying its postings list from the db in the collection vs_index. Using this list of tuples of doc ids and tf scores, the method then calculates the idf of the respective document and term relationship. The tf-idf score is calculated by first multiplying the tf score of the given posting with the idf of entire data set and the length of the individual postings list. Next, a helper method `cosine_sim()` is used to calculate the cosine similarity of a document to the query. It does so by taking the previously calculated tf-idf score and the tf score of the document and divides their product by the product of the query length and the document length. Finally, it adds this calculated value to a dictionary called `doc_scores` where the keys are doc ids and values are cosine similarity scores. This dictionary gets passed to `top_k_scores` and then a reutrnable product is sent to `hw4.py` in order for the flask backend to render the results.
 
 
 ###   Mongo Database
@@ -80,15 +83,24 @@ The following are it's methods:
 
 This method is used to construct the collection of the database representing all of the documents. This, in turn, allows us to access a document's data in constant time. It works by taking advantage of the pymongo class and creates a new db collection entitled `wapo_docs`. Iterating through the passed iterable of documents, it adds each sequentially in linear time - it takes around 9 minutes for me to index 27,000 documents on a MacBook Pro (13-inch, 2020, 1.4 GHz Quad-Core Intel Core i5, 16 GB 2133 MHz LPDDR3 RAM).
 
-*   `def insert_db_index(index_list: List[Dict]) -> None:`
+*   `def insert_vs_index(index_list: List[Dict]) -> None:`
 
-This method does the same as above but it inserts each index-postings list pairing of the inverted index into the database. It creates a new collection entitled: `inverted_index` and fills that with the items of the iterable argument.
+This method does the same as above but it inserts each index to postings list/tf scores pairing of the inverted index into the database. It creates a new collection entitled: `inverted_index` and fills that with the items of the iterable argument.
+
+*   `def insert_doc_len_index(index_list: List[Dict]) -> None:`
+
+This method is used to insert the document cosine-normalized scores into a db collection. 
+
+
+*   `def query_doc_len_index(doc_id: int) -> Dict:`
+
+This method querys the database for an float representing the cosine-normalized length of a document. It queries by document id.
 
 *   `def query_doc(doc_id: int) -> Dict:`
 
 This method queries the database for a document using its unique id. It returns null if no document is found.
 
-*   `def query_db_index(token: str) -> Dict:`
+*   `def query_vs_index(token: str) -> Dict:`
 
 This method queries the database for a postings list via a token
 

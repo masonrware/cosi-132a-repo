@@ -6,6 +6,9 @@
 
 from pathlib import Path
 import argparse
+import unittest
+import test_hw3
+import time
 
 from flask import Flask, render_template, request
 
@@ -21,7 +24,7 @@ wapo_path = data_dir.joinpath("wapo_pa3.jl")
 pages = {}
 PAGE_NUM, TOTAL_PAGES = 1, 0
 
-if "wapo_docs" not in db.list_collection_names():
+if "wapo_docs_PA3" not in db.list_collection_names():
     insert_docs(load_wapo(wapo_path))
 
 
@@ -74,7 +77,9 @@ class FlaskApp:
                                    unknown_words=unknown_words,
                                    PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # render results on results page
         else:
-            return render_template("errorResults.html", PAGE_NUM=PAGE_NUM, TOTAL_PAGES=PAGE_NUM)  # render error page
+            return render_template("errorResults.html", query=query_text, stop_words=stop_words,
+                                   unknown_words=unknown_words,
+                                   PAGE_NUM=1, TOTAL_PAGES=1)  # render error page
 
     @app.route("/results/<int:page_id>/prev", methods=["GET", "POST"])
     def prev_page(page_id: int) -> str:
@@ -103,9 +108,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Boolean IR system")
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--test", action="store_true")
     args = parser.parse_args()
 
     if args.build:
-        build_inverted_index(load_wapo(wapo_path))
+        build_inverted_index(load_wapo(wapo_path), flag='build')
+    if args.test:
+        suite = unittest.TestLoader().loadTestsFromModule(test_hw3)
+        unittest.TextTestRunner(verbosity=1).run(suite)
+        time.sleep(7)
+        print(f'-'*15,f'\nstarting construction of test database...\n', f'-'*15)
+        build_inverted_index(load_wapo('pa3_data/test_data_pa3.jl'), flag='test')
+        print(f'-'*15,f'\ntest database contruction finished :)\n', f'-'*15)
+        app.run(port=5001)
     if args.run:
-        app.run(debug=True, port=5000)
+        app.run(debug=True, port=5001)

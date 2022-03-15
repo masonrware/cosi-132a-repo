@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>IR Vector Space</title>
 </head>
-<body>
+<body style='background-color: grey'>
 
 <h3>Washington Post Search 3.0 (Vector Space)</h3>
 
@@ -14,6 +14,23 @@
     <input type="submit" value="Search">
 </form>
 
+
+<br>
+<table style='width:30%; border:1px solid black'>
+    <caption><b style="text-align: left;">QUERY:</b> <i>{{ query }}</i></caption>
+    <tr>
+        <th><i>Ignored Term(s)</i></th>
+        {% for item in stop_words %}
+            <td style='border:1px solid black'>{{ item }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th><i>Unknown Term(s)</i></th>
+        {% for item in unknown_words %}
+            <td style='border:1px solid black'>{{ item }}</td>
+        {% endfor %}
+    </tr>
+</table>
 
 <!-- start of doc -->
 <p>No Results Found For That Query :(</p>

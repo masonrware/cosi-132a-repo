@@ -6,6 +6,9 @@ import json
 import re
 from datetime import datetime
 
+from text_processing import TextProcessing
+
+text_processor = TextProcessing()
 
 def timer(func):
     @functools.wraps(func)
@@ -31,7 +34,7 @@ def load_wapo(wapo_jl_path: Union[str, os.PathLike]) -> Generator[Dict, None, No
         for line in file:
             if(line):
                 conv = json.loads(line)
-                contents = conv['contents']
+                contents = (conv['contents'])
                 if conv['title']:
                     res = [item['content'] for item in contents if item and item['type'] == 'sanitized_html']
                     print(conv['id'], '        ...        ', id_)

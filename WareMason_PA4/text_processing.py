@@ -46,9 +46,9 @@ class TextProcessing:
            the stem of the token """
         token = token.lower()
         token = re.sub(r'[^a-zA-Z0-9 -]', '', token)
-        if token in stop_words or len(token) <= 1:
+        if token in self.STOP_WORDS or len(token) <= 1:
             return ''
-        elif token not in stop_words and len(token) > 1:
+        elif token not in self.STOP_WORDS and len(token) > 1:
             return self.stemmer.stem(token)
 
     def get_normalized_tokens(self, title_: str = " ", content_: str = " ") -> Set[str]:
@@ -63,6 +63,7 @@ class TextProcessing:
         for token in token_content:
             if self.normalize(token) != '':
                 tokenized_words.append(self.normalize(token))
+        print('-'*30, self.STOP_WORDS)
         return tokenized_words
 
     @staticmethod

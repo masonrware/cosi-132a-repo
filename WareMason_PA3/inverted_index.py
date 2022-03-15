@@ -6,11 +6,12 @@
 
 from typing import List, Tuple, Iterable
 import re
+from customized_text_processing import CustomizedTextProcessing
 
 from utils import timer
 from text_processing import TextProcessing
 
-from mongo_db import insert_db_index, query_db_index
+from mongo_db import insert_db_index, query_db_index, insert_test_db_index
 
 
 text_processor = TextProcessing()
@@ -43,18 +44,25 @@ class InvertedIndex:
 
 
 @timer
-def build_inverted_index(wapo_docs: Iterable) -> None:
+def build_inverted_index(wapo_docs: Iterable, flag: str) -> None:
     """load wapo_pa3.jl to build the inverted index and insert the index by using mongo_db.insert_db_index method."""
     inv_ind = InvertedIndex()
+    if flag == 'test':
+        text_processor = CustomizedTextProcessing()
     for doc_image in wapo_docs:
         inv_ind.index_document(doc_image)
     inv_ind.load_index_postings_list()
-    insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) # gets inserted into the db largest->smallest
+    if flag == 'build':
+        insert_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) # gets inserted into the db largest->smallest
+    if flag == 'test':
+        insert_test_db_index(sorted(inv_ind.get_index(), key = lambda i:len(i['doc_ids']), reverse=True)) # gets inserted into the db largest->smallest
 
 def intersection(posting_lists: List[List[int]]) -> List[int]:
     """implementation of the intersection of a list of posting lists that have been ordered from the shortest to the longest."""
     return list(set.intersection(*[set(x) for x in posting_lists])) if posting_lists else []
-
+    ##TODO rewrite  - psuedo code on slides 
+    
+    
 def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     """
     conjunctive query over the built index by using mongo_db.query_db_index method
@@ -63,13 +71,16 @@ def query_inverted_index(query: str) -> Tuple[List[int], List[str], List[str]]:
     normalized_query = text_processor.get_normalized_tokens(query)
     query_list = query.split(' ')
     query_list = re.findall(r"[\w']+|[.,!?;]", query)
-
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_db_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
-
+    
+    
+    
     posting_lists = []
+    
     for token in normalized_query:
         if not token in unknown_words:
             posting_lists.append(query_db_index(token)['doc_ids'])
+    
     intersect_posting_lists = intersection(posting_lists)
     return (intersect_posting_lists, stop_words, unknown_words)

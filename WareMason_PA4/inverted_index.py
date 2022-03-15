@@ -84,12 +84,10 @@ def build_inverted_index(wapo_docs: Iterable) -> None:
         - "doc_len_index": for each doc id as a key, the value should be the "length" of that document vector
     insert the indices by using mongo_db.insert_vs_index and mongo_db.insert_doc_len_index method
     """    
-    num_docs = 0
     inv_ind = InvertedIndex()
     doc_vec_lengths = {}
     doc_vec_lengths_list = []
     for doc_image in wapo_docs:
-        num_docs+=1        
         inv_ind.index_document(doc_image)             ##! Weight document terms using log TF formula with cosine (length) normalization  
     inv_ind.load_index_postings_list()
     index = inv_ind.get_index()
@@ -113,6 +111,7 @@ def parse_query(query: str) -> Tuple[List[str], List[str], List[str]]:
     given each query, return a list of normalized terms, a list of stop words and a list of unknown words separately
     """
     normalized_query = text_processor.get_normalized_tokens(query)
+    print(f'recieved {query}, returning {normalized_query}')
     query_list = query.split(' ')
     stop_words = {token for token in query_list if not text_processor.normalize(token) in normalized_query}
     unknown_words = {token for token in query_list if isinstance(query_vs_index(text_processor.normalize(token)), type(None)) and not token in stop_words}
@@ -141,16 +140,18 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
     parsed_query, stop_words, unknown_words = parse_query(query)
     doc_scores = {}
     for term in parsed_query:
-        if not term in unknown_words:
-            postings_list = query_vs_index(term)['doc_tf_index']
-        if postings_list:
+        print(f'querying {term} from vs index; got: {query_vs_index(term)}')
+        test_item = query_vs_index(term)
+
+        if not term in unknown_words and test_item:
+            postings_list = test_item['doc_tf_index']
             for doc_tuple in postings_list:
                 term_tf_idf_score = (doc_tuple[1] * text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
                 doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
-                                               tf_doc=doc_tuple[1],
-                                               query_length=len(parsed_query),
-                                               doc_length=10)
-                ##! The above line - where the doc length is queried for query_doc_len_index(doc_tuple[0])['doc-vec-length']
+                                                tf_doc=doc_tuple[1],
+                                                query_length=len(parsed_query),
+                                                doc_length=10.0)
+                    ##! The above line - where the doc length is queried for query_doc_len_index(doc_tuple[0])['doc-vec-length']
                 doc_scores[doc_tuple[0]] = doc_score
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)

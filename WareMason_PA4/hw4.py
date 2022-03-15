@@ -70,7 +70,9 @@ class FlaskApp:
                                    unknown_words=unknown_words,
                                    PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # render results on results page
         else:
-            return render_template("errorResults.html", PAGE_NUM=PAGE_NUM, TOTAL_PAGES=PAGE_NUM)  # render error page
+            return render_template("errorResults.html", query=query_text, stop_words=stop_words,
+                                   unknown_words=unknown_words,
+                                   PAGE_NUM=1, TOTAL_PAGES=1)  # render error page
 
     @app.route("/results/<int:page_id>/prev", methods=["GET", "POST"])
     def prev_page(page_id: int) -> str:

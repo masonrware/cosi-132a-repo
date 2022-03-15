@@ -26,8 +26,7 @@ class CustomizedTextProcessing:
         self.stop_words = text.ENGLISH_STOP_WORDS.union(["book"])
         self.vectorizer = TfidfVectorizer(ngram_range=(1, 1), stop_words=self.stop_words)
 
-    @staticmethod
-    def normalize(token: str) -> str:
+    def normalize(self, token: str) -> str:
         """
         your approach to normalize a token. You can still adopt the criterion and methods from TextProcessing along with your own approaches
         """
@@ -35,7 +34,7 @@ class CustomizedTextProcessing:
         no_number_token = re.sub('\d+', '', token)
         no_punc_token = re.sub('[^\w\s]', '', no_number_token)
         no_wspace_token = no_punc_token.strip()
-        if len(no_wspace_token) <= 1:
+        if token in self.stop_words or len(no_wspace_token) <= 1:
             return ''
         else:
             return no_wspace_token
@@ -48,11 +47,9 @@ class CustomizedTextProcessing:
         token_title = word_tokenize(title)
         token_content = word_tokenize(content)
         for token in token_title:
-            token = str(token)
             if self.normalize(token) != '':
                 tokenized_words.add(self.normalize(token))
         for token in token_content:
-            token = str(token)
             if self.normalize(token) != '':
                 tokenized_words.add(self.normalize(token))
 

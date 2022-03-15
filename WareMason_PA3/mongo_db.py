@@ -4,13 +4,14 @@
 # Version 1.0
 # 2/24/2022
 
+from operator import index
 from typing import Dict, List, Iterable
 
 import pymongo
 import pprint
 
 client = pymongo.MongoClient("localhost", 27017)  # connect to the mongodb server running on your localhost
-db = client["ir_2022_wapo"]  # create a new database called "ir_2022_wapo"
+db = client["ir_2022_wapo_(PA3)"]  # create a new database called "ir_2022_wapo"
 
 
 def insert_docs(docs: Iterable) -> None:
@@ -21,10 +22,8 @@ def insert_docs(docs: Iterable) -> None:
     :param docs: WAPO docs iterator (utils.load_wapo(...))
     :return:
     """
-    wapo_docs = db.wapo_docs
-    for doc in docs:
-        wapo_docs.insert_one(doc)
-        pprint.pprint('---added ' + (doc['title'] if doc['title'] is not None else 'null title') + ' to the DB')
+    wapo_docs = db.wapo_docs_PA3
+    wapo_docs.insert_many(docs)
 
 
 def insert_db_index(index_list: List[Dict]) -> None:
@@ -36,18 +35,23 @@ def insert_db_index(index_list: List[Dict]) -> None:
     :return:
     """
     inverted_index = db.inverted_index
-    for index in index_list:
-        inverted_index.insert_one(index)
-        pprint.pprint('---added inv. index for ' + index['token'] + ' to the DB')
+    inverted_index.insert_many(index_list)
 
 
+def insert_test_db_index(index_list: List[Dict]) -> None:
+    """Insert a test db index"""
+    test_inverted_index = db.test_inverted_index
+    test_inverted_index.insert_many(index_list)
+    
+    
+    
 def query_doc(doc_id: int) -> Dict:
     """
     query the document from "wapo_docs" collection based on the doc_id
     :param doc_id:
     :return:
     """
-    return db.wapo_docs.find_one({'id': doc_id})
+    return db.wapo_docs_PA3.find_one({'id': doc_id})
 
 
 def query_db_index(token: str) -> Dict:
