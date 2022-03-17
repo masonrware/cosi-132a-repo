@@ -51,7 +51,7 @@ class FlaskApp:
         res = []
         dict_ind = 1
 
-        postings_list, stop_words, unknown_words = query_inverted_index(query_text, 30) ##k = 30
+        postings_list, stop_words, unknown_words = query_inverted_index(query_text, 30) # k = 30
 
         if len(postings_list) != 0:
             for posting in postings_list:
@@ -110,14 +110,15 @@ if __name__ == "__main__":
 
     if args.build:
         build_inverted_index(load_wapo(wapo_path))
-        print('\n'+'='*50+'\nbuild completed successfully :)\n'+'='*50)
+        print('\n'+'='*60+'\nbuild completed successfully :)\n'+'='*60)
     if args.test:
+        print(f'-'*60,f'\nRunning Test Suite...\n\n', f'-'*60)
         suite = unittest.TestLoader().loadTestsFromModule(test_hw4)
-        unittest.TextTestRunner(verbosity=1).run(suite)
-        time.sleep(3)
-        print(f'-'*15,f'\nstarting construction of test database...\n', f'-'*15)
+        unittest.TextTestRunner(verbosity=3).run(suite)
+        time.sleep(3)   # delay is to help visuals
+        print(f'-'*60,f'\nstarting construction of test database...\n', f'-'*60)
         build_inverted_index(load_wapo('pa4_data/test_data_pa4.jl'), flag='test')
-        print(f'-'*15,f'\ntest database contruction finished :)\n', f'-'*15)
+        print(f'-'*60,f'\ntest database contruction finished :)\n', f'-'*60)
         app.run(port=5001)
     if args.run:
         app.run(debug=True, port=5000)

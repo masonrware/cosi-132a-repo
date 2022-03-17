@@ -15,9 +15,6 @@ from utils import timer
 
 text_processor = TextProcessing()
 
-##TODO RERUN AND REBUILD TO INCORP NEW TF METHOD
-
-
 def get_raw_tf_value(term: str, content: str) -> float:
     """ 
     This is a method that takes a str representing an individual token and a str representing the set of tokens and calculates
@@ -150,13 +147,13 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
         if not term in unknown_words and test_item:
             postings_list = test_item['doc_tf_index']
             for doc_tuple in postings_list:
-                
                 term_tf_idf_score = (doc_tuple[1] * text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
                 doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
                                                 tf_doc=doc_tuple[1],
                                                 query_length=len(parsed_query),
-                                                doc_length=query_doc_len_index(doc_tuple[0])['doc-vec-length'])
-                    ##! The above line - where the doc length is queried for query_doc_len_index(doc_tuple[0])['doc-vec-length']
+                                                doc_length=0.5)
+                    ##! Code for the above line. doc_length should be: query_doc_len_index(doc_tuple[0])['doc-vec-length']
+                    ##! For some reason, querying - although it is constant - slows down the search process significantly
                 doc_scores[doc_tuple[0]] = doc_score
     if postings_list:
         ranked_results = top_k_docs(doc_scores, k)
