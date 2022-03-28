@@ -135,6 +135,8 @@ classPractice/
 PA1venv/
 PA3venv/
 
+#specific
 .DS_Store
 .DS_Store/
 *.jl
+elasticsearch-7.10.2/
