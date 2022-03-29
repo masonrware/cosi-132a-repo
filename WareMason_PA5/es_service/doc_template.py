@@ -8,7 +8,6 @@ from elasticsearch_dsl import (  # type: ignore
     analyzer,
 )
 
-
 class BaseDoc(Document):
     """
     wapo document mapping structure
