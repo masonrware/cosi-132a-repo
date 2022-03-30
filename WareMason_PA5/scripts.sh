@@ -11,4 +11,5 @@ python3.9 load_es_index.py --index_name wapo_docs_50k --wapo_path pa5_data/subse
 python3.9 evaluate.py --index_name wapo_docs_50k --topic_id 363 --query_type kw --use_english_analyzer --top_k 20
 
 # use natural language from topic 363 as the query; search over the stemmed_content field from index "wapo_docs_50k" based on sentence BERT embedding reranking query and compute NDCG@20
-python3.9 evaluate.py --index_name wapo_docs_50k --topic_id 363 --query_type nl --vector_name sbert_vector --top_k 20  --search_type rerank
+python3.9 evaluate.py --index_name wapo_docs_50k --topic_id 363 --query_type nl --top_k 20  --search_type rerank
+#  --vector_name sbert_vector  #! problem with name idk go to oh

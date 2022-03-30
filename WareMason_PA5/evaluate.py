@@ -1,12 +1,15 @@
 import argparse
+import json
 
 
 # TODO:
-# wapo doc index has been built...
-# TODO: build out the argument tree for evaluation
-# run through each (4/5) retrieval options
-# ... get results ...
-# ...
+# analyze text and do everything in analyzer
+# then get a match all query and a specific query
+# branch for type of encoding (sbert or fasttext):
+#   encode the sepecific query like is done in example_embedding.py and example_query.py
+# have branches to deal with certain selections including reruns, etc..
+
+
 
 class Evaluate:
     ''' A class to represent an individual evaluation run. '''
@@ -18,9 +21,17 @@ class Evaluate:
         self.search_type = search_type
         self.eng_ana = eng_ana
         self.top_k = top_k
+        self.topic_dict: dict()
         
-    def print_content(self) -> None:
+    def __str__(self) -> None:
         print(f'{self.index}\n{self.topic}\n{self.query_type}\n{self.search_type}\n{self.eng_ana}\n{self.top_k}')
+        
+    def get_topic(self) -> None:
+        with open("pa5_data/pa5_queries.json", 'r') as f:
+            data = json.load(f)['pa5_queries']
+        self.topic_dict = [topic_dict for topic_dict in data if int(topic_dict['topic'])==self.topic][0]
+       
+    
 
 
 def main():
@@ -50,7 +61,9 @@ def main():
                     query_type=args.query_type, search_type=args.search_type,
                     eng_ana=False, top_k=args.top_k)
     
-    eval.print_content()
+    # eval.__str__()
+    eval.get_topic()
+    
     
     
 

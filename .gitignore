@@ -140,3 +140,4 @@ PA3venv/
 .DS_Store/
 *.jl
 elasticsearch-7.10.2/
+*.vec

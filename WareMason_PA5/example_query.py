@@ -62,15 +62,18 @@ if __name__ == "__main__":
     connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
 
     q_match_all = MatchAll()  # a query that matches all documents
+    
     q_basic = Match(
         title={"query": "D.C"}
     )  # a query that matches "D.C" in the title field of the index, using BM25 as default
+    
     q_match_ids = Ids(values=[1, 3, 2])  # a query that matches ids
 
     query_text = ["students pursue college education"]
     query_vector = encoder.encode(query_text, pooling="mean").tolist()[
         0
     ]  # get the query embedding and convert it to a list
+     
     q_vector = generate_script_score_query(
         query_vector, "sbert_vector"
     )  # custom query that scores documents based on cosine similarity
