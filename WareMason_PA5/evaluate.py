@@ -20,14 +20,6 @@ from elasticsearch_dsl.connections import connections           # type: ignore
 from sklearn.feature_extraction.text import TfidfVectorizer     # type: ignore
 
 
-# TODO:
-# analyze text and do everything in analyzer
-# then get a match all query and a specific query
-# branch for type of encoding (sbert or fasttext):
-#   encode the sepecific query like is done in example_embedding.py and example_query.py
-# have branches to deal with certain selections including reruns, etc..
-
-
 
 class Evaluate:
     ''' A class to represent an individual evaluation run. '''
@@ -69,7 +61,6 @@ class Evaluate:
         
         
         if self.query_type=='kw':
-            #! NEED TO FIND WAY OF USING ENGLISH ANALYZER HERE?
             X = vectorizer.fit_transform([self.topic_dict['kw']])
             self.basic_query = Match(
                 title={"query": vectorizer.get_feature_names_out()[0]}
@@ -79,7 +70,6 @@ class Evaluate:
             self.raw_query = [t.token for t in response.tokens]
             
         elif self.query_type=='nl':
-            #! NEED TO FIND WAY OF USING ENGLISH ANALYZER HERE?
             X = vectorizer.fit_transform([self.topic_dict['nl']])
             self.basic_query = Match(
                 title={"query": vectorizer.get_feature_names_out()[0]}
