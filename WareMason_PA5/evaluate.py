@@ -19,7 +19,11 @@ from elasticsearch_dsl.query import MatchAll, Match             # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
 from sklearn.feature_extraction.text import TfidfVectorizer     # type: ignore
 
-
+## TODO
+#1. BM25, just use Search with:
+#       if ENGANA: stemmed_content
+#       else no ENGANA: content
+#2. use 
 
 class Evaluate:
     ''' A class to represent an individual evaluation run. '''
@@ -47,6 +51,7 @@ class Evaluate:
     def process_topic(self) -> None:
         ''' Method to analyze the query and embed it. '''
         vectorizer = TfidfVectorizer()
+        ##! no analyzer
         my_analyzer = analyzer(
             "my_analyzer1",
             tokenizer=tokenizer("trigram", "ngram", min_gram=3, max_gram=3),
@@ -56,30 +61,29 @@ class Evaluate:
         with open("pa5_data/pa5_queries.json", 'r') as f:
             data = json.load(f)['pa5_queries']
         self.topic_dict = [topic_dict for topic_dict in data if int(topic_dict['topic'])==self.topic][0]
-        
-        ###????????? How to go from text to list to searching?
-        
+                
         
         if self.query_type=='kw':
             X = vectorizer.fit_transform([self.topic_dict['kw']])
             self.basic_query = Match(
-                title={"query": vectorizer.get_feature_names_out()[0]}
+                content={"query": vectorizer.get_feature_names_out()[0]}    # get most informative word
             )
             
-            response = my_analyzer.simulate(self.topic_dict['kw'])
-            self.raw_query = [t.token for t in response.tokens]
+            # response = my_analyzer.simulate(self.topic_dict['kw'])
+            # self.raw_query = [t.token for t in response.tokens]
+            self.raw_query = self.topic_dict['kw']
             
         elif self.query_type=='nl':
             X = vectorizer.fit_transform([self.topic_dict['nl']])
             self.basic_query = Match(
-                title={"query": vectorizer.get_feature_names_out()[0]}
+                content = {"query": vectorizer.get_feature_names_out()[0]}
             )
             
-            response = my_analyzer.simulate(self.topic_dict['nl'])
-            self.raw_query = [t.token for t in response.tokens]
+            # response = my_analyzer.simulate(self.topic_dict['nl'])
+            # self.raw_query = [t.token for t in response.tokens]
+            self.raw_query = self.topic_dict['nl']
         
-        ###????????
-        
+        #! ?? HOW TO RANK (NOT RERANK) W/ SBERT? - thougt I can only rank with 
         #embedding done here
         if self.vector_name == 'ft_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="fasttext")
@@ -87,15 +91,15 @@ class Evaluate:
             self.vector_query = generate_script_score_query(self.vector_query, "ft_vector")
         elif self.vector_name == 'sbert_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="sbert")
-            self.vector_query = encoder.encode([self.raw_query], pooling="mean").tolist()[0]
+            self.vector_query = encoder.encode([self.raw_query], pooling="mean").tolist()[0]  # get the query embedding and convert it to a list
             self.vector_query = generate_script_score_query(self.vector_query, "sbert_vector")
 
 
     def rank_results(self) -> None:
         ''' Method to search the db and return the specified-method-ranked results. '''
-        search("wapo_docs_50k", self.raw_query)
+        search("wapo_docs_50k", self.basic_query)
         print('\n')
-        rescore_search("wapo_docs_50k", self.basic_query, self.vector_query)
+        # rescore_search("wapo_docs_50k", self.basic_query, self.vector_query)
         
         ##??? NDCG20 ?
         

@@ -26,7 +26,7 @@ def generate_script_score_query(query_vector: List[float], vector_name: str) -> 
     return q_script
 
 
-def search(index: str, query: Query) -> None:
+def search(index: str, query: Query) -> None:us
     s = Search(using="default", index=index).query(query)[
         :5
     ]  # initialize a query and return top five results
