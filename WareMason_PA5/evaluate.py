@@ -51,12 +51,6 @@ class Evaluate:
     def process_topic(self) -> None:
         ''' Method to analyze the query and embed it. '''
         vectorizer = TfidfVectorizer()
-        ##! no analyzer
-        my_analyzer = analyzer(
-            "my_analyzer1",
-            tokenizer=tokenizer("trigram", "ngram", min_gram=3, max_gram=3),
-            filter=["lowercase"],
-        )
         
         with open("pa5_data/pa5_queries.json", 'r') as f:
             data = json.load(f)['pa5_queries']
@@ -83,7 +77,7 @@ class Evaluate:
             # self.raw_query = [t.token for t in response.tokens]
             self.raw_query = self.topic_dict['nl']
         
-        #! ?? HOW TO RANK (NOT RERANK) W/ SBERT? - thougt I can only rank with 
+        #! ?? HOW TO RANK (NOT RERANK) W/ SBERT? - thougt I can only rank with standard which is bm25
         #embedding done here
         if self.vector_name == 'ft_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="fasttext")
