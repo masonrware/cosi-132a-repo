@@ -26,7 +26,7 @@ def generate_script_score_query(query_vector: List[float], vector_name: str) -> 
     return q_script
 
 
-def search(index: str, query: Query) -> None:us
+def search(index: str, query: Query) -> None:
     s = Search(using="default", index=index).query(query)[
         :5
     ]  # initialize a query and return top five results
@@ -35,7 +35,7 @@ def search(index: str, query: Query) -> None:us
         print(
             hit.meta.id, hit.meta.score, hit.title, sep="\t"
         )  # print the document id that is assigned by ES index, score and title
-
+        
 
 def rescore_search(index: str, query: Query, rescore_query: Query) -> None:
     s = Search(using="default", index=index).query(query)[
