@@ -39,7 +39,7 @@ class Evaluate:
         self.basic_query: Any
         
     def __str__(self) -> None:
-        return (f'{self.index}\n{self.topic}\n{self.query_type}\n{self.search_type}\n{self.eng_ana}\n{self.top_k}')
+        return (f'index: {self.index}\ntopic: {self.topic}\nquery type: {self.query_type}\nsearch type: {self.search_type}\nUsing Eng. Analyzer? {self.eng_ana}\nK: {self.top_k}\n')
         
     def process_topic(self) -> None:
         ''' Method to analyze the query and embed it. '''
@@ -65,7 +65,7 @@ class Evaluate:
             self.basic_query = Match(content = {"query": vectorizer.get_feature_names_out()[0]})
             self.raw_query = self.topic_dict[self.query_type]
             
-        #! HOW TO RANK W/ SBERT? - thougt I can only rank with standard bm25 (bc sbert requires embedding...)
+        #! HOW TO RANK W/ SBERT? - thought I can only rank with standard bm25 (bc sbert requires embedding...)
         #* embed with ft
         if self.vector_name == 'ft_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="fasttext")
@@ -82,6 +82,7 @@ class Evaluate:
             rank_results(self.basic_query, self.top_k)
             #somehow also search sbert - no way to differentiate?
         elif self.search_type == 'rerank':
+            #* rerank with either embed
             re_rank_results(self.basic_query, self.vector_query, self.top_k)
         
 
@@ -96,8 +97,12 @@ def re_rank_results(query: Query, vector: Query, top_k: int) -> None:
     rescore_search("wapo_docs_50k", query, vector, top_k)
     print('\n')
 
-
-#!! NDCG20 ?
+# For each query, you should produce a table with 1 row per search type and 
+# 1 column per query type. The value of each cell is the NDCG@20 value. 
+# Include your results tables along with a short paragraph of analysis 
+# of each table in the report. If you do the extra credit (below), 
+# include results in the table(s) as additional query types and discuss 
+# your interpretations here.
 
 
 def main():
@@ -144,7 +149,7 @@ def main():
     eval = Evaluate(index=args.index_name, topic=args.topic_id, query_type=args.query_type, 
                     search_type=args.search_type if args.search_type else search_type, eng_ana=args.use_english_analyzer, 
                     vector_name= args.vector_name if args.vector_name else vector_name, top_k=args.top_k)
-    print(eval)
+    print('='*50, '\nRUNNING ELASTICSEARCH WITH THE FOLLOWING SPECS:\n', eval, '='*50, '\n')
     eval.process_topic()
     eval.search()       #run
     
