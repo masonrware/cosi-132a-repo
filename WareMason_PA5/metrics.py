@@ -46,7 +46,7 @@ def dcg(relevance: Sequence[int], k: int = 20) -> float:
     return sum(rel / math.log2(i + 1) for i, rel in enumerate(top_k, 1))
 
 
-def ndcg(relevance: Sequence[int], idea_relevance: Sequence[int], k: int = 20) -> float:
+def ndcg(relevance: Sequence[int], ideal_relevance: Sequence[int], k: int = 20) -> float:
     relevance_len = len(relevance)
     if relevance_len < k:
         warnings.warn(
@@ -54,10 +54,10 @@ def ndcg(relevance: Sequence[int], idea_relevance: Sequence[int], k: int = 20) -
             SyntaxWarning,
         )
     top_k = relevance[:k]
-    ideal_relevance_len = len(idea_relevance)
+    ideal_relevance_len = len(ideal_relevance)
     if ideal_relevance_len < k:
-        idea_relevance += [0] * (k - ideal_relevance_len)
-    idea_relevance = idea_relevance[:k]
+        ideal_relevance += [0] * (k - ideal_relevance_len)
+    idea_relevance = ideal_relevance[:k]
 
     try:
         return dcg(top_k, k) / dcg(idea_relevance, k)

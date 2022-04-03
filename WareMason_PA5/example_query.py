@@ -26,24 +26,25 @@ def generate_script_score_query(query_vector: List[float], vector_name: str) -> 
     return q_script
 
 
-def search(index: str, query: Query) -> None:
+def search(index: str, query: Query, top_k: int) -> None:
     s = Search(using="default", index=index).query(query)[
-        :5
+        :top_k
     ]  # initialize a query and return top five results
     response = s.execute()
-    for hit in response:
+    for i, hit in enumerate(response):
+        #!!! ??? is meta.score the relevance score
         print(
-            hit.meta.id, hit.meta.score, hit.title, sep="\t"
+            f'{i+1}.', hit.meta.id, hit.meta.score, hit.title, sep="\t"
         )  # print the document id that is assigned by ES index, score and title
-        
 
-def rescore_search(index: str, query: Query, rescore_query: Query) -> None:
+
+def rescore_search(index: str, query: Query, rescore_query: Query, top_k: int) -> None:
     s = Search(using="default", index=index).query(query)[
-        :5
+        :top_k
     ]  # initialize a query and return top five results
     s = s.extra(
         rescore={
-            "window_size": 5,
+            "window_size": top_k,
             "query": {
                 "rescore_query": rescore_query,
                 "query_weight": 0,
@@ -52,9 +53,9 @@ def rescore_search(index: str, query: Query, rescore_query: Query) -> None:
         }
     )
     response = s.execute()
-    for hit in response:
+    for i, hit in enumerate(response):
         print(
-            hit.meta.id, hit.meta.score, hit.title, sep="\t"
+            f'{i+1}.', hit.meta.id, hit.meta.score, hit.title, sep="\t"
         )  # print the document id that is assigned by ES index, score and title
 
 

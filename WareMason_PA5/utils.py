@@ -1,3 +1,5 @@
+import functools
+import time
 from typing import Dict, Union, Generator
 import os
 import json
@@ -21,6 +23,19 @@ def load_topic_queries(query_json_file: str) -> Dict[str, Dict[str, str]]:
         query_lst = json.load(f)["pa5_queries"]
     return {k["topic"]: k for k in query_lst}
 
+def timer(func):
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_t = time.perf_counter()
+        f_value = func(*args, **kwargs)
+        elapsed_t = time.perf_counter() - start_t
+        mins = elapsed_t // 60
+        print(
+            f"elapsed time: {mins} minutes, {elapsed_t - mins * 60:0.2f} seconds"
+        )
+        return f_value
+
+    return wrapper_timer
 
 if __name__ == "__main__":
     pass
