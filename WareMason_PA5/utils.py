@@ -31,7 +31,7 @@ def timer(func):
         elapsed_t = time.perf_counter() - start_t
         mins = elapsed_t // 60
         print(
-            f"elapsed time: {mins} minutes, {elapsed_t - mins * 60:0.2f} seconds"
+            f"Elapsed time: {mins} minutes, {elapsed_t - mins * 60:0.2f} seconds"
         )
         return f_value
 

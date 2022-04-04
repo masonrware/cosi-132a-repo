@@ -91,11 +91,13 @@ class Evaluate:
         if self.search_type == 'vector':
             #* bm25 w/ either analyzer
             #! here is where I would recieve any relevance scores
-            rank_results(self.basic_query, self.top_k)
+            print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
+            rank_results(self.basic_query['query'], self.top_k)
             #somehow also search sbert - no way to differentiate?
         elif self.search_type == 'rerank':
             #* rerank with either embed
             #! here is where I would recieve any relevance scores
+            print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults:')
             re_rank_results(self.basic_query, self.vector_query, self.top_k)
     
     def score(self) -> None:
