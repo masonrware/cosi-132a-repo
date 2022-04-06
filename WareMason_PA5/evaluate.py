@@ -15,6 +15,7 @@ from typing import Any, Sequence
 from example_query import generate_script_score_query, search, rescore_search
 from embedding_service.client import EmbeddingClient
 from utils import timer
+from user_search import rank, re_rank
 
 from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
@@ -87,31 +88,34 @@ class Evaluate:
             #* bm25 w/ either analyzer
             #! here is where I would recieve any relevance scores
             print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
-            rank(self.basic_query, self.top_k)
+            p_rank(self.basic_query, self.top_k)
+            self.rel_scores = p_rank(self.basic_query, self.top_k)
         if self.search_type == 'vector':
             #* sbert with either embed (default of sbert)
             print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
-            rank(self.vector_query, self.top_k)
+            p_rank(self.vector_query, self.top_k)
+            self.rel_scores = p_rank(self.basic_query, self.top_k)
         elif self.search_type == 'rerank':
             #* rerank with either embed (default of sbert)
             #! here is where I would recieve any relevance scores
             print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults:')
-            re_rank(self.basic_query, self.vector_query, self.top_k)
-    
+            p_re_rank(self.basic_query, self.vector_query, self.top_k)
+            self.rel_scores = re_rank(self.basic_query, self.vector_query, self.top_k)
+        
     def score(self) -> None:
         ''' Method to get the relevance scores of every evaluation
             and then score the evaluation based on metrics and ideal
             data. '''
-        #!! ??? How to get the relevance scores?
-        pass
+        for score in self.rel_scores:
+            print(score['annotations'])
 
-def rank(query: Query, top_k: int) -> None:
-    ''' Function to search for and rank documents using the standard bm25. '''
+def p_rank(query: Query, top_k: int) -> None:
+    ''' Function to search for and rank documents using the standard bm25 [PRINT]. '''
     search("wapo_docs_50k", query=query, top_k=top_k)
     print('\n')
     
-def re_rank(query: Query, vector: Query, top_k: int) -> None:
-    ''' Function to rerank documents using embeddings (fasttext and sbert). '''
+def p_re_rank(query: Query, vector: Query, top_k: int) -> None:
+    ''' Function to rerank documents using embeddings (fasttext and sbert) [PRINT]. '''
     rescore_search("wapo_docs_50k", query=query, rescore_query=vector, top_k=top_k)
     print('\n')
 
