@@ -8,15 +8,17 @@ import argparse
 import time
 import unittest
 
+from user_search import Engine
 from embedding_service.text_processing import TextProcessing
-from flask import Flask, render_template, request
 
+from flask import Flask, render_template, request
 
 
 pages = {}
 PAGE_NUM, TOTAL_PAGES = 1, 0
 
 app = Flask(__name__)
+user_search: "Engine"
 text_processor = TextProcessing.from_nltk()
 
 
@@ -31,64 +33,73 @@ class FlaskApp:
     def home():
         return render_template("home.html")
 
-    @app.route("/results")
+    #results page
+    @app.route("/results", methods=["POST"])
     def results():
+        # persisting data
         global postings_list
         global stop_words
         global unknown_words
         global query_text
-
+        
         query_text = request.form["query"]  # Get the raw user query from home page
-        res = []
+        ## get additional info from user - i.e. the params
+        
+        # for now I will use bm25 defaults:
+        # 
+        # index: wapo_docs_50k
+        # raw_query: user query
+        # search_type: n/a (bm25)
+        # eng_ana: False
+        # vector_name: n/a (sbert)
+        # top_k: 40
+        
+        #defaults:
+        seng = Engine(index='wapo_docs_50k', raw_query=query_text,
+                      eng_ana=False, top_k=20)
+        res = seng.search()
         dict_ind = 1
-
+        
         #get the list of words
         
-        if len(postings_list) != 0:
-            for posting in postings_list:
-                document = query_doc(posting[0])
-                item_dict = {
-                    'title': document['title'],
-                    'published_date': document['published_date'],
-                    'content': limit_content(document['content_str']) + '...',
-                    'id': document['id']
-                }
-                res.append(item_dict)
-                if len(res) == 8:  # limit page length to 8 results
-                    pages[dict_ind] = res
-                    res = []
-                    dict_ind += 1
-            TOTAL_PAGES = dict_ind
-            if len(res) != 0:  # catch any overflow on last page
-                pages[dict_ind] = res
-                return render_template("results.html", response=pages[1], query=query_text, stop_words=stop_words,
-                                        unknown_words=unknown_words,
-                                        PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # render results on results page
-            else:
-                return render_template("errorResults.html", query=query_text, stop_words=stop_words,
-                                        unknown_words=unknown_words,
-                                        PAGE_NUM=1, TOTAL_PAGES=1)  # render error page
+        if len(res) == 8:  # limit page length to 8 results
+            pages[dict_ind] = res
+            res = []
+            dict_ind += 1
+            
+        while len(res) > 8:
+            pages[dict_ind] = res[:8]
+            res = res[8:]
+            dict_ind += 1
+            #hit.meta.....
+        pages[dict_ind] = res
+        TOTAL_PAGES = dict_ind
+        if len(res) != 0:
+            return render_template("results.html", response=pages[1], query=query_text, 
+                                    PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # render results on results page
+        else:
+            return render_template("errorResults.html", query=query_text,
+                                    PAGE_NUM=1, TOTAL_PAGES=1)  # render error page
 
     @app.route("/results/<int:page_id>/prev", methods=["GET", "POST"])
     def prev_page(page_id: int) -> str:
-        """"previous page"to show more results"""
+        """previous page to show more results"""
         PAGE_NUM = page_id
-        return render_template("results.html", response=pages[PAGE_NUM], query=query_text, stop_words=stop_words,
-                               unknown_words=unknown_words,
+        return render_template("results.html", response=pages[PAGE_NUM], query=query_text,
                                PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # render results page with persisting data
 
     @app.route("/results/<int:page_id>/next", methods=["GET", "POST"])
     def next_page(page_id: int) -> str:
-        """"next page" to show more results"""
+        """next page to show more results"""
         PAGE_NUM = page_id
-        return render_template("results.html", response=pages[PAGE_NUM], query=query_text, stop_words=stop_words,
-                               unknown_words=unknown_words,
+        return render_template("results.html", response=pages[PAGE_NUM], query=query_text,
                                PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # render results page with persisting data
 
     @app.route("/doc_data/<int:doc_id>")
     def doc_data(doc_id):
         """individual document page"""
-        doc_image = query_doc(doc_id)
+        #! might need to go to OH for this
+        ##somehow search by id 
         return render_template("doc.html", document=doc_image)  # render a document page
 
 

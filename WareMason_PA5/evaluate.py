@@ -35,14 +35,12 @@ class Evaluate:
         
         self.topic_dict: dict()
         self.ideal_rel_scores: Sequence[int]
+        self.rel_scores: Sequence[int]          #! needs filling
         
         self.match_all_query: Query = MatchAll()
-        self.raw_query: Any
+        self.raw_query: str
         self.vector_query: Any
-        self.basic_query: Any
-        
-        ## area where I will store outputs for params of scoring funcs
-        
+        self.basic_query: Any        
         
     def __str__(self) -> None:
         return (f'index: {self.index}\ntopic: {self.topic}\nquery type: {self.query_type}\nsearch type: {self.search_type}\nUsing Eng. Analyzer? {self.eng_ana}\nK: {self.top_k}\n')
@@ -56,9 +54,8 @@ class Evaluate:
             data = json.load(f)
         self.ideal_rel_scores = data[f'{self.topic}']
     
-    def search(self) -> None:
-        ''' Method to perform searching. '''
-        
+    def eval_search(self) -> None:
+        ''' Method to perform searching for an evaluation. '''
         # find the most informative words in query and
         # create a basic query (one for english analyzer
         # and one for std analyzer)
@@ -67,7 +64,6 @@ class Evaluate:
         X = vectorizer.fit_transform([self.topic_dict[self.query_type]]) 
         if self.eng_ana:
             #! Better way to do this?
-            # could find a way of using n top words instead of single str
             self.basic_query = Match(stemmed_content = {"query": ' '.join(vectorizer.get_feature_names_out()[:5])})
             self.raw_query = self.topic_dict[self.query_type]
         else:
@@ -75,7 +71,6 @@ class Evaluate:
             self.raw_query = self.topic_dict[self.query_type]
             
         # do embedding
-        #! HOW TO RANK W/ SBERT? - thought I can only rank with standard bm25 (bc sbert requires embedding...)
         #* embed with ft
         if self.vector_name == 'ft_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="fasttext")
@@ -88,17 +83,20 @@ class Evaluate:
             self.vector_query = generate_script_score_query(self.vector_query, "sbert_vector")
             
         # search
-        if self.search_type == 'vector':
+        if not self.search_type:
             #* bm25 w/ either analyzer
             #! here is where I would recieve any relevance scores
             print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
-            rank_results(self.basic_query['query'], self.top_k)
-            #somehow also search sbert - no way to differentiate?
+            rank(self.basic_query, self.top_k)
+        if self.search_type == 'vector':
+            #* sbert with either embed (default of sbert)
+            print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
+            rank(self.vector_query, self.top_k)
         elif self.search_type == 'rerank':
-            #* rerank with either embed
+            #* rerank with either embed (default of sbert)
             #! here is where I would recieve any relevance scores
             print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults:')
-            re_rank_results(self.basic_query, self.vector_query, self.top_k)
+            re_rank(self.basic_query, self.vector_query, self.top_k)
     
     def score(self) -> None:
         ''' Method to get the relevance scores of every evaluation
@@ -107,14 +105,14 @@ class Evaluate:
         #!! ??? How to get the relevance scores?
         pass
 
-def rank_results(query: Query, top_k: int) -> None:
+def rank(query: Query, top_k: int) -> None:
     ''' Function to search for and rank documents using the standard bm25. '''
-    search("wapo_docs_50k", query, top_k)
+    search("wapo_docs_50k", query=query, top_k=top_k)
     print('\n')
     
-def re_rank_results(query: Query, vector: Query, top_k: int) -> None:
+def re_rank(query: Query, vector: Query, top_k: int) -> None:
     ''' Function to rerank documents using embeddings (fasttext and sbert). '''
-    rescore_search("wapo_docs_50k", query, vector, top_k)
+    rescore_search("wapo_docs_50k", query=query, rescore_query=vector, top_k=top_k)
     print('\n')
 
 # For each query, you should produce a table with 1 row per search type and 
@@ -125,7 +123,7 @@ def re_rank_results(query: Query, vector: Query, top_k: int) -> None:
 # your interpretations here.
 
 class Client:
-    ''' Class to run single/many evaluations of the SEO. '''
+    ''' Class to run single/many evaluations of the SE. '''
     def __init__(self, index: str, topic: int, query_type: str, search_type: str,
                  eng_ana: bool, vector_name: str, top_k: int = 20) -> None:
         self.index: str = index
@@ -146,15 +144,15 @@ class Client:
                     vector_name=self.vector_name, top_k=self.top_k)
         eval.process_topic()    # get correct topic and ideal scores
         eval.search()           # perform search and get relevance scores
-        eval.score()            # generate a score for SEO run
+        eval.score()            # generate a score for SE run
 
 
 def main():
     parser = argparse.ArgumentParser()
     connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
 
-    search_type: str = 'vector'
-    vector_name: str = 'ft_vector'
+    # search_type: str = 'vector'
+    vector_name: str = 'sbert_vector'
     
     parser.add_argument("--index_name", 
                         metavar='{wapo_docs_50k}', 
@@ -191,11 +189,12 @@ def main():
     args = parser.parse_args()
     
     client = Client(index=args.index_name, topic=args.topic_id, query_type=args.query_type, 
-                    search_type=args.search_type if args.search_type else search_type, eng_ana=args.use_english_analyzer, 
+                    search_type=args.search_type, eng_ana=args.use_english_analyzer, 
                     vector_name= args.vector_name if args.vector_name else vector_name, top_k=args.top_k)
     
     # driver
-    print('='*50, '\nRUNNING ELASTICSEARCH WITH THE FOLLOWING SPECS:\n', client, '='*50, '\n')
+    line: str = '=' * 50
+    print(f'\n\n{line}\n\nRUNNING ELASTICSEARCH WITH THE FOLLOWING SPECS:\n\n{client}\n{line}\n')
     client.run()
     
 
