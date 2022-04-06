@@ -21,7 +21,8 @@ app = Flask(__name__)
 user_search: "Engine"
 text_processor = TextProcessing.from_nltk()
 
-
+#TODO 
+#use this !!!
 def limit_content(content: str) -> str:
     return content[:150] if len(content) > 150 else content
 
