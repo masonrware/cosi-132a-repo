@@ -8,19 +8,21 @@
 
 
 import argparse
-from concurrent.futures import process
 import json
 from typing import Any, Sequence
 
 from example_query import generate_script_score_query, search, rescore_search
 from embedding_service.client import EmbeddingClient
 from utils import timer
-from user_search import rank, re_rank
+from user_search import rank, re_rank                           # used to actually recieve relevance scores
 
 from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
 from sklearn.feature_extraction.text import TfidfVectorizer     # type: ignore
+import nltk                                                     # type: ignore
+from nltk.corpus import wordnet                                 # type: ignore
 
+nltk.download('wordnet')
 
 class Evaluate:
     ''' A class to represent an individual evaluation run. '''
@@ -41,7 +43,8 @@ class Evaluate:
         self.match_all_query: Query = MatchAll()
         self.raw_query: str
         self.vector_query: Any
-        self.basic_query: Any        
+        self.basic_query: Any     
+        self.better_query: Any   
         
     def __str__(self) -> None:
         return (f'index: {self.index}\ntopic: {self.topic}\nquery type: {self.query_type}\nsearch type: {self.search_type}\nUsing Eng. Analyzer? {self.eng_ana}\nK: {self.top_k}\n')
@@ -51,63 +54,78 @@ class Evaluate:
         with open("pa5_data/pa5_queries.json", 'r') as f:
             data = json.load(f)['pa5_queries']
         self.topic_dict = [topic_dict for topic_dict in data if int(topic_dict['topic'])==self.topic][0] 
+        self.raw_query = self.topic_dict[self.query_type]
         with open("pa5_data/ideal_relevance.json", 'r') as f:
             data = json.load(f)
         self.ideal_rel_scores = data[f'{self.topic}']
+        
     
     def eval_search(self) -> None:
         ''' Method to perform searching for an evaluation. '''
-        # find the most informative words in query and
-        # create a basic query (one for english analyzer
-        # and one for std analyzer)
-        # also save the raw query as a str for encoding
-        vectorizer = TfidfVectorizer()
-        X = vectorizer.fit_transform([self.topic_dict[self.query_type]]) 
+        vectorizer_basic = TfidfVectorizer(stop_words='english')
+        vectorizer_better = TfidfVectorizer(stop_words='english')
+        X = vectorizer_basic.fit_transform([self.topic_dict[self.query_type]])                                  # for self.basic_query
+        parse_query: list = self.raw_query.split(' ')
+        # definitions: list = list()
+        # examples: list = list()
+        synonyms: list = list()
+        for term in parse_query:
+            synset = wordnet.synsets(term)
+            # definitions.append(synset[0].definition()) if len(synset)>0 else ''
+            # examples.append(str(synset[0].examples()) if len(synset)>0 else '')
+            synonyms += [lemma.name() for lemma in synset[0].lemmas()] if len(synset)>0 else ''
+        Y = vectorizer_better.fit_transform([' '.join(synonyms)])    # for self.better_query   ' '.join(definitions), ' '.join(examples)
         if self.eng_ana:
-            #! Better way to do this?
-            self.basic_query = Match(stemmed_content = {"query": ' '.join(vectorizer.get_feature_names_out()[:5])})
-            self.raw_query = self.topic_dict[self.query_type]
+            self.basic_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_basic.get_feature_names_out())})
+            self.better_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_better.get_feature_names_out())})
         else:
-            self.basic_query = Match(content = {"query": ' '.join(vectorizer.get_feature_names_out()[:5])})
-            self.raw_query = self.topic_dict[self.query_type]
-            
+            self.basic_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_basic.get_feature_names_out())})
+            self.better_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_better.get_feature_names_out())})
+        
+        QUERY = self.better_query   # select which query to use
+        
         # do embedding
         #* embed with ft
         if self.vector_name == 'ft_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="fasttext")
-            self.vector_query = encoder.encode([self.raw_query], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
+            self.vector_query = encoder.encode([QUERY.stemmed_content['query'] if self.eng_ana else QUERY.content['query']], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
             self.vector_query = generate_script_score_query(self.vector_query, "ft_vector")
         #* embed with sbert
         elif self.vector_name == 'sbert_vector':
             encoder = EmbeddingClient(host="localhost", embedding_type="sbert")
-            self.vector_query = encoder.encode([self.raw_query], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
+            self.vector_query = encoder.encode([QUERY.stemmed_content['query'] if self.eng_ana else QUERY.content['query']], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
             self.vector_query = generate_script_score_query(self.vector_query, "sbert_vector")
             
-        # search
+        # search and retrieve
         if not self.search_type:
             #* bm25 w/ either analyzer
-            #! here is where I would recieve any relevance scores
-            print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
-            p_rank(self.basic_query, self.top_k)
-            self.rel_scores = p_rank(self.basic_query, self.top_k)
+            print(f'\nBM25 Ranking\n\nResults:')
+            p_rank(QUERY, self.top_k)
+            self.rel_scores = rank(self.index, QUERY, self.top_k)
         if self.search_type == 'vector':
             #* sbert with either embed (default of sbert)
-            print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults')
-            p_rank(self.vector_query, self.top_k)
-            self.rel_scores = p_rank(self.basic_query, self.top_k)
+            print(f'\nVector Ranking\n\nResults:')
+            p_rank(QUERY, self.top_k)
+            self.rel_scores = rank(self.index, QUERY, self.top_k)
         elif self.search_type == 'rerank':
             #* rerank with either embed (default of sbert)
-            #! here is where I would recieve any relevance scores
-            print(f'\nBasic Query Used: ( {self.basic_query} )\n\nResults:')
-            p_re_rank(self.basic_query, self.vector_query, self.top_k)
-            self.rel_scores = re_rank(self.basic_query, self.vector_query, self.top_k)
+            print(f'\nVector RERanking\n\nResults:')
+            p_re_rank(QUERY, self.vector_query, self.top_k)
+            self.rel_scores = re_rank(self.index, QUERY, self.vector_query, self.top_k)
         
     def score(self) -> None:
         ''' Method to get the relevance scores of every evaluation
             and then score the evaluation based on metrics and ideal
             data. '''
+        parsed_scores = list()
         for score in self.rel_scores:
-            print(score['annotations'])
+            if not score['annotation'].split('-')[0]=='':
+                parsed_scores.append((score['annotation'].split('-'))[1])
+        self.rel_scores = parsed_scores
+        print(sorted(self.rel_scores, reverse=True))
+        #TODO:
+        # incorperate ndcg and actually metricize the model
+        # go to office hours to discuss results
 
 def p_rank(query: Query, top_k: int) -> None:
     ''' Function to search for and rank documents using the standard bm25 [PRINT]. '''
@@ -147,7 +165,7 @@ class Client:
                     search_type=self.search_type, eng_ana=self.eng_ana, 
                     vector_name=self.vector_name, top_k=self.top_k)
         eval.process_topic()    # get correct topic and ideal scores
-        eval.search()           # perform search and get relevance scores
+        eval.eval_search()      # perform search and get relevance scores
         eval.score()            # generate a score for SE run
 
 
