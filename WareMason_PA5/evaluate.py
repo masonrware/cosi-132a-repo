@@ -15,6 +15,7 @@ from example_query import generate_script_score_query, search, rescore_search
 from embedding_service.client import EmbeddingClient
 from utils import timer
 from user_search import rank, re_rank                           # used to actually recieve relevance scores
+from metrics import ndcg
 
 from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
@@ -44,7 +45,9 @@ class Evaluate:
         self.raw_query: str
         self.vector_query: Any
         self.basic_query: Any     
-        self.better_query: Any   
+        self.better_query: Any  
+        
+        self.ndcg: float 
         
     def __str__(self) -> None:
         return (f'index: {self.index}\ntopic: {self.topic}\nquery type: {self.query_type}\nsearch type: {self.search_type}\nUsing Eng. Analyzer? {self.eng_ana}\nK: {self.top_k}\n')
@@ -62,9 +65,6 @@ class Evaluate:
     
     def eval_search(self) -> None:
         ''' Method to perform searching for an evaluation. '''
-        vectorizer_basic = TfidfVectorizer(stop_words='english')
-        vectorizer_better = TfidfVectorizer(stop_words='english')
-        X = vectorizer_basic.fit_transform([self.topic_dict[self.query_type]])                                  # for self.basic_query
         parse_query: list = self.raw_query.split(' ')
         # definitions: list = list()
         # examples: list = list()
@@ -74,13 +74,12 @@ class Evaluate:
             # definitions.append(synset[0].definition()) if len(synset)>0 else ''
             # examples.append(str(synset[0].examples()) if len(synset)>0 else '')
             synonyms += [lemma.name() for lemma in synset[0].lemmas()] if len(synset)>0 else ''
-        Y = vectorizer_better.fit_transform([' '.join(synonyms)])    # for self.better_query   ' '.join(definitions), ' '.join(examples)
         if self.eng_ana:
-            self.basic_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_basic.get_feature_names_out())})
-            self.better_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_better.get_feature_names_out())})
+            self.basic_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})        #vectorizer_basic.get_feature_names_out()
+            self.better_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
         else:
-            self.basic_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_basic.get_feature_names_out())})
-            self.better_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(vectorizer_better.get_feature_names_out())})
+            self.basic_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
+            self.better_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
         
         QUERY = self.better_query   # select which query to use
         
@@ -120,12 +119,13 @@ class Evaluate:
         parsed_scores = list()
         for score in self.rel_scores:
             if not score['annotation'].split('-')[0]=='':
-                parsed_scores.append((score['annotation'].split('-'))[1])
+                parsed_scores.append(int((score['annotation'].split('-'))[1]))
+            else:
+                parsed_scores.append(0)
         self.rel_scores = parsed_scores
-        print(sorted(self.rel_scores, reverse=True))
-        #TODO:
-        # incorperate ndcg and actually metricize the model
-        # go to office hours to discuss results
+        print(self.rel_scores)
+        self.ndcg = ndcg(self.rel_scores, self.ideal_rel_scores, k=self.top_k)
+        print(f'NDCG20 SCORE: {self.ndcg}')
 
 def p_rank(query: Query, top_k: int) -> None:
     ''' Function to search for and rank documents using the standard bm25 [PRINT]. '''

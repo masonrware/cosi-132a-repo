@@ -5,6 +5,8 @@
 # 4/3/2022
 
 import argparse
+from pydoc import doc
+import re
 import time
 import unittest
 
@@ -12,7 +14,9 @@ from user_search import Engine
 from embedding_service.text_processing import TextProcessing
 
 from flask import Flask, render_template, request
+from elasticsearch import Elasticsearch
 
+search_client = Elasticsearch()
 
 pages = {}
 PAGE_NUM, TOTAL_PAGES = 1, 0
@@ -21,10 +25,8 @@ app = Flask(__name__)
 user_search: "Engine"
 text_processor = TextProcessing.from_nltk()
 
-#TODO 
-#use this !!!
 def limit_content(content: str) -> str:
-    return content[:150] if len(content) > 150 else content
+    return f'{content[:350] if len(content) > 350 else content} ...'
 
 
 class FlaskApp:
@@ -34,7 +36,7 @@ class FlaskApp:
     def home():
         return render_template("home.html")
 
-    #results page
+    # results page
     @app.route("/results", methods=["POST"])
     def results():
         # persisting data
@@ -59,21 +61,21 @@ class FlaskApp:
         seng = Engine(index='wapo_docs_50k', raw_query=query_text,
                       eng_ana=False, top_k=20)
         res = seng.search()
+        
         dict_ind = 1
-        
-        #get the list of words
-        
+        for document in res:
+            document = document.to_dict()
+            document['content'] = limit_content(document['content'])     
         if len(res) == 8:  # limit page length to 8 results
             pages[dict_ind] = res
             res = []
             dict_ind += 1
-            
-        while len(res) > 8:
-            pages[dict_ind] = res[:8]
-            res = res[8:]
-            dict_ind += 1
-            #hit.meta.....
-        pages[dict_ind] = res
+        else:
+            while len(res) > 8:
+                pages[dict_ind] = res[:8]
+                res = res[8:]
+                dict_ind += 1
+            pages[dict_ind] = res
         TOTAL_PAGES = dict_ind
         if len(res) != 0:
             return render_template("results.html", response=pages[1], query=query_text, 
@@ -82,6 +84,7 @@ class FlaskApp:
             return render_template("errorResults.html", query=query_text,
                                     PAGE_NUM=1, TOTAL_PAGES=1)  # render error page
 
+    # previous page
     @app.route("/results/<int:page_id>/prev", methods=["GET", "POST"])
     def prev_page(page_id: int) -> str:
         """previous page to show more results"""
@@ -89,6 +92,7 @@ class FlaskApp:
         return render_template("results.html", response=pages[PAGE_NUM], query=query_text,
                                PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # render results page with persisting data
 
+    # next page
     @app.route("/results/<int:page_id>/next", methods=["GET", "POST"])
     def next_page(page_id: int) -> str:
         """next page to show more results"""
@@ -96,12 +100,15 @@ class FlaskApp:
         return render_template("results.html", response=pages[PAGE_NUM], query=query_text,
                                PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # render results page with persisting data
 
+    # get a single doc based on it's id
     @app.route("/doc_data/<int:doc_id>")
     def doc_data(doc_id):
         """individual document page"""
-        #! might need to go to OH for this
-        ##somehow search by id 
-        return render_template("doc.html", document=doc_image)  # render a document page
+        result_doc = search_client.search(index="wapo_docs_50k", body={"query": {"terms": { "_id": [ doc_id ]}}})
+        # result_doc = result_doc.to_dict()
+        # print(result_doc.title)  #?!
+        result_doc = (result_doc['hits']['hits'][0]['_source'])
+        return render_template("doc.html", document=result_doc)  # render a document page
 
 
 if __name__ == "__main__":
