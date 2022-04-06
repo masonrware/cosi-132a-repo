@@ -47,7 +47,7 @@ class Evaluate:
         self.basic_query: Any     
         self.better_query: Any  
         
-        self.ndcg: float 
+        self.ndcg: float
         
     def __str__(self) -> None:
         return (f'index: {self.index}\ntopic: {self.topic}\nquery type: {self.query_type}\nsearch type: {self.search_type}\nUsing Eng. Analyzer? {self.eng_ana}\nK: {self.top_k}\n')
@@ -66,22 +66,18 @@ class Evaluate:
     def eval_search(self) -> None:
         ''' Method to perform searching for an evaluation. '''
         parse_query: list = self.raw_query.split(' ')
-        # definitions: list = list()
-        # examples: list = list()
         synonyms: list = list()
         for term in parse_query:
             synset = wordnet.synsets(term)
-            # definitions.append(synset[0].definition()) if len(synset)>0 else ''
-            # examples.append(str(synset[0].examples()) if len(synset)>0 else '')
             synonyms += [lemma.name() for lemma in synset[0].lemmas()] if len(synset)>0 else ''
         if self.eng_ana:
-            self.basic_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})        #vectorizer_basic.get_feature_names_out()
+            self.basic_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
             self.better_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
         else:
             self.basic_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
             self.better_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
         
-        QUERY = self.better_query   # select which query to use
+        QUERY = self.better_query   # here is where you can select which query to use
         
         # do embedding
         #* embed with ft
@@ -98,24 +94,26 @@ class Evaluate:
         # search and retrieve
         if not self.search_type:
             #* bm25 w/ either analyzer
-            print(f'\nBM25 Ranking\n\nResults:')
-            p_rank(QUERY, self.top_k)
+            print(f'\nBM25 Ranking\n\n')
+            p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
             self.rel_scores = rank(self.index, QUERY, self.top_k)
         if self.search_type == 'vector':
             #* sbert with either embed (default of sbert)
-            print(f'\nVector Ranking\n\nResults:')
-            p_rank(QUERY, self.top_k)
+            print(f'\nVector Ranking\n\n')
+            p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
             self.rel_scores = rank(self.index, QUERY, self.top_k)
         elif self.search_type == 'rerank':
             #* rerank with either embed (default of sbert)
-            print(f'\nVector RERanking\n\nResults:')
-            p_re_rank(QUERY, self.vector_query, self.top_k)
+            print(f'\nVector RERanking\n\n')
+            p_re_rank(QUERY, self.vector_query, self.top_k)             # comment out to not have search results printed
             self.rel_scores = re_rank(self.index, QUERY, self.vector_query, self.top_k)
         
     def score(self) -> None:
         ''' Method to get the relevance scores of every evaluation
             and then score the evaluation based on metrics and ideal
             data. '''
+        # TODO:
+        # need to figure out if I am doing ndcg correctly?
         parsed_scores = list()
         for score in self.rel_scores:
             if not score['annotation'].split('-')[0]=='':
@@ -127,22 +125,24 @@ class Evaluate:
         self.ndcg = ndcg(self.rel_scores, self.ideal_rel_scores, k=self.top_k)
         print(f'NDCG20 SCORE: {self.ndcg}')
 
-def p_rank(query: Query, top_k: int) -> None:
-    ''' Function to search for and rank documents using the standard bm25 [PRINT]. '''
-    search("wapo_docs_50k", query=query, top_k=top_k)
-    print('\n')
-    
-def p_re_rank(query: Query, vector: Query, top_k: int) -> None:
-    ''' Function to rerank documents using embeddings (fasttext and sbert) [PRINT]. '''
-    rescore_search("wapo_docs_50k", query=query, rescore_query=vector, top_k=top_k)
-    print('\n')
-
 # For each query, you should produce a table with 1 row per search type and 
 # 1 column per query type. The value of each cell is the NDCG@20 value. 
 # Include your results tables along with a short paragraph of analysis 
 # of each table in the report. If you do the extra credit (below), 
 # include results in the table(s) as additional query types and discuss 
 # your interpretations here.
+
+def p_rank(query: Query, top_k: int) -> None:
+    ''' Function to search for and rank documents using the standard bm25 [PRINT]. '''
+    print('Results:\n')
+    search("wapo_docs_50k", query=query, top_k=top_k)
+    print('\n')
+    
+def p_re_rank(query: Query, vector: Query, top_k: int) -> None:
+    ''' Function to rerank documents using embeddings (fasttext and sbert) [PRINT]. '''
+    print('Results:\n')
+    rescore_search("wapo_docs_50k", query=query, rescore_query=vector, top_k=top_k)
+    print('\n')
 
 class Client:
     ''' Class to run single/many evaluations of the SE. '''

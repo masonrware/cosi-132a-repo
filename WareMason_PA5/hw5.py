@@ -9,6 +9,7 @@ from pydoc import doc
 import re
 import time
 import unittest
+import os
 
 from user_search import Engine
 from embedding_service.text_processing import TextProcessing
@@ -119,21 +120,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.build:
-        # add if not code - look at es_service/load_es_index.py
-        
-        build_inverted_index(load_wapo(wapo_path))
-        print('\n'+'='*60+'\nbuild completed successfully :)\n'+'='*60)
+        if not search_client.indices.exists(index="wapo_docs_50k"):
+            os.system('python3.9 load_es_index.py --index_name wapo_docs_50k --wapo_path pa5_data/subset_wapo_50k_sbert_ft_filtered.jl')    # pa5 data is saved locally due to size issues so this will not work
     if args.test:
         # write test suite and switch below
         
         print(f'-'*60,f'\nRunning Test Suite...\n\n', f'-'*60)
         suite = unittest.TestLoader().loadTestsFromModule(test_hw4)
         unittest.TextTestRunner(verbosity=3).run(suite)
-        time.sleep(3)   # delay is to help visuals
-        
-        print(f'-'*60,f'\nstarting construction of test database...\n', f'-'*60)
-        build_inverted_index(load_wapo('pa4_data/test_data_pa4.jl'), flag='test')
-        print(f'-'*60,f'\ntest database contruction finished :)\n', f'-'*60)
         
         app.run(port=5001)
     if args.run:

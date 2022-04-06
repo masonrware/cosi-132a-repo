@@ -117,7 +117,7 @@ if __name__ == "__main__":
         unittest.TextTestRunner(verbosity=3).run(suite)
         time.sleep(3)   # delay is to help visuals
         print(f'-'*60,f'\nstarting construction of test database...\n', f'-'*60)
-        build_inverted_index(load_wapo('pa4_data/test_data_pa4.jl'), flag='test')
+        build_inverted_index(load_wapo('/Users/masonware/Desktop/local_drive/CS132-pa4_data_local/test_data_pa4.jl'), flag='test')
         print(f'-'*60,f'\ntest database contruction finished :)\n', f'-'*60)
         app.run(port=5001)
     if args.run:
