@@ -32,6 +32,9 @@ class Engine:
     def __init__(self, index: str, raw_query: str, eng_ana: bool, 
                  vector_name: str = 'sbert_vector', search_type: str = '', 
                  top_k: int = 20) -> None:
+        #TODO
+        #change defaults so that user can customize their search
+        
         self.index: str = index
         self.search_type: str = search_type
         self.eng_ana: bool = eng_ana

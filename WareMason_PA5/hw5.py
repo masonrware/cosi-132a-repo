@@ -14,8 +14,8 @@ import os
 from user_search import Engine
 from embedding_service.text_processing import TextProcessing
 
-from flask import Flask, render_template, request
-from elasticsearch import Elasticsearch
+from flask import Flask, render_template, request       # type: ignore
+from elasticsearch import Elasticsearch                 # type: ignore
 
 search_client = Elasticsearch()
 
@@ -106,8 +106,6 @@ class FlaskApp:
     def doc_data(doc_id):
         """individual document page"""
         result_doc = search_client.search(index="wapo_docs_50k", body={"query": {"terms": { "_id": [ doc_id ]}}})
-        # result_doc = result_doc.to_dict()
-        # print(result_doc.title)  #?!
         result_doc = (result_doc['hits']['hits'][0]['_source'])
         return render_template("doc.html", document=result_doc)  # render a document page
 
