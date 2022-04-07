@@ -10,7 +10,7 @@
 import argparse
 from concurrent.futures import process
 import json
-from typing import Any, Sequence
+from typing import Any
 
 from example_query import generate_script_score_query
 from embedding_service.client import EmbeddingClient
@@ -19,7 +19,6 @@ from utils import timer
 from elasticsearch_dsl import Search                            # type: ignore
 from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
-from sklearn.feature_extraction.text import TfidfVectorizer     # type: ignore
 import nltk                                                     # type: ignore
 from nltk.corpus import wordnet                                 # type: ignore
 nltk.download('wordnet')
@@ -53,13 +52,9 @@ class Engine:
     def search(self) -> list():
         ''' Method to perform searching '''
         parse_query: list = self.raw_query.split(' ')
-        # definitions: list = list()
-        # examples: list = list()
         synonyms: list = list()
         for term in parse_query:
             synset = wordnet.synsets(term)
-            # definitions.append(synset[0].definition()) if len(synset)>0 else ''
-            # examples.append(str(synset[0].examples()) if len(synset)>0 else '')
             synonyms += [lemma.name() for lemma in synset[0].lemmas()] if len(synset)>0 else ''
         if self.eng_ana:
             self.basic_query = Match(stemmed_content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})        #vectorizer_basic.get_feature_names_out()
@@ -82,8 +77,6 @@ class Engine:
             self.vector_query = encoder.encode([QUERY.stemmed_content['query'] if self.eng_ana else QUERY.content['query']], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
             self.vector_query = generate_script_score_query(self.vector_query, "sbert_vector")
             
-        # search
-        #! might need to change logic gate bc search_type is an empty str default
         if not self.search_type:
             #* bm25 w/ either analyzer
             self.results = rank(self.index, QUERY, self.top_k)
@@ -105,7 +98,6 @@ def rank(index: str, query: Query, top_k: int) -> list():
     response = s.execute()
     return response
         
-    
 def re_rank(index: str, query: Query, rescore_query: Query, top_k: int) -> list():
     ''' Function to rank and rerank documents given a query. '''
     s = Search(using="default", index=index).query(query)[
@@ -123,7 +115,7 @@ def re_rank(index: str, query: Query, rescore_query: Query, top_k: int) -> list(
     )
     response = s.execute()
     return response
-
+    
     
 def main():
     # driver

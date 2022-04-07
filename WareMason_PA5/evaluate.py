@@ -19,7 +19,6 @@ from metrics import ndcg
 
 from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
-from sklearn.feature_extraction.text import TfidfVectorizer     # type: ignore
 import nltk                                                     # type: ignore
 from nltk.corpus import wordnet                                 # type: ignore
 
@@ -61,7 +60,6 @@ class Evaluate:
         with open("pa5_data/ideal_relevance.json", 'r') as f:
             data = json.load(f)
         self.ideal_rel_scores = data[f'{self.topic}']
-        
     
     def eval_search(self) -> None:
         ''' Method to perform searching for an evaluation. '''
@@ -112,8 +110,6 @@ class Evaluate:
         ''' Method to get the relevance scores of every evaluation
             and then score the evaluation based on metrics and ideal
             data. '''
-        # TODO:
-        # need to figure out if I am doing ndcg correctly?
         parsed_scores = list()
         for score in self.rel_scores:
             if not score['annotation'].split('-')[0]=='':
@@ -125,12 +121,7 @@ class Evaluate:
         self.ndcg = ndcg(self.rel_scores, self.ideal_rel_scores, k=self.top_k)
         print(f'NDCG20 SCORE: {self.ndcg}')
 
-# For each query, you should produce a table with 1 row per search type and 
-# 1 column per query type. The value of each cell is the NDCG@20 value. 
-# Include your results tables along with a short paragraph of analysis 
-# of each table in the report. If you do the extra credit (below), 
-# include results in the table(s) as additional query types and discuss 
-# your interpretations here.
+
 
 def p_rank(query: Query, top_k: int) -> None:
     ''' Function to search for and rank documents using the standard bm25 [PRINT]. '''
@@ -218,7 +209,15 @@ def main():
     line: str = '=' * 50
     print(f'\n\n{line}\n\nRUNNING ELASTICSEARCH WITH THE FOLLOWING SPECS:\n\n{client}\n{line}\n')
     client.run()
-    
+
+
+# For each query, you should produce a table with 1 row per search type and 
+# 1 column per query type. The value of each cell is the NDCG@20 value. 
+# Include your results tables along with a short paragraph of analysis 
+# of each table in the report. If you do the extra credit (below), 
+# include results in the table(s) as additional query types and discuss 
+# your interpretations here.
+
 
 if __name__ == "__main__":
     main()
