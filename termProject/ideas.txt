@@ -1,2 +1,9 @@
+<<<<<<< Updated upstream
 docs for web scraping: https://docs.scrapy.org/en/latest/
+=======
+https://docs.scrapy.org/en/latest/
+
+scrape product/movie/etc reviews and build an index
+be able to search for a product and get a product profile back to be able to evaluate the product
+>>>>>>> Stashed changes
 
