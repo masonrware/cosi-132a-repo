@@ -47,11 +47,11 @@ class FlaskApp:
         global query_text
         
         query_text = request.form["query"]  # Get the raw user query from home page
-        query_text = request.form["bm25"]  # Get the raw user query from home page
-        query_text = request.form["bm25eng"]  # Get the raw user query from home page
-        query_text = request.form["vector"]  # Get the raw user query from home page
-        query_text = request.form["rerank_sbert"]  # Get the raw user query from home page
-        query_text = request.form["rerank_ft"]  # Get the raw user query from home page
+        # query_text = request.form["bm25"]  # Get the raw user query from home page
+        # query_text = request.form["bm25eng"]  # Get the raw user query from home page
+        # query_text = request.form["vector"]  # Get the raw user query from home page
+        # query_text = request.form["rerank_sbert"]  # Get the raw user query from home page
+        # query_text = request.form["rerank_ft"]  # Get the raw user query from home page
         ## get additional info from user - i.e. the params
         
         # for now I will use bm25 defaults:
