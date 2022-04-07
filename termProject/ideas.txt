@@ -1,10 +1,2 @@
-Game Reviews
-    - [ ] With COVID-19  in place, the gaming industry saw a massive bump in its users. To keep the users hooked 
-          to their games and not lose them to other entertainment options, the analysts have to keep track of the 
-          customer reviews.
-    - [ ] Project Idea: You can do a web scraping project with the data available on the STEAM game store. The 
-          store hosts about 10,000 games and has reviews from nearly 4 million game users. The website has a 
-          product listings page that you can use to extract metadata of the games it hosts.
-    - [ ] Recommended Web Scraping Tool: For this project, Python programming language’s Scrapy is a good option. 
-          You can control the way you want to crawl the game store page using Scrapy’s CrawlSpider.
+docs for web scraping: https://docs.scrapy.org/en/latest/
 
