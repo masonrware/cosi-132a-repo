@@ -22,12 +22,12 @@ def get_raw_tf_value(term: str, content: str) -> float:
     """
     return float(content.count(term))
 
-def cosine_sim(tfidf_term: float, tf_doc: float, query_length: int, doc_length: float) -> float:
+def cosine_sim(tfidf_term: float, tf_doc: float, doc_length: float) -> float:
     """ 
     This is a method to get the cosine similarity between objects of given information. Namely, this method computes the cosine similarity
     for a given tfidf score, a given tf score, and two vector lengths 
     """
-    return (tfidf_term*tf_doc)/(query_length*doc_length)
+    return (tfidf_term*tf_doc)/(doc_length)
 
 
 class InvertedIndex:
@@ -67,9 +67,9 @@ def get_doc_vec_norm(term_tfs: List[float]) -> float:
     :param term_tfs: a list of term weights (log tf) for one document
     :return:
     """
-    total_tf = sum(term_tfs)
+    total_tf = sum((tf**2 for tf in term_tfs))
     if total_tf:
-        return float(1/math.sqrt(total_tf))
+        return float(math.sqrt(total_tf))
     else:
         return 0.0
 
@@ -150,7 +150,6 @@ def query_inverted_index(query: str, k: int = 10) -> Tuple[List[Tuple[float, int
                 term_tf_idf_score = (doc_tuple[1] * text_processor.idf(26987, len(postings_list)))        ##! Weight query terms using logarithmic TF*IDF formula without length normalization
                 doc_score = cosine_sim(tfidf_term=term_tf_idf_score,
                                                 tf_doc=doc_tuple[1],
-                                                query_length=len(parsed_query),
                                                 doc_length=0.5)
                     ##! Code for the above line. doc_length should be: query_doc_len_index(doc_tuple[0])['doc-vec-length']
                     ##! For some reason, querying - although it is constant - slows down the search process significantly

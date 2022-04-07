@@ -109,7 +109,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.build:
-        build_inverted_index(load_wapo(wapo_path))
+        build_inverted_index(load_wapo(wapo_path), flag='build')
         print('\n'+'='*60+'\nbuild completed successfully :)\n'+'='*60)
     if args.test:
         print(f'-'*60,f'\nRunning Test Suite...\n\n', f'-'*60)
