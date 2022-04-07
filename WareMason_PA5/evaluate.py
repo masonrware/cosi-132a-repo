@@ -210,8 +210,8 @@ def main():
                         help="evaluate on top K ranked documents")   
     args = parser.parse_args()
     
-    client = Client(index=args.index_name, topic=args.topic_id, query_type=args.query_type, 
-                    search_type=args.search_type, eng_ana=args.use_english_analyzer, 
+    client = Client(index=args.index_name, topic=args.topic_id, query_type=args.query_type, search_type=args.search_type, 
+                    eng_ana=args.use_english_analyzer or True if args.search_type=='rerank' else args.use_english_analyzer, 
                     vector_name= args.vector_name if args.vector_name else vector_name, top_k=args.top_k)
     
     # driver
