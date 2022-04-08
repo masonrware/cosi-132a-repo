@@ -21,7 +21,7 @@ from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
 import nltk                                                     # type: ignore
 from nltk.corpus import wordnet                                 # type: ignore
-nltk.download('wordnet')
+nltk.download('wordnet', quiet=True)
 
 connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
 

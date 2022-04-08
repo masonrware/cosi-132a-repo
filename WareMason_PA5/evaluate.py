@@ -22,7 +22,7 @@ from elasticsearch_dsl.connections import connections           # type: ignore
 import nltk                                                     # type: ignore
 from nltk.corpus import wordnet                                 # type: ignore
 
-nltk.download('wordnet')
+nltk.download('wordnet', quiet=True)
 
 class Evaluate:
     ''' A class to represent an individual evaluation run. '''
@@ -92,18 +92,18 @@ class Evaluate:
         # search and retrieve
         if not self.search_type:
             #* bm25 w/ either analyzer
-            print(f'\nBM25 Ranking\n\n')
-            p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
+            # print(f'\nBM25 Ranking\n\n')
+            # p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
             self.rel_scores = rank(self.index, QUERY, self.top_k)
         if self.search_type == 'vector':
             #* sbert with either embed (default of sbert)
-            print(f'\nVector Ranking\n\n')
-            p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
+            # print(f'\nVector Ranking\n\n')
+            # p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
             self.rel_scores = rank(self.index, QUERY, self.top_k)
         elif self.search_type == 'rerank':
             #* rerank with either embed (default of sbert)
-            print(f'\nVector RERanking\n\n')
-            p_re_rank(QUERY, self.vector_query, self.top_k)             # comment out to not have search results printed
+            # print(f'\nVector RERanking\n\n')
+            # p_re_rank(QUERY, self.vector_query, self.top_k)             # comment out to not have search results printed
             self.rel_scores = re_rank(self.index, QUERY, self.vector_query, self.top_k)
         
     def score(self) -> None:
@@ -117,9 +117,9 @@ class Evaluate:
             else:
                 parsed_scores.append(0)
         self.rel_scores = parsed_scores
-        print(self.rel_scores)
+        # print(self.rel_scores)
         self.ndcg = ndcg(self.rel_scores, self.ideal_rel_scores, k=self.top_k)
-        print(f'NDCG20 SCORE: {self.ndcg}')
+        # print(f'NDCG20 SCORE: {self.ndcg}')
 
 
 
@@ -150,15 +150,15 @@ class Client:
     def __str__(self) -> None:
         return (f'index: {self.index}\ntopic: {self.topic}\nquery type: {self.query_type}\nsearch type: {self.search_type}\nUsing Eng. Analyzer? {self.eng_ana}\nK: {self.top_k}\n')
      
-    @timer
-    def run(self) -> None:
+    # @timer
+    def run(self) -> float:
         eval = Evaluate(index=self.index, topic=self.topic, query_type=self.query_type, 
                     search_type=self.search_type, eng_ana=self.eng_ana, 
                     vector_name=self.vector_name, top_k=self.top_k)
         eval.process_topic()    # get correct topic and ideal scores
         eval.eval_search()      # perform search and get relevance scores
         eval.score()            # generate a score for SE run
-
+        print(eval.ndcg)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -207,7 +207,7 @@ def main():
     
     # driver
     line: str = '=' * 50
-    print(f'\n\n{line}\n\nRUNNING ELASTICSEARCH WITH THE FOLLOWING SPECS:\n\n{client}\n{line}\n')
+    # print(f'\n\n{line}\n\nRUNNING ELASTICSEARCH WITH THE FOLLOWING SPECS:\n\n{client}\n{line}\n')
     client.run()
 
 
