@@ -1,5 +1,12 @@
-<input type="radio" id="bm25" name="bm25" value="Okapi BM25 + std analyzer">
-    <input type="radio" id="bm25eng" name="bm25eng" value="Okapi BM25 + eng analyzer">
-    <input type="radio" id="vector" name="vector" value="sBERT embeddings">
-    <input type="radio" id="rerank_sbert" name="rerank_sbert" value="ReRanking with sBERT embeddings">
-    <input type="radio" id="rerank_ft" name="rerank_ft" value="ReRanking with fastText embeddings">
+<form action="{{ url_for('results') }}" name="search" method="post">
+    <label for="query">Query:</label>
+    <input type="text" id="query" name="query" size=50>
+    <input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">
+    <label for="vehicle1"> I have a bike</label><br>
+    <input type="checkbox" id="vehicle2" name="vehicle2" value="Car">
+    <label for="vehicle2"> I have a car</label><br>
+    <input type="checkbox" id="vehicle3" name="vehicle3" value="Boat">
+    <label for="vehicle3"> I have a boat</label><br> 
+    <input type="submit" value="Search">
+</form>
+<script type="text/javascript">onlyOneCheckBox()</script>

@@ -3,16 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>IR Vector Space</title>
+    <script type="text/javascript">
+		function onlyOneCheckBox() {
+			var checkboxgroup = document.getElementById('checkboxgroup').getElementsByTagName("input");
+			var limit = 1;
+			for (var i = 0; i < checkboxgroup.length; i++) {
+				checkboxgroup[i].onclick = function() {
+					var checkedcount = 0;
+						for (var i = 0; i < checkboxgroup.length; i++) {
+						checkedcount += (checkboxgroup[i].checked) ? 1 : 0;
+					}
+					if (checkedcount > limit) {
+						console.log("You can select maximum of " + limit + " checkbox.");
+						alert("You can select maximum of " + limit + " checkbox.");
+						this.checked = false;
+					}
+				}
+			}
+		}
+	</script>
 </head>
 <body style='background-color: grey'>
 
 <h3>Washington Post Search 5.0 (Multi-Model Retrieval w/ ElasticSearch)</h3>
 
-<form action="{{ url_for('results') }}" name="search" method="post">
-    <label for="query">Query:</label>
-    <input type="text" id="query" name="query" size=50>
-    <input type="submit" value="Search">
-</form>
-
+<!-- using div -->
+<h1>Using Div</h1>
+<div id="checkboxgroup">
+    <input type="checkbox" value="CheckBox 1" name="check[]">
+    <input type="checkbox" value="CheckBox 2" name="check[]">
+    <input type="checkbox" value="CheckBox 3" name="check[]">
+</div>
+<script type="text/javascript">
+    onlyOneCheckBox()
+</script>
+  
 </body>
 </html>
