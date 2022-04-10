@@ -99,7 +99,7 @@ class Evaluate:
             #* sbert with either embed (default of sbert)
             # print(f'\nVector Ranking\n\n')
             # p_rank(QUERY, self.top_k)                                   # comment out to not have search results printed
-            self.rel_scores = rank(self.index, QUERY, self.top_k)
+            self.rel_scores = rank(self.index, self.vector_query, self.top_k)
         elif self.search_type == 'rerank':
             #* rerank with either embed (default of sbert)
             # print(f'\nVector RERanking\n\n')

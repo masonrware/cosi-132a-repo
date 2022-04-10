@@ -9,8 +9,9 @@
 
 import argparse
 from concurrent.futures import process
+from flask import flash
 import json
-from typing import Any
+from typing import Any, Tuple
 
 from example_query import generate_script_score_query
 from embedding_service.client import EmbeddingClient
@@ -21,23 +22,43 @@ from elasticsearch_dsl.query import MatchAll, Match, Query      # type: ignore
 from elasticsearch_dsl.connections import connections           # type: ignore
 import nltk                                                     # type: ignore
 from nltk.corpus import wordnet                                 # type: ignore
+
 nltk.download('wordnet', quiet=True)
 
 connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
 
-
+def define_search(search_type: list()) -> dict():
+    ''' A function to process which kind of search the user
+        intends and returning the appropriate data. '''
+    search_type = search_type[0]
+    if search_type=='bm25':
+        return {'search_type': ''}
+    elif search_type=='bm25eng':
+        return {'search_type': '', 'engana': True}
+    elif search_type=='vec':
+        return {'search_type': 'vector', 'vector_name': 'sbert_vector'}
+    elif search_type=='reft':
+        return {'search_type': 'rerank', 'vector_name': 'ft_vector'}
+    elif search_type=='resbert':
+        return {'search_type': 'rerank', 'vector_name': 'sbert_vector'} 
+        
+        
 class Engine:
     ''' A class to represent an SE user query. '''
     def __init__(self, index: str, raw_query: str, eng_ana: bool, 
-                 vector_name: str = 'sbert_vector', search_type: str = '', 
-                 top_k: int = 20) -> None:
-        #TODO
-        #change defaults so that user can customize their search
-        
+                 vector_name: str, search_type: list(), 
+                 top_k: int = 40) -> None:
+        search_params = define_search(search_type)
         self.index: str = index
-        self.search_type: str = search_type
-        self.eng_ana: bool = eng_ana
-        self.vector_name: str = vector_name
+        self.search_type: str = search_params['search_type']
+        if 'engana' in search_params.keys():
+            self.eng_ana: bool = search_params['engana']
+        else:
+            self.eng_ana: bool = eng_ana
+        if 'vector_name' in search_params.keys():
+            self.vector_name: str = search_params['vector_name']
+        else:
+            self.vector_name: str = vector_name
         self.top_k: int = top_k
         self.raw_query: str = raw_query
         
@@ -85,7 +106,7 @@ class Engine:
             self.results = rank(self.index, self.vector_query, self.top_k)
         elif self.search_type == 'rerank':
             #* rerank with either embed (default of sbert)
-            self.results = re_rank(QUERY, self.vector_query, self.top_k)
+            self.results = re_rank(self.index, QUERY, self.vector_query, self.top_k)
             
         return self.results
     

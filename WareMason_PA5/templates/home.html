@@ -14,8 +14,8 @@
 						checkedcount += (checkboxgroup[i].checked) ? 1 : 0;
 					}
 					if (checkedcount > limit) {
-						console.log("You can select maximum of " + limit + " checkbox.");
-						alert("You can select maximum of " + limit + " checkbox.");
+						console.log("You can select maximum of " + limit + " retrieval method.");
+						alert("You can select maximum of " + limit + " retrieval method.");
 						this.checked = false;
 					}
 				}
@@ -27,16 +27,26 @@
 
 <h3>Washington Post Search 5.0 (Multi-Model Retrieval w/ ElasticSearch)</h3>
 
-<!-- using div -->
-<h1>Using Div</h1>
-<div id="checkboxgroup">
-    <input type="checkbox" value="CheckBox 1" name="check[]">
-    <input type="checkbox" value="CheckBox 2" name="check[]">
-    <input type="checkbox" value="CheckBox 3" name="check[]">
-</div>
+
+<form action="{{ url_for('results') }}" name="search" method="post" id="checkboxgroup">
+    <label for="query">Query:</label>
+    <input type="text" id="query" name="query" size=50>
+	<br><br>
+	
+	<label for="retrieval_method">Retrieval Method:</label>
+	Okami BM25 + english analyzer . . . <input type="checkbox" method="post" id="bm25eng" value="bm25eng" name="retr_methods"><br>
+	Okami BM25 + std. analyzer . . . <input type="checkbox" method="post" id="bm25" value="bm25" name="retr_methods"><br>
+	Vector Spacing w/ sBERT embeddings . . . <input type="checkbox" method="post" id="vec" value="vec" name="retr_methods"><br>
+	ReRanking Results w/ FastText embeddings . . . <input type="checkbox" method="post" value="reft" id="reft" name="retr_methods"><br>
+	ReRanking Results w/ sBERT embeddings . . . <input type="checkbox" method="post" value="resbert" id="resbert" name="retr_methods"><br>
+
+	<br>
+    <input type="submit" value="Search">
+</form>
 <script type="text/javascript">
     onlyOneCheckBox()
 </script>
+<hr>
   
 </body>
 </html>

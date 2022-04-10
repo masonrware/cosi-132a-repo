@@ -3,17 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <title>IR Vector Space</title>
+    <script type="text/javascript">
+		function onlyOneCheckBox() {
+			var checkboxgroup = document.getElementById('checkboxgroup').getElementsByTagName("input");
+			var limit = 1;
+			for (var i = 0; i < checkboxgroup.length; i++) {
+				checkboxgroup[i].onclick = function() {
+					var checkedcount = 0;
+						for (var i = 0; i < checkboxgroup.length; i++) {
+						checkedcount += (checkboxgroup[i].checked) ? 1 : 0;
+					}
+					if (checkedcount > limit) {
+						console.log("You can select maximum of " + limit + " retrieval method.");
+						alert("You can select maximum of " + limit + " retrieval method.");
+						this.checked = false;
+					}
+				}
+			}
+		}
+	</script>
 </head>
 <body style='background-color: grey'>
 
 <h3>Washington Post Search 5.0 (Multi-Model Retrieval w/ ElasticSearch)</h3>
 
-<form action="{{ url_for('results') }}" name="search" method="post">
+<form action="{{ url_for('results') }}" name="search" method="post" id="checkboxgroup">
     <label for="query">Query:</label>
     <input type="text" id="query" name="query" size=50>
+	<br><br>
+	
+	<label for="retrieval_method">Retrieval Method:</label>
+	Okami BM25 + english analyzer . . . <input type="checkbox" method="post" id="bm25eng" value="bm25eng" name="retr_methods"><br>
+	Okami BM25 + std. analyzer . . . <input type="checkbox" method="post" id="bm25" value="bm25" name="retr_methods"><br>
+	Vector Spacing w/ sBERT embeddings . . . <input type="checkbox" method="post" id="vec" value="vec" name="retr_methods"><br>
+	ReRanking Results w/ FastText embeddings . . . <input type="checkbox" method="post" value="reft" id="reft" name="retr_methods"><br>
+	ReRanking Results w/ sBERT embeddings . . . <input type="checkbox" method="post" value="resbert" id="resbert" name="retr_methods"><br>
+
+	<br>
     <input type="submit" value="Search">
 </form>
+<script type="text/javascript">
+    onlyOneCheckBox()
+</script>
 
+<hr>
 
 <!-- Results -->
 <ul>

@@ -14,12 +14,15 @@ with open ('pa5_data/pa5_queries.json', 'r') as f:
     #cycle through each type of thing which will be keys in dict
     for line in data['pa5_queries']:
         # outputs.append(subprocess.call(['run.sh', line['topic']], shell=True))
-        outputs.append(float(check_output(['python3.9', 'evaluate.py', '--index_name', 
-                                           'wapo_docs_50k', '--topic_id', line['topic'], 
-                                           '--query_type', 'nl', '--top_k', '20', 
-                                           '--search_type', 'vector', '--vector_name', 'sbert_vector'])))
+        shell_path = './run.sh'
+        outputs.append(float(check_output([shell_path, str(line['topic'])])))
+        
+        # ['python3.9', 'evaluate.py', '--index_name', 
+                                        #    'wapo_docs_50k', '--topic_id', line['topic'], 
+                                        #    '--query_type', 'nl', '--top_k', '20', 
+                                        #    '--search_type', 'vector', '--vector_name', 'sbert_vector']
         
 print(outputs)
 
 #run the flask app
-subprocess.call(['python3.9', 'hw5.py', '--run'])
+# subprocess.call(['python3.9', 'hw5.py', '--run'])

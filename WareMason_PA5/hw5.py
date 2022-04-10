@@ -6,8 +6,6 @@
 
 import argparse
 from pydoc import doc
-import re
-import time
 import unittest
 import os
 
@@ -47,24 +45,15 @@ class FlaskApp:
         global query_text
         
         query_text = request.form["query"]  # Get the raw user query from home page
-        # query_text = request.form["bm25"]  # Get the raw user query from home page
-        # query_text = request.form["bm25eng"]  # Get the raw user query from home page
-        # query_text = request.form["vector"]  # Get the raw user query from home page
-        # query_text = request.form["rerank_sbert"]  # Get the raw user query from home page
-        # query_text = request.form["rerank_ft"]  # Get the raw user query from home page
-        ## get additional info from user - i.e. the params
+        if request.method == 'POST':
+            retr_methods = request.form.getlist('retr_methods')
         
-        # for now I will use bm25 defaults:
-        # 
-        # index: wapo_docs_50k
-        # raw_query: user query
-        # search_type: n/a (bm25)
-        # eng_ana: False
-        # vector_name: n/a (sbert)
-        # top_k: 40
+        #TODO
+        #still need to undo the search_type param default - i.e. add the checkbox for vector
         
         #defaults:
         seng = Engine(index='wapo_docs_50k', raw_query=query_text,
+                      vector_name='sbert_vector', search_type=retr_methods,
                       eng_ana=False, top_k=20)
         res = seng.search()
         
