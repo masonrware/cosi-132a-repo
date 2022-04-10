@@ -141,3 +141,5 @@ PA3venv/
 *.jl
 elasticsearch-7.10.2/
 *.vec
+
+termProject/data/reviews.json
