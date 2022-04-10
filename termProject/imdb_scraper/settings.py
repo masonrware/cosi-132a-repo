@@ -1,0 +1,1 @@
+SPIDER_MODULES = ['imdb_scraper.spiders']
