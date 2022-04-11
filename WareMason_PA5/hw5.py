@@ -7,10 +7,11 @@
 import argparse
 from pydoc import doc
 import unittest
-import os
+import subprocess
 
 from user_search import Engine
 from embedding_service.text_processing import TextProcessing
+import test_hw5
 
 from flask import Flask, render_template, request       # type: ignore
 from elasticsearch import Elasticsearch                 # type: ignore
@@ -112,15 +113,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.build:
-        if not search_client.indices.exists(index="wapo_docs_50k"):
-            os.system('python3.9 load_es_index.py --index_name wapo_docs_50k --wapo_path pa5_data/subset_wapo_50k_sbert_ft_filtered.jl')    # pa5 data is saved locally due to size issues so this will not work
+        subprocess.call('./build.sh', shell=False)
+        
+        print(('='*100)+'\n'+('='*100)+'\nES index constructed and all listeners ACTIVE :)\n'+('='*100)+'\n'+('='*100)+'\n\n\n\n....\n\n\n\n')
     if args.test:
         # write test suite and switch below
         
         print(f'-'*60,f'\nRunning Test Suite...\n\n', f'-'*60)
-        suite = unittest.TestLoader().loadTestsFromModule(test_hw4)
+        suite = unittest.TestLoader().loadTestsFromModule(test_hw5)
         unittest.TextTestRunner(verbosity=3).run(suite)
         
-        app.run(port=5001)
     if args.run:
+        
         app.run(debug=True, port=5000)

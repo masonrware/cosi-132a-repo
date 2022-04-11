@@ -1,6 +1,8 @@
-elasticsearch
-elasticsearch-dsl
-sentence-transformers
-flask
-numpy
-pyzmq
+elasticsearch==7.17.1
+elasticsearch_dsl==7.4.0
+Flask==2.0.2
+nltk==3.5
+numpy==1.22.3
+pyzmq==22.3.0
+sentence_transformers==2.2.0
+tqdm==4.61.2

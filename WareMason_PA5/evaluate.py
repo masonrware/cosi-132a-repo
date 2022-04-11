@@ -158,7 +158,7 @@ class Client:
         eval.process_topic()    # get correct topic and ideal scores
         eval.eval_search()      # perform search and get relevance scores
         eval.score()            # generate a score for SE run
-        print(eval.ndcg)
+        return(eval.ndcg)
 
 def main():
     parser = argparse.ArgumentParser()
