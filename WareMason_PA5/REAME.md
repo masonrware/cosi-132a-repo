@@ -22,7 +22,9 @@ used to produce search results for the flask app. As such, `evaluate` has a clie
 
 The following are the main components of the program:
 
-### `hw5.py`
+### Engine
+
+* `hw5.py`
 
 `hw5.py` implements a flask app so that it can obtain a raw query string and some specifications about which retrieval method to use. Once these attributes are recorded, that are
 used to instantiate the Engine class present in `user_search.py` with the specified arguments. This is then searched upon and it's retrieved, ranked documents are returned and
