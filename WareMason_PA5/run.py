@@ -3,6 +3,8 @@ import json
 import subprocess
 from subprocess import check_output
 
+## this was to try to run every eval and create a table but I gave up and did it manually
+
 #TODO
 # make this into a dict
 # then make script to generate a table with that
