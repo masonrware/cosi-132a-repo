@@ -71,7 +71,7 @@ Build & Run
 
 [!DEPRECATED]In order to build the index and start the services required for interacting with the program, run the command `python3.9 hw5.py --build` while located in the root directory of the project. 
 
-Alternatively, you can navigate to the file: `scripts.sh` to refer to some boilerplate scripts that start the service's required build.
+Alternatively, you can navigate to the file: `scripts/scripts.sh` to refer to some boilerplate scripts that start the service's required build.
 
 ### Run Instructions
 
