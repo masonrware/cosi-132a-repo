@@ -85,4 +85,10 @@ To test this program, I wrote unit tests for each major class and utility in the
 
 Alternatively, this program is designed to be able to be controlled entirely from within `hw5.py`. Therefore, one can enter the command `python3.9 hw5.py --test` to run the test suite as well.
 
+* * *
+
+### Results
+
+A link to the results sheet can be found in the file `results.txt` in the root directory of the project. 
+
 _© 2022 MASON WARE_
