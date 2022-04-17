@@ -47,4 +47,5 @@ with open(out_file_path, 'w') as outfile:
 # iterate over them
 # make an individual call for each movie review
     
+'https://api.themoviedb.org/3/review/401478?api_key=dae980beb03de6af72723c0778acdc0e'
 'https://api.themoviedb.org/3/movie/401478/reviews?api_key=dae980beb03de6af72723c0778acdc0e'
