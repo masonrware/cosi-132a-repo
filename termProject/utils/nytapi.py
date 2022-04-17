@@ -40,3 +40,11 @@ with open(in_file_path, 'r') as file:
 json_str = json.dumps(json_data, indent=4, sort_keys=True)
 with open(out_file_path, 'w') as outfile:
     outfile.write(json_str)
+    
+    
+#TODO
+# get list of valid movie ids
+# iterate over them
+# make an individual call for each movie review
+    
+'https://api.themoviedb.org/3/movie/401478/reviews?api_key=dae980beb03de6af72723c0778acdc0e'
