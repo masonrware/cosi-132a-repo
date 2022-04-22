@@ -40,19 +40,27 @@ load_dotenv()
 # json_str = json.dumps(json_data, indent=4, sort_keys=True)
 # with open(out_file_path, 'w') as outfile:
 #     outfile.write(json_str)
-    
+   
+#! below link if from forum
+ 
 res = requests.get('http://files.tmdb.org/p/exports/movie_ids_04_21_2022.json.gz')
 if res.status_code == 200:
     print(res.text)
 
 
+# ?
 #TODO
 # get list of valid movie ids
 # iterate over them
 # make an individual call for each movie review
-    
+# ?
+
+
 # TODO
-# restructure requests so that I am making calls based on movie title
-# make calls to at least 5 apis
+# restructure requests so that I am making calls based on movie title!
+# make calls to at least 5 apis!
+
+### api urls ###
 'https://api.themoviedb.org/3/review/401478?api_key=dae980beb03de6af72723c0778acdc0e'
 'https://api.themoviedb.org/3/movie/401478/reviews?api_key=dae980beb03de6af72723c0778acdc0e'
+################
