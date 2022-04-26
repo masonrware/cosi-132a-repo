@@ -10,19 +10,17 @@
 import gzip
 import json
 import os
-from typing import Dict, Generator, List, Set
-import requests                     # type: ignore 
-import pandas as pd
+from typing import Dict, Generator, Iterable, List, Set
+import requests                                                 # type: ignore 
+import pandas as pd                                             # type: ignore 
 import csv
 from collections import namedtuple
 
 from animate import Loader
 
-from dotenv import load_dotenv      # type: ignore
-from pynytimes import NYTAPI        # type: ignore 
-from googletrans import Translator
-
-
+from dotenv import load_dotenv                                  # type: ignore
+from pynytimes import NYTAPI                                    # type: ignore 
+from googletrans import Translator                              # type: ignore 
 
 
 # TODO
@@ -52,7 +50,7 @@ class Commit:
         ''' generator method to yield a json object of an individual movie and all of its reviews
             to be written to a file with unique movies. '''
         translator = Translator()
-        loader = Loader("Compressing Movie Data...", "All done!", 0.05).start()
+        loader = Loader("Compressing Unique Movie Data...", "All done!", 0.05).start()
         for title in self.movies_set:
             result = translator.translate(title)
             if result and result.src == 'en':
@@ -117,40 +115,64 @@ class Commit:
                     if row['original_title'].lower() == title.lower():
                         json_obj['review'] = row['overview']
             yield json_obj
-
-    def write_unique(self, json_obj: Dict, target_file: str) -> None:
+        loader.stop()
+        
+    def write_unique(self, json_objs: Iterable, target_file: str) -> None:
         ''' write a json_obj of a unique movie to a target file. '''
         # ensure that the movie has multiple reviews and that they are unique
-        if len(json_obj['reviews'])>1:           
-            # convert into JSON string
+        for json_obj in json_objs:
+            if len(json_obj['reviews'])>1:           
+                # convert into JSON string
+                json_str = json.dumps(json_obj, indent=4, sort_keys=True)
+                with open(target_file, 'a') as outfile:
+                    outfile.write(json_str)
+                    outfile.write(',')
+    
+    def write_dupe(self, json_objs: Iterable, target_file: str) -> None:
+        ''' wrtie a json_obj of a duplicated movie to a target file. '''
+        for json_obj in json_objs:
             json_str = json.dumps(json_obj, indent=4, sort_keys=True)
             with open(target_file, 'a') as outfile:
                 outfile.write(json_str)
                 outfile.write(',')
-    
-    def write_dupe(self, json_obj: Dict, target_file: str) -> None:
-        ''' wrtie a json_obj of a duplicated movie to a target file. '''
-        json_str = json.dumps(json_obj, indent=4, sort_keys=True)
-        with open(target_file, 'a') as outfile:
-            outfile.write(json_str)
-            outfile.write(',')
 
 if __name__=='__main__':
-    target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_movie_data.json'
+    unique_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_unique_movie_data.json'
+    duplicated_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_dupe_movie_data.json'
+    
+    # TODO
+    # write api class
+    # add args options to:
+    # 1.  commit dupe data
+    # 2.  commit unique data
+    # 3.  make all api calls
+    # 4.    make each api call
+    
+    # add error handeling for making commits before making calls
+    
     md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
     mdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
     nyt = '/Users/masonware/Desktop/COSI_132A/termProject/data/nyt.json'
     tmdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
+    
+    # move below to a function and that way I can try catch with the call to see if there is a file or not - if not please make api call
     md_df = pd.read_csv(md, low_memory=False)
     mdb_df = pd.read_json(mdb)
     nyt_df = pd.read_json(nyt)
     tmdb_df = pd.read_json(tmdb)
+    
     commit = Commit(md_df=md_df,
                     mdb_df=mdb_df,
                     nyt_df=nyt_df,
                     tmdb_df=tmdb_df)
-    commit.load_data()
+    # add class creation for api calls
     
+    
+    commit.load_data()
+    commit.write_unique(commit.generate_movie_json(), unique_target_file)
+    
+
+
 
 #################################################
 #################################################
