@@ -10,6 +10,7 @@
 import gzip
 import json
 import os
+from typing import Dict, Generator, List, Set
 import requests                     # type: ignore 
 import pandas as pd
 import csv
@@ -22,14 +23,7 @@ from pynytimes import NYTAPI        # type: ignore
 from googletrans import Translator
 
 
-md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
-mdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
-nyt = '/Users/masonware/Desktop/COSI_132A/termProject/data/nyt.json'
-tmdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
-md_df = pd.read_csv(md, low_memory=False)
-mdb_df = pd.read_json(mdb)
-nyt_df = pd.read_json(nyt)
-tmdb_df = pd.read_json(tmdb)
+
 
 # TODO
 
@@ -44,93 +38,120 @@ class Commit:
         self.mdb_df = mdb_df
         self.nyt_df = nyt_df
         self.tmdb_df = tmdb_df
-        self.movies_set: set()
-        self.movies_list: list()
+        self.movies_set: Set
+        self.movies_list: List
       
-    def load_datat(self) -> None:
+    def load_data(self) -> None:
+        ''' get all movie names in a set and list. '''
         # using movies_metadata.csv because it is by far the largest
         self.movies_set = set(self.md_df['original_title'].tolist())
         self.movies_list = (self.md_df['original_title'].tolist())
+        
+        
+    def generate_movie_json(self) -> Generator[Dict, None, None]:
+        ''' generator method to yield a json object of an individual movie and all of its reviews
+            to be written to a file with unique movies. '''
+        translator = Translator()
+        loader = Loader("Compressing Movie Data...", "All done!", 0.05).start()
+        for title in self.movies_set:
+            result = translator.translate(title)
+            if result and result.src == 'en':
+                # TODO
+                # find more relevant, persistent data
+                # add more keys below
+                # get popularity scores
+                json_obj = dict.fromkeys(['title', 'reviews', 'popularity'])
+                json_obj['reviews'] = []
+                json_obj['title'] = title
+                # find all in movies_metadata.csv
+                for index, row in md_df.iterrows():
+                    if row['original_title'].lower() == title.lower():
+                        movie_data = {
+                            'review': row['overview'],
+                            'src': 'movies_metadata'
+                        }
+                        json_obj['reviews'].append(movie_data)
+                # find all in mdblist
+                for index, row in mdb_df.iterrows():
+                    if row['title'].lower() == title.lower():
+                        movie_data = {
+                            'review': row['description'],
+                            'src': 'mdblist'
+                        }
+                        json_obj['reviews'].append(movie_data)
+                # find all in nyt
+                for index, row in nyt_df.iterrows():
+                    if row['display_title'].lower() == title.lower():
+                        movie_data = {
+                            'review': row['summary_short'],
+                            'src': 'nyt'
+                        }
+                        json_obj['reviews'].append(movie_data)  
+                # find all in tmdb
+                for index, row in tmdb_df.iterrows():
+                    for movie in row['results']:
+                        if movie['original_title'].lower() == title.lower():
+                            movie_data = {
+                                'review': movie['overview'],
+                                'src': 'tmdb'
+                            }
+                            json_obj['reviews'].append(movie_data)
+                            
+                json_obj['reviews'] = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
+                yield json_obj
+        loader.stop()
+        
+    def generate_dupe_movie_json(self) -> Generator[Dict, None, None]:
+        ''' generator method to yield a json object of an individual movie and review
+            to be written to a file with duplicated movies. '''
+        translator = Translator()
+        loader = Loader("Compressing Duplicate Movie Data...", "All done!", 0.05).start()
 
-    def generate_movie_json()
-translator = Translator()
+        for title in self.movies_list:
+            result = translator.translate(title)
+            if result and result.src == 'en':
+                json_obj = dict.fromkeys(['title', 'review', 'popularity'])
+                json_obj['title'] = title
+                # only need to look in movie_metdata.csv because that is where we started from
+                for index, row in md_df.iterrows():
+                    if row['original_title'].lower() == title.lower():
+                        json_obj['review'] = row['overview']
+            yield json_obj
 
-# # for dupes
-# for title in movies_list:
-#     line = {}
-#     result = translator.translate(title)
-#     if result and result.src == 'en':
-#         pass
-        
-
-loader = Loader("Compressing Movie Data...", "All done!", 0.05).start()
-# for non-dupes  
-for title in movies_set:
-    result = translator.translate(title)
-    if result and result.src == 'en':
-        
-        # TODO
-        # append a tuple of the review and the source
-        # find more relevant, persistent data
-        # add keys to movie_data_tuple
-        json_obj = dict.fromkeys(['title', 'reviews', 'popularity'])
-        
-        json_obj['reviews'] = []
-        
-        json_obj['title'] = title
-        
-        # find all in movies_metadata.csv
-        for index, row in md_df.iterrows():
-            if row['original_title'].lower() == title.lower():
-                # Create a namedtuple type, Point
-                movie_data = {
-                    'review': row['overview'],
-                    'src': 'movies_metadata'
-                }
-                json_obj['reviews'].append(movie_data)
-                
-        # find all in mdblist
-        for index, row in mdb_df.iterrows():
-            if row['title'].lower() == title.lower():
-                movie_data = {
-                    'review': row['description'],
-                    'src': 'mdblist'
-                }
-                json_obj['reviews'].append(movie_data)
-                
-        # find all in nyt
-        for index, row in nyt_df.iterrows():
-            if row['display_title'].lower() == title.lower():
-                movie_data = {
-                    'review': row['summary_short'],
-                    'src': 'nyt'
-                }
-                json_obj['reviews'].append(movie_data)  
-                      
-        # find all in tmdb
-        for index, row in tmdb_df.iterrows():
-            for movie in row['results']:
-                if movie['original_title'].lower() == title.lower():
-                    movie_data = {
-                        'review': movie['overview'],
-                        'src': 'tmdb'
-                    }
-                    json_obj['reviews'].append(movie_data)
-        
+    def write_unique(self, json_obj: Dict, target_file: str) -> None:
+        ''' write a json_obj of a unique movie to a target file. '''
+        # ensure that the movie has multiple reviews and that they are unique
         if len(json_obj['reviews'])>1:           
-            json_obj['reviews'] = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
-            # convert into JSON string:
-            y = json.dumps(json_obj, indent=4, sort_keys=True)
-            
-            target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_movie_data.json'
-        
-            # Using a JSON string
+            # convert into JSON string
+            json_str = json.dumps(json_obj, indent=4, sort_keys=True)
             with open(target_file, 'a') as outfile:
-                outfile.write(y)
+                outfile.write(json_str)
                 outfile.write(',')
     
-loader.stop()
+    def write_dupe(self, json_obj: Dict, target_file: str) -> None:
+        ''' wrtie a json_obj of a duplicated movie to a target file. '''
+        json_str = json.dumps(json_obj, indent=4, sort_keys=True)
+        with open(target_file, 'a') as outfile:
+            outfile.write(json_str)
+            outfile.write(',')
+
+if __name__=='__main__':
+    target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_movie_data.json'
+    md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
+    mdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
+    nyt = '/Users/masonware/Desktop/COSI_132A/termProject/data/nyt.json'
+    tmdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
+    md_df = pd.read_csv(md, low_memory=False)
+    mdb_df = pd.read_json(mdb)
+    nyt_df = pd.read_json(nyt)
+    tmdb_df = pd.read_json(tmdb)
+    commit = Commit(md_df=md_df,
+                    mdb_df=mdb_df,
+                    nyt_df=nyt_df,
+                    tmdb_df=tmdb_df)
+    commit.load_data()
     
+
 #################################################
 #################################################
 
