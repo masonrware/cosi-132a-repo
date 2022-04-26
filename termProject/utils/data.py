@@ -136,12 +136,102 @@ class Commit:
                 outfile.write(json_str)
                 outfile.write(',')
 
+class API:
+    ''' A class to execute one or many api calls and generate .json files with their output. '''
+    def __init__(self) -> None:
+        load_dotenv()
+        # work in data subdir
+        os.chdir('../data/')
+    
+    def nyt_api(self, in_file_path: str, out_file_path: str) -> None:
+        # check to make nyt calls
+        # write to data/nyt.json
+        if not os.path.exists('nyt.json'):
+            nyt = NYTAPI(os.getenv('API_KEY'), parse_dates=True)
+            reviews = nyt.movie_reviews
+            url = 'https://api.nytimes.com/svc/movies/v2/reviews/all.json?api-key=' + os.getenv('API_KEY')
+            json_str = json.dumps(requests.get(url).json(), indent=4, sort_keys=True)
+
+            loader = Loader("Writing nyt data to data/nyt.json...", "All done!", 0.05).start()
+            # write first page
+            with open(out_file_path, 'w') as outfile:
+                outfile.write(json_str)
+                
+            # write the rest
+            with open(in_file_path, 'r') as file:
+                json_data = json.load(file)
+            json_str = json.dumps(json_data, indent=4, sort_keys=True)
+            with open(out_file_path, 'w') as outfile:
+                outfile.write(json_str)
+            loader.stop()
+
+    def tmdb_api(self, url: str, out_file_path: str) -> None:
+        # check to make tmdb calls
+        # write to data/tmdb_raw.json
+        # this call will return all movies in all languages as of april 21st, 2022
+        if not os.path.exists('tmdb_raw.json'):
+            import zlib
+            import urllib
+
+            f=urllib.request.urlopen(url) 
+            decompressed_data=zlib.decompress(f.read(), 16+zlib.MAX_WBITS)
+            with open(out_file_path, 'wb') as f:
+                f.write(decompressed_data)
+        # check to find english tmdb entries and get full json image
+        # write to data/tmdb.json
+        elif os.path.exists('tmdb_raw.json') and not os.path.exists('tmdb.json'):
+            translator = Translator()
+            out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
+            
+            from animate import Loader
+            loader = Loader("Writing tmdb english data to data/tmdb.json...", "All done!", 0.05).start()
+            
+            with open('/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json') as movies:
+                for movie in movies:
+                    json_dict = json.loads(movie)
+                    title = json_dict['original_title']
+                    if title:
+                        # get all english movies only
+                        result = translator.translate(title)
+                        if result and result.src == 'en':
+                            url = f'https://api.themoviedb.org/3/search/movie?api_key=dae980beb03de6af72723c0778acdc0e&query=' + ('+').join(title.split(' '))
+                            response = requests.get(url)
+                            if response.status_code==200:
+                                json_str = json.dumps(response.json(), indent=4, sort_keys=True)
+                                with open(out_file_path, 'a') as outfile:
+                                    outfile.write(json_str)
+            loader.stop()  
+
+    def mdblist_api(self, mdblist_out_file_path: str, tmdb_in_file_path: str) -> None:
+        if not os.path.exists('mdblist.json'):
+            loader = Loader("Writing mdblist data to data/mdblist.json...", "All done!", 0.05).start()
+                
+            with open(tmdb_in_file_path) as movies:
+                dict1 = json.load(movies)
+                for page in dict1:
+                    for movie in page['results']:
+                        title = movie['original_title'].lower()
+                        url = f'https://mdblist.com/api/?apikey=cvd24hv7j9t955qygrrlgvmxj&s=' + ('+').join(title.split(' '))
+                        response = requests.get(url)
+                        if response.status_code==200:
+                            for item in response.json()['search']:
+                                imdbid = (item['imdbid'])
+                                if imdbid:
+                                    url = 'https://mdblist.com/api/?apikey=cvd24hv7j9t955qygrrlgvmxj&i=' + imdbid
+                                    response = requests.get(url)
+                                    if response.status_code==200:
+                                        json_str = json.dumps(response.json(), indent=4, sort_keys=True)
+                                        with open(mdblist_out_file_path, 'a') as outfile:
+                                            outfile.write(json_str)          
+                
+            loader.stop()
+    
+
 if __name__=='__main__':
     unique_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_unique_movie_data.json'
     duplicated_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_dupe_movie_data.json'
     
     # TODO
-    # write api class
     # add args options to:
     # 1.  commit dupe data
     # 2.  commit unique data
@@ -150,10 +240,14 @@ if __name__=='__main__':
     
     # add error handeling for making commits before making calls
     
+    
     md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
     mdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
     nyt = '/Users/masonware/Desktop/COSI_132A/termProject/data/nyt.json'
     tmdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
+    nyt_in_file_path = 'termProject/data/reviews.json'  # deprecated
+    tmdb_url = 'http://files.tmdb.org/p/exports/movie_ids_04_21_2022.json.gz'
+    tmdb_out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json'
     
     # move below to a function and that way I can try catch with the call to see if there is a file or not - if not please make api call
     md_df = pd.read_csv(md, low_memory=False)
@@ -165,112 +259,17 @@ if __name__=='__main__':
                     mdb_df=mdb_df,
                     nyt_df=nyt_df,
                     tmdb_df=tmdb_df)
+    
+    apis = API()
+    
+    apis.nyt_api(in_file_path=nyt_in_file_path, out_file_path=nyt)
+    apis.tmdb_api(url=tmdb_url, out_file_path=tmdb_out_file_path)
+    apis.mdblist_api(mdblist_out_file_path=mdb, tmdb_in_file_path=tmdb_out_file_path)
     # add class creation for api calls
     
     
     commit.load_data()
-    commit.write_unique(commit.generate_movie_json(), unique_target_file)
+    commit.write_unique(commit.generate_movie_json(), unique_target_file) 
     
 
 
-
-#################################################
-#################################################
-
-  
-# load_dotenv()
-
-# # work in data subdir
-# os.chdir('../data/')
-
-
-# # check to make nyt calls
-# # write to data/nyt.json
-# if not os.path.exists('nyt.json'):
-#     out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/nyt.json'
-#     in_file_path = 'termProject/data/reviews.json'  # deprecated
-#     nyt = NYTAPI(os.getenv('API_KEY'), parse_dates=True)
-#     reviews = nyt.movie_reviews
-#     url = 'https://api.nytimes.com/svc/movies/v2/reviews/all.json?api-key=' + os.getenv('API_KEY')
-#     json_str = json.dumps(requests.get(url).json(), indent=4, sort_keys=True)
-
-#     loader = Loader("Writing nyt data to data/nyt.json...", "All done!", 0.05).start()
-#     # write first page
-#     with open(out_file_path, 'w') as outfile:
-#         outfile.write(json_str)
-        
-#     # write the rest
-#     with open(in_file_path, 'r') as file:
-#         json_data = json.load(file)
-#     json_str = json.dumps(json_data, indent=4, sort_keys=True)
-#     with open(out_file_path, 'w') as outfile:
-#         outfile.write(json_str)
-#     loader.stop()
-    
-    
-# # check to make tmdb calls
-# # write to data/tmdb_raw.json
-# # this call will return all movies in all languages as of april 21st, 2022
-# if not os.path.exists('tmdb_raw.json'):
-#     url = 'http://files.tmdb.org/p/exports/movie_ids_04_21_2022.json.gz'
-#     target = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json'
-#     import zlib
-#     import urllib
-
-#     f=urllib.request.urlopen(url) 
-#     decompressed_data=zlib.decompress(f.read(), 16+zlib.MAX_WBITS)
-#     with open(target, 'wb') as f:
-#         f.write(decompressed_data)
-    
-    
-# # check to find english tmdb entries and get full json image
-# # write to data/tmdb.json
-# elif os.path.exists('tmdb_raw.json') and not os.path.exists('tmdb.json'):
-#     translator = Translator()
-#     out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
-    
-#     from animate import Loader
-#     loader = Loader("Writing tmdb english data to data/tmdb.json...", "All done!", 0.05).start()
-    
-#     with open('/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json') as movies:
-#         for movie in movies:
-#             json_dict = json.loads(movie)
-#             title = json_dict['original_title']
-#             if title:
-#                 # get all english movies only
-#                 result = translator.translate(title)
-#                 if result and result.src == 'en':
-#                     url = f'https://api.themoviedb.org/3/search/movie?api_key=dae980beb03de6af72723c0778acdc0e&query=' + ('+').join(title.split(' '))
-#                     response = requests.get(url)
-#                     if response.status_code==200:
-#                         json_str = json.dumps(response.json(), indent=4, sort_keys=True)
-#                         with open(out_file_path, 'a') as outfile:
-#                             outfile.write(json_str)
-#     loader.stop()  
-                    
-
-# if not os.path.exists('mdblist.json'):
-#     target = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
-#     res = []
-    
-#     loader = Loader("Writing mdblist data to data/mdblist.json...", "All done!", 0.05).start()
-        
-#     with open('/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json') as movies:
-#         dict1 = json.load(movies)
-#         for page in dict1:
-#             for movie in page['results']:
-#                 title = movie['original_title'].lower()
-#                 url = f'https://mdblist.com/api/?apikey=cvd24hv7j9t955qygrrlgvmxj&s=' + ('+').join(title.split(' '))
-#                 response = requests.get(url)
-#                 if response.status_code==200:
-#                     for item in response.json()['search']:
-#                         imdbid = (item['imdbid'])
-#                         if imdbid:
-#                             url = 'https://mdblist.com/api/?apikey=cvd24hv7j9t955qygrrlgvmxj&i=' + imdbid
-#                             response = requests.get(url)
-#                             if response.status_code==200:
-#                                 json_str = json.dumps(response.json(), indent=4, sort_keys=True)
-#                                 with open(target, 'a') as outfile:
-#                                     outfile.write(json_str)          
-        
-#     loader.stop()
