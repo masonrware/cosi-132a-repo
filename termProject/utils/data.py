@@ -11,6 +11,9 @@ import gzip
 import json
 import os
 import requests                     # type: ignore 
+import pandas as pd
+import csv
+from collections import namedtuple
 
 from animate import Loader
 
@@ -18,17 +21,6 @@ from dotenv import load_dotenv      # type: ignore
 from pynytimes import NYTAPI        # type: ignore 
 from googletrans import Translator
 
-
-
-
-
-# TODO
-
-# make a .jl file for every movie
-# get all movies into a nondupe .jl file
-
-import pandas as pd
-import csv
 
 md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
 mdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
@@ -39,13 +31,28 @@ mdb_df = pd.read_json(mdb)
 nyt_df = pd.read_json(nyt)
 tmdb_df = pd.read_json(tmdb)
 
+# TODO
 
+# do dupes as well for elastic search
 
-# print(tmdb_df.head())
+class Commit:
+    ''' A class to generate the final json data. It will generate a json file of movies containing all of
+        their reviews from 4 sources.'''
 
-movies_set = set(md_df['original_title'].tolist())
-movies_list = (md_df['original_title'].tolist())
+    def __init__(self, md_df: "pd.DataFrame", mdb_df: "pd.DataFrame", nyt_df: "pd.DataFrame", tmdb_df: "pd.DataFrame",) -> None:
+        self.md_df = md_df
+        self.mdb_df = mdb_df
+        self.nyt_df = nyt_df
+        self.tmdb_df = tmdb_df
+        self.movies_set: set()
+        self.movies_list: list()
+      
+    def load_datat(self) -> None:
+        # using movies_metadata.csv because it is by far the largest
+        self.movies_set = set(self.md_df['original_title'].tolist())
+        self.movies_list = (self.md_df['original_title'].tolist())
 
+    def generate_movie_json()
 translator = Translator()
 
 # # for dupes
@@ -55,48 +62,74 @@ translator = Translator()
 #     if result and result.src == 'en':
 #         pass
         
-        
+
+loader = Loader("Compressing Movie Data...", "All done!", 0.05).start()
 # for non-dupes  
 for title in movies_set:
     result = translator.translate(title)
     if result and result.src == 'en':
         
         # TODO
-        # fix below so that it works?
-        json_obj = dict()
-        json_obj['title'] = title.lower()
-        json_obj['reviews'] = list()
+        # append a tuple of the review and the source
+        # find more relevant, persistent data
+        # add keys to movie_data_tuple
+        json_obj = dict.fromkeys(['title', 'reviews', 'popularity'])
         
+        json_obj['reviews'] = []
         
+        json_obj['title'] = title
         
         # find all in movies_metadata.csv
         for index, row in md_df.iterrows():
             if row['original_title'].lower() == title.lower():
-                json_obj['reviews'].append(row['overview'])
+                # Create a namedtuple type, Point
+                movie_data = {
+                    'review': row['overview'],
+                    'src': 'movies_metadata'
+                }
+                json_obj['reviews'].append(movie_data)
                 
         # find all in mdblist
         for index, row in mdb_df.iterrows():
             if row['title'].lower() == title.lower():
-                json_obj['reviews'].append(row['description'])
+                movie_data = {
+                    'review': row['description'],
+                    'src': 'mdblist'
+                }
+                json_obj['reviews'].append(movie_data)
                 
         # find all in nyt
         for index, row in nyt_df.iterrows():
             if row['display_title'].lower() == title.lower():
-                json_obj['reviews'].append(row['summary_short'])
-                
-        # # find all in tmdb
-        # for index, row in tmdb_df.iterrows():
-        #     if row['original_title'].lower() == title.lower():
-        #         json_obj['reviews'].append(row['overview'])
-                
-        with open('/Users/masonware/Desktop/COSI_132A/termProject/data/test.json', 'a') as outfile:
-            # print(type(json_obj))
-            json.dump(json.dumps(dict(json_obj)), outfile)
-        json_obj.clear()
-    # print(json_obj if json_obj['title'] else 'NONE')
-    # print('\n')
+                movie_data = {
+                    'review': row['summary_short'],
+                    'src': 'nyt'
+                }
+                json_obj['reviews'].append(movie_data)  
+                      
+        # find all in tmdb
+        for index, row in tmdb_df.iterrows():
+            for movie in row['results']:
+                if movie['original_title'].lower() == title.lower():
+                    movie_data = {
+                        'review': movie['overview'],
+                        'src': 'tmdb'
+                    }
+                    json_obj['reviews'].append(movie_data)
+        
+        if len(json_obj['reviews'])>1:           
+            json_obj['reviews'] = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
+            # convert into JSON string:
+            y = json.dumps(json_obj, indent=4, sort_keys=True)
+            
+            target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_movie_data.json'
+        
+            # Using a JSON string
+            with open(target_file, 'a') as outfile:
+                outfile.write(y)
+                outfile.write(',')
     
-
+loader.stop()
     
 #################################################
 #################################################
