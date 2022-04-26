@@ -7,9 +7,11 @@
 # Written By: Mason Ware
 
 
+import argparse
 import gzip
 import json
 import os
+import sys
 from typing import Dict, Generator, Iterable, List, Set
 import requests                                                 # type: ignore 
 import pandas as pd                                             # type: ignore 
@@ -135,6 +137,8 @@ class Commit:
             with open(target_file, 'a') as outfile:
                 outfile.write(json_str)
                 outfile.write(',')
+                
+                
 
 class API:
     ''' A class to execute one or many api calls and generate .json files with their output. '''
@@ -249,27 +253,43 @@ if __name__=='__main__':
     tmdb_url = 'http://files.tmdb.org/p/exports/movie_ids_04_21_2022.json.gz'
     tmdb_out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json'
     
-    # move below to a function and that way I can try catch with the call to see if there is a file or not - if not please make api call
-    md_df = pd.read_csv(md, low_memory=False)
-    mdb_df = pd.read_json(mdb)
-    nyt_df = pd.read_json(nyt)
-    tmdb_df = pd.read_json(tmdb)
     
-    commit = Commit(md_df=md_df,
-                    mdb_df=mdb_df,
-                    nyt_df=nyt_df,
-                    tmdb_df=tmdb_df)
-    
+    parser = argparse.ArgumentParser(description="Data Builder For TermProject")
+    parser.add_argument("--insert", action="store_true")
+                        # python3.9 data.py --api <name>
+    parser.add_argument("--load_final", action="store_true")
+                        # python3.9 data.py --load_final 
+    args = parser.parse_args()
     apis = API()
-    
-    apis.nyt_api(in_file_path=nyt_in_file_path, out_file_path=nyt)
-    apis.tmdb_api(url=tmdb_url, out_file_path=tmdb_out_file_path)
-    apis.mdblist_api(mdblist_out_file_path=mdb, tmdb_in_file_path=tmdb_out_file_path)
-    # add class creation for api calls
-    
-    
-    commit.load_data()
-    commit.write_unique(commit.generate_movie_json(), unique_target_file) 
+
+    if args.insert:
+        if not sys.argv[2]:
+            apis.nyt_api(in_file_path=nyt_in_file_path, out_file_path=nyt)
+            apis.tmdb_api(url=tmdb_url, out_file_path=tmdb_out_file_path)
+            apis.mdblist_api(mdblist_out_file_path=mdb, tmdb_in_file_path=tmdb_out_file_path)
+        elif sys.argv[2] == 'nyt':
+            apis.nyt_api(in_file_path=nyt_in_file_path, out_file_path=nyt)
+        elif sys.argv[2] == 'mdbl':
+            apis.mdblist_api(mdblist_out_file_path=mdb, tmdb_in_file_path=tmdb_out_file_path)
+        elif sys.argv[2] == 'tmdb':
+            apis.tmdb_api(url=tmdb_url, out_file_path=tmdb_out_file_path)
+    if args.load_final:
+        api = False
+        try:
+            md_df = pd.read_csv(md, low_memory=False)
+            mdb_df = pd.read_json(mdb)
+            nyt_df = pd.read_json(nyt)
+            tmdb_df = pd.read_json(tmdb)
+            api = True
+        except Exception as e:
+            print('You must make API calls to populate data first.')
+        if api:
+            commit = Commit(md_df=md_df,
+                            mdb_df=mdb_df,
+                            nyt_df=nyt_df,
+                            tmdb_df=tmdb_df)
+            commit.load_data()
+            commit.write_unique(commit.generate_movie_json(), unique_target_file) 
     
 
 
