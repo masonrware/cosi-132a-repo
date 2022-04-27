@@ -148,7 +148,6 @@ class Commit:
                 outfile.write(json_str)
                 outfile.write(',')
                 
-                
 
 class API:
     ''' A class to execute one or many api calls and generate .json files with their output. '''
