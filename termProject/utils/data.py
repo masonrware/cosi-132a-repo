@@ -22,7 +22,10 @@ from animate import Loader
 
 from dotenv import load_dotenv                                  # type: ignore
 from pynytimes import NYTAPI                                    # type: ignore 
-from googletrans import Translator                              # type: ignore 
+from googletrans import Trnaslator                              # type: ignore 
+import enchant                                                  # type: ignore 
+
+dictionary = enchant.Dict("en_US")
 
 
 # TODO
@@ -46,16 +49,21 @@ class Commit:
         # using movies_metadata.csv because it is by far the largest
         self.movies_set = set(self.md_df['original_title'].tolist())
         self.movies_list = (self.md_df['original_title'].tolist())
-        
+    
         
     def generate_movie_json(self) -> Generator[Dict, None, None]:
         ''' generator method to yield a json object of an individual movie and all of its reviews
             to be written to a file with unique movies. '''
-        translator = Translator()
+        # translator = Translator()
         loader = Loader("Compressing Unique Movie Data...", "All done!", 0.05).start()
         for title in self.movies_set:
-            result = translator.translate(title)
-            if result and result.src == 'en':
+            title_list = title.split(' ')
+            lang = True
+            for i in range(len(title_list)):
+                if title_list[i]:
+                    lang = dictionary.check(title_list[i])
+            # result = translator.translate(title)
+            if lang:
                 # TODO
                 # find more relevant, persistent data
                 # add more keys below
@@ -104,19 +112,21 @@ class Commit:
     def generate_dupe_movie_json(self) -> Generator[Dict, None, None]:
         ''' generator method to yield a json object of an individual movie and review
             to be written to a file with duplicated movies. '''
-        translator = Translator()
+        # translator = Translator()
         loader = Loader("Compressing Duplicate Movie Data...", "All done!", 0.05).start()
-
+        # TODO 
+        # fix lang check like above method
         for title in self.movies_list:
-            result = translator.translate(title)
-            if result and result.src == 'en':
+            lang = TextBlob(title)
+            # result = translator.translate(title)
+            if lang and lang.detect_language()=='en':
                 json_obj = dict.fromkeys(['title', 'review', 'popularity'])
                 json_obj['title'] = title
                 # only need to look in movie_metdata.csv because that is where we started from
                 for index, row in md_df.iterrows():
                     if row['original_title'].lower() == title.lower():
                         json_obj['review'] = row['overview']
-            yield json_obj
+                yield json_obj
         loader.stop()
         
     def write_unique(self, json_objs: Iterable, target_file: str) -> None:
@@ -227,22 +237,12 @@ class API:
                                         json_str = json.dumps(response.json(), indent=4, sort_keys=True)
                                         with open(mdblist_out_file_path, 'a') as outfile:
                                             outfile.write(json_str)          
-                
             loader.stop()
     
 
 if __name__=='__main__':
-    unique_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_unique_movie_data.json'
+    unique_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_unique_movie_data1.json'
     duplicated_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_dupe_movie_data.json'
-    
-    # TODO
-    # add args options to:
-    # 1.  commit dupe data
-    # 2.  commit unique data
-    # 3.  make all api calls
-    # 4.    make each api call
-    
-    # add error handeling for making commits before making calls
     
     
     md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
@@ -288,6 +288,9 @@ if __name__=='__main__':
                             mdb_df=mdb_df,
                             nyt_df=nyt_df,
                             tmdb_df=tmdb_df)
+            
+            # TODO
+            # separate commit for dupe movies
             commit.load_data()
             commit.write_unique(commit.generate_movie_json(), unique_target_file) 
     
