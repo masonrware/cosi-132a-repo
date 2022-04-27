@@ -6,7 +6,7 @@ from elasticsearch_dsl import Index
 from elasticsearch_dsl.connections import connections
 from elasticsearch.helpers import bulk
 
-from es_service.doc_template import BaseDoc
+from doc_template import BaseDoc
 
 
 class ESIndex(object):

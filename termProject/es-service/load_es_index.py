@@ -1,8 +1,8 @@
 import argparse
 import time
 from typing import List, Dict, Union, Iterator
-from es_service.index import ESIndex
-from utils import load_clean_wapo_with_embedding
+from index import ESIndex
+from utils.utils import load_clean_wapo_with_embedding
 import logging
 
 logger = logging.getLogger(__name__)
