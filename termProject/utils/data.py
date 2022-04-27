@@ -22,7 +22,7 @@ from animate import Loader
 
 from dotenv import load_dotenv                                  # type: ignore
 from pynytimes import NYTAPI                                    # type: ignore 
-from googletrans import Trnaslator                              # type: ignore 
+from googletrans import Translator                              # type: ignore 
 import enchant                                                  # type: ignore 
 
 dictionary = enchant.Dict("en_US")
