@@ -49,10 +49,10 @@ def main():
         help="name of the ES index",
     )
     parser.add_argument(
-        "--wapo_path",
+        "--path",
         required=True,
         type=str,
-        help="path to the processed wapo jsonline file",
+        help="path to the processed jsonline file",
     )
 
     args = parser.parse_args()

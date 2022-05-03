@@ -37,5 +37,13 @@ def timer(func):
 
     return wrapper_timer
 
+def load_jl_file(query_json_file: str):
+    with open(query_json_file, "r") as f:
+        with open('data/final_unique_movie_data.jl', 'w') as outfile:
+            for entry in f:
+                json.dump(entry, outfile)
+                outfile.write('\n')
+        
+
 if __name__ == "__main__":
     pass
