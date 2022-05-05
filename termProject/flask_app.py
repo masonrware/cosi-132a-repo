@@ -62,8 +62,9 @@ def review_data(review_id):
     author = "Wiki Pedia"
     date = "05/05/2022"
     title = "What is a movie?"  # title of movie or of review
+    page_id = 2
     # actors? directors?
-    return render_template("review.html", content=content, date=date, author=author, title=title)
+    return render_template("review.html", content=content, date=date, author=author, title=title, page_id=page_id)
 
 
 if __name__ == "__main__":

@@ -32,7 +32,9 @@
     <p style="font-size:17px">{{ content }}</p>
 </div>
 
-
+<form action="{{ url_for('next_page', page_id = page_id) }}" name="search" method="post" style="text-align:center;">
+    <input type="submit" value="Back to Results">
+</form>
 
 </body>
 </html>
