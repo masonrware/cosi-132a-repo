@@ -13,17 +13,20 @@
 </head>
 
 <body>
-<nav class="navbar navbar-light bg-light .navbar-brand">
-  <div style="color:white;font-size:20px;">
-      <img src="jetbrains://pycharm/navigate/reference?project=cosi-132a-repo&path=termProject/templates/RealView.jpg" alt="" width="30" height="20">
-      Home         SentiMovie
-  </div>
-</nav>
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView" border="0"></a>
-<p style=text-align:center;"><img src="RealView.jpg" alt="RealView Logo" width="170px" height="130px" class="center"></p>
-<h1 align="center">Are you ready to find a movie to watch?</h1>
-<p align="center">Enter keywords based on what you are planning to see in the movie you want to watch<br></p>
+<nav class="navbar">
+      <div style="height:30px;font-size:22px;display:table-cell;vertical-align:middle;">
+          <a href="https://imgbb.com/"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" border="0" width="34px" height="28px"></a>&nbsp&nbsp
+          <a style="color:white;text-decoration:none;vertical-align:top;" aria-current="page" href="#">Home</a>&nbsp&nbsp
+          <a style="color:white;text-decoration:none;vertical-align:top;" href="#">SentiMovie</a>
+      </div>
 
+</nav>
+
+<div style="justify-content:center;padding-top:80px;">
+    <a href="https://imgbb.com/"><p style=text-align:center;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" border="0" width="180px" height="150px"></a>
+    <h1 align="center" style="font-size:45px;">Are you ready to find a movie to watch?</h1>
+    <p align="center" style="font-size:18px;">Enter keywords based on what you are planning to see in the movie you want to watch<br></p>
+</div>
 <form action="{{ url_for('results') }}" name="search" method="post" align="center">
     <input type="text" id="query" name="query" size=50 value="type keywords here...">
     <input type="submit" value="Search">
