@@ -18,9 +18,15 @@
       <div style="height:30px;font-size:22px;display:table-cell;vertical-align:middle;">
           <a href="https://imgbb.com/"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="30px" height="28px" style="border:solid;border-color:red;border-width:.8px;"></a>&nbsp&nbsp
           <a style="color:white;text-decoration:none;vertical-align:top;" aria-current="page" href="#">Home</a>&nbsp&nbsp
-          <a style="color:white;text-decoration:none;vertical-align:top;" href="#">SentiMovie</a>
+          <a style="color:white;text-decoration:none;vertical-align:top;" href="#">SentiMovie</a> &nbsp&nbsp
+          <form action="{{ url_for('results') }}" name="search" method="post" style="vertical-align:top;display:inline;text-align:left;">
+              <input type="text" id="query" name="query" size=25 value="search again...">
+              <input style="border:solid;border-color:red;border-width:1px;text-align:right;" type="submit" value="Search">
+          </form>
       </div>
 </nav>
+
+<!-- search below nav bar
 <div style="text-align:right;margin:0em;">
     <p style="font-size:18px;margin:0em;"><br>Search again?<br></p>
     <form action="{{ url_for('results') }}" name="search" method="post" align="right">
@@ -28,8 +34,9 @@
         <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
     </form>
 </div>
+-->
 
-<div style="justify-content:center;padding-top:0px;text-align:center;">
+<div style="justify-content:center;padding-top:30px;text-align:center;">
     <a href="https://imgbb.com/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="180px" height="150px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
 </div>
 
