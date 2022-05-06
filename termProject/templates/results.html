@@ -24,7 +24,7 @@
 </nav>
 
 <div style="justify-content:center;padding-top:15px;text-align:center">
-    <a href="https://imgbb.com/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="72px" height="60px"  style="border:solid;border-color:red;border-width:.8px;"></a>
+    <a href="https://imgbb.com/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="72px" height="60px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
     <p align="center" style="font-size:18px;display:inline;"><br>Search again?<br></p>
 </div>
 
@@ -34,17 +34,15 @@
 </form>
 
 <!-- reviews here-->
+<div style="text-align:left;padding-left:350px; padding-right:350px;">
+    {% for doc in doc_results %}
+        <p style="color:red;font-size:25px">{{ doc[0] }}</p>
+        <p>{{ doc[1] }}</p>
+    {% endfor %}
+</div>
 
 
 <br><br><br>
-<div style="display:inline-block;">
-    {% with more_pages= num_res/page <= 8 %}
-
-        <form action="{{ url_for('next_page', page_id=page+1, query=query) }}" name="search" method="post">
-            <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Next" {% if more_pages %} disabled=True {% endif %}>
-        </form>
-    {% endwith %}
-</div>
 <div style="display:inline-block;">
     {% with prev_pages= page == 1 %}
 
@@ -53,6 +51,16 @@
         </form>
     {% endwith %}
 </div>
+
+<div style="display:inline-block;">
+    {% with more_pages= num_res/page <= 8 %}
+
+        <form action="{{ url_for('next_page', page_id=page+1, query=query) }}" name="search" method="post">
+            <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Next" {% if more_pages %} disabled=True {% endif %}>
+        </form>
+    {% endwith %}
+</div>
+
 
 </body>
 </html>

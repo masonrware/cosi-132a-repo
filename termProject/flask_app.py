@@ -36,7 +36,13 @@ def results():
     #query = request.form["query"]
     doc_results = []  # query index based on query, save result ids in doc_results for next page queries
 
-    return render_template("results.html", page=2, num_res=100)
+    temp_data = ["What is a movie?", """The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
+                Before the introduction of digital production, series of still images were recorded on a strip of chemically sensitized celluloid (photographic film stock), usually at the rate of 24 frames per second. The images are transmitted through a movie projector at the same rate as they were recorded, with a Geneva drive ensuring that each frame remains still during its short projection time. A rotating shutter causes stroboscopic intervals of darkness, but the viewer does not notice the interruptions due to flicker fusion. The apparent motion on the screen is the result of the fact that the visual sense cannot discern the individual images at high speeds, so the impressions of the images blend with the dark intervals and are thus linked together to produce the illusion of one moving image. An analogous optical soundtrack (a graphic recording of the spoken words, music and other sounds) runs along a portion of the film exclusively reserved for it, and was not projected.
+                Contemporary"""[:250] + "..."]
+    for i in range(10):
+        doc_results.append(temp_data)
+
+    return render_template("results.html", page=2, num_res=len(doc_results), doc_results=doc_results)
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])
