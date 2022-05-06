@@ -24,17 +24,12 @@ class BaseDoc(Document):
     title = (
         Text()
     )  # by default, Text field will be applied a standard analyzer at both index and search time
-    author = Text()
-    content = Text(
+    review = Text(
         analyzer="standard"
     )  # we can also set the standard analyzer explicitly
-    stemmed_content = Text(
+    stemmed_review = Text(
         analyzer="english"
     )  # index the same content again with english analyzer
-    date = Date(
-        format="yyyy/MM/dd"
-    )  # Date field can be searched by special queries such as a range query.
-    annotation = Text()
     ft_vector = DenseVector(dims=300)  # fasttext embedding in the DenseVector field
     sbert_vector = DenseVector(
         dims=768

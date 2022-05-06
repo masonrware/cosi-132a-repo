@@ -64,10 +64,6 @@ class Commit:
                     lang = dictionary.check(title_list[i])
             # result = translator.translate(title)
             if lang:
-                # TODO
-                # find more relevant, persistent data
-                # add more keys below
-                # get popularity scores
                 json_obj = dict.fromkeys(['title', 'reviews', 'popularity'])
                 json_obj['reviews'] = []
                 json_obj['title'] = title
@@ -104,7 +100,6 @@ class Commit:
                                 'src': 'tmdb'
                             }
                             json_obj['reviews'].append(movie_data)
-                            
                 json_obj['reviews'] = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
                 yield json_obj
         loader.stop()
@@ -114,8 +109,6 @@ class Commit:
             to be written to a file with duplicated movies. '''
         # translator = Translator()
         loader = Loader("Compressing Duplicate Movie Data...", "All done!", 0.05).start()
-        # TODO 
-        # fix lang check like above method
         for title in self.movies_list:
             lang = TextBlob(title)
             # result = translator.translate(title)

@@ -6,6 +6,11 @@ from elasticsearch_dsl import Index
 from elasticsearch_dsl.connections import connections
 from elasticsearch.helpers import bulk
 
+from embedding_service.client import EmbeddingClient
+from elasticsearch_dsl.connections import connections
+from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
+
+
 from doc_template import BaseDoc
 
 
@@ -47,17 +52,38 @@ class ESIndex(object):
         :param docs: wapo docs
         :return:
         """
+        connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
+
+        # embedders
+        sbert_encoder = EmbeddingClient(
+            host="localhost", embedding_type="sbert"
+        )  # connect to the sbert embedding server
+        fasttext_encoder = EmbeddingClient(
+            host="localhost", embedding_type="fasttext"
+        )  # connect to the fasttext embedding server
+        
+        # stemmers
+        my_analyzer1 = analyzer(
+            "my_analyzer1",
+            tokenizer=tokenizer("trigram", "ngram", min_gram=3, max_gram=3),
+            filter=["lowercase"],
+        )
+        
+        
+        response = my_analyzer1.simulate(
+            "The big fox jumps over the lazy dog!"
+        )  # simulate the analyzer effect on text
+        tokens = [t.token for t in response.tokens]
+
+        
         for i, doc in enumerate(docs):
             es_doc = BaseDoc(_id=i)
-            es_doc.doc_id = doc["doc_id"]
+            es_doc.doc_id = i
             es_doc.title = doc["title"]
-            es_doc.author = doc["author"]
-            es_doc.content = doc["content_str"]
-            es_doc.stemmed_content = doc["content_str"]
-            es_doc.annotation = doc["annotation"]
-            es_doc.date = doc["published_date"]
-            es_doc.ft_vector = doc["ft_vector"]
-            es_doc.sbert_vector = doc["sbert_vector"]
+            es_doc.review = str(combine_review(doc["reviews"]))
+            es_doc.stemmed_review = str([t.token for t in my_analyzer1.simulate(combine_review(doc["reviews"]))])
+            es_doc.ft_vector = fasttext_encoder.encode(combine_review(doc["reviews"]))
+            es_doc.sbert_vector = sbert_encoder.encode(combine_review(doc["reviews"]))
             yield es_doc
 
     def load(self, docs: Union[Iterator[Dict], Sequence[Dict]]):
@@ -71,3 +97,9 @@ class ESIndex(object):
                 for d in self._populate_doc(docs)
             ),
         )
+    
+def combine_review(reviews: list(dict())):
+    res = set()
+    for review in reviews:
+        res.add(review['review'])
+    return res
