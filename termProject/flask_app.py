@@ -42,7 +42,7 @@ def results():
     for i in range(10):
         doc_results.append(temp_data)
 
-    return render_template("results.html", page=2, num_res=len(doc_results), doc_results=doc_results)
+    return render_template("results.html", page=2, num_res=100, doc_results=doc_results)
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])

@@ -20,23 +20,24 @@
           <a style="color:white;text-decoration:none;vertical-align:top;" aria-current="page" href="#">Home</a>&nbsp&nbsp
           <a style="color:white;text-decoration:none;vertical-align:top;" href="#">SentiMovie</a>
       </div>
-
 </nav>
-
-<div style="justify-content:center;padding-top:15px;text-align:center">
-    <a href="https://imgbb.com/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="72px" height="60px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
-    <p align="center" style="font-size:18px;display:inline;"><br>Search again?<br></p>
+<div style="text-align:right;margin:0em;">
+    <p style="font-size:18px;margin:0em;"><br>Search again?<br></p>
+    <form action="{{ url_for('results') }}" name="search" method="post" align="right">
+        <input type="text" id="query" name="query" size=30 value="type keywords here...">
+        <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
+    </form>
 </div>
 
-<form action="{{ url_for('results') }}" name="search" method="post" align="center">
-    <input type="text" id="query" name="query" size=50 value="type keywords here...">
-    <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
-</form>
+<div style="justify-content:center;padding-top:0px;text-align:center;">
+    <a href="https://imgbb.com/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="180px" height="150px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
+</div>
 
-<!-- reviews here-->
-<div style="text-align:left;padding-left:350px; padding-right:350px;">
+
+
+<div style="text-align:left;padding-left:375px; padding-right:375px;">
     {% for doc in doc_results %}
-        <p style="color:red;font-size:25px">{{ doc[0] }}</p>
+        <p style="color:red;font-size:25px;">{{ doc[0] }}</p>
         <p>{{ doc[1] }}</p>
     {% endfor %}
 </div>
