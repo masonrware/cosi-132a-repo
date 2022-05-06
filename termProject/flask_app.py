@@ -30,13 +30,13 @@ def home():
 
 
 # result page
-@app.route("/results", methods=["POST"])
+@app.route("/results")  #, methods=["POST"])  # put back after testing
 def results():
     global doc_results
-    query = request.form["query"]
+    #query = request.form["query"]
     doc_results = []  # query index based on query, save result ids in doc_results for next page queries
 
-    return render_template("results.html")
+    return render_template("results.html", page=2, num_res=100)
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])
