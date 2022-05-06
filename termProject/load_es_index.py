@@ -1,7 +1,7 @@
 import argparse
 import time
 from typing import List, Dict, Union, Iterator
-from index import ESIndex
+from es_service.index import ESIndex
 from utils.utils import load_clean_wapo_with_embedding
 import logging
 
@@ -56,7 +56,7 @@ def main():
     )
 
     args = parser.parse_args()
-    idx_loader = IndexLoader.from_docs_jsonl(args.index_name, args.wapo_path)
+    idx_loader = IndexLoader.from_docs_jsonl(args.index_name, args.path)
     idx_loader.load()
 
 

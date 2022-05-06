@@ -11,7 +11,7 @@ from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
 
 
-from doc_template import BaseDoc
+from es_service.doc_template import BaseDoc
 
 
 class ESIndex(object):

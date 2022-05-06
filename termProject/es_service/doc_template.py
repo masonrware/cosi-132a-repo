@@ -8,11 +8,6 @@ from elasticsearch_dsl import (  # type: ignore
     analyzer,
 )
 
-# TODO
-# needs base changing
-# note: need to standardize all retrieved data in order to make blanket calls like the ones below:
-
-
 class BaseDoc(Document):
     """
     wapo document mapping structure
