@@ -70,13 +70,14 @@ class ESIndex(object):
         )
         
         for i, doc in enumerate(docs):
+            review_str = combine_review(doc["reviews"])
             es_doc = BaseDoc(_id=i)
             es_doc.doc_id = i
             es_doc.title = doc["title"]
-            es_doc.review = combine_review(doc["reviews"])
-            es_doc.stemmed_review = str([t.token for t in my_analyzer1.simulate(combine_review(doc["reviews"])).tokens])
-            es_doc.ft_vector = fasttext_encoder.encode([combine_review(doc["reviews"])])[0]
-            es_doc.sbert_vector = sbert_encoder.encode([combine_review(doc["reviews"])])[0]
+            es_doc.review = review_str
+            es_doc.stemmed_review = " ".join([t.token for t in my_analyzer1.simulate(review_str).tokens])
+            es_doc.ft_vector = fasttext_encoder.encode([review_str])[0]
+            es_doc.sbert_vector = sbert_encoder.encode([review_str])[0]
             yield es_doc
 
     def load(self, docs: Union[Iterator[Dict], Sequence[Dict]]):
@@ -84,9 +85,7 @@ class ESIndex(object):
         bulk(
             connections.get_connection(),
             (
-                d.to_dict(
-                    include_meta=True, skip_empty=False
-                )  # serialize the BaseDoc instance (include meta information and not skip empty documents)
+                d.to_dict(include_meta=True, skip_empty=False)  # serialize the BaseDoc instance (include meta information and not skip empty documents)
                 for d in self._populate_doc(docs)
             ),
         )
