@@ -128,10 +128,10 @@ class Commit:
         for json_obj in json_objs:
             if len(json_obj['reviews'])>1:           
                 # convert into JSON string
-                json_str = json.dumps(json_obj, indent=4, sort_keys=True)
+                json_str = json.dumps(json_obj, sort_keys=True)
                 with open(target_file, 'a') as outfile:
                     outfile.write(json_str)
-                    outfile.write(',')
+                    outfile.write('\n')
     
     def write_dupe(self, json_objs: Iterable, target_file: str) -> None:
         ''' wrtie a json_obj of a duplicated movie to a target file. '''
@@ -233,17 +233,17 @@ class API:
     
 
 if __name__=='__main__':
-    unique_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_unique_movie_data1.json'
-    duplicated_target_file = '/Users/masonware/Desktop/COSI_132A/termProject/data/final_dupe_movie_data.json'
+    unique_target_file = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/final_unique_movie_data.jl'
+    duplicated_target_file = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/final_dupe_movie_data.json'
     
     
-    md = '/Users/masonware/Desktop/COSI_132A/termProject/data/movies_metadata.csv'
-    mdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/mdblist.json'
-    nyt = '/Users/masonware/Desktop/COSI_132A/termProject/data/nyt.json'
-    tmdb = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
+    md = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/movies_metadata.csv'
+    mdb = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/mdblist.json'
+    nyt = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/nyt.json'
+    tmdb = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/tmdb.json'
     nyt_in_file_path = 'termProject/data/reviews.json'  # deprecated
     tmdb_url = 'http://files.tmdb.org/p/exports/movie_ids_04_21_2022.json.gz'
-    tmdb_out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json'
+    tmdb_out_file_path = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/tmdb_raw.json'
     
     
     parser = argparse.ArgumentParser(description="Data Builder For TermProject")
@@ -274,6 +274,7 @@ if __name__=='__main__':
             tmdb_df = pd.read_json(tmdb)
             api = True
         except Exception as e:
+            print(e)
             print('You must make API calls to populate data first.')
         if api:
             commit = Commit(md_df=md_df,
