@@ -135,11 +135,17 @@ class Commit:
     
     def write_dupe(self, json_objs: Iterable, target_file: str) -> None:
         ''' wrtie a json_obj of a duplicated movie to a target file. '''
-        for json_obj in json_objs:
-            json_str = json.dumps(json_obj, indent=4, sort_keys=True)
-            with open(target_file, 'a') as outfile:
-                outfile.write(json_str)
-                outfile.write(',')
+        with open(target_file, 'w') as outfile:
+            for json_obj in json_objs:
+                json.dump(json_obj, outfile)
+                outfile.write('\n')
+        
+        
+        # for json_obj in json_objs:
+        #     json_str = json.dumps(json_obj, indent=4, sort_keys=True)
+        #     with open(target_file, 'a') as outfile:
+        #         outfile.write(json_str)
+        #         outfile.write(',')
                 
 
 class API:
