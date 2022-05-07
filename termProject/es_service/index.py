@@ -69,21 +69,14 @@ class ESIndex(object):
             filter=["lowercase"],
         )
         
-        
-        response = my_analyzer1.simulate(
-            "The big fox jumps over the lazy dog!"
-        )  # simulate the analyzer effect on text
-        tokens = [t.token for t in response.tokens]
-
-        
         for i, doc in enumerate(docs):
             es_doc = BaseDoc(_id=i)
             es_doc.doc_id = i
             es_doc.title = doc["title"]
-            es_doc.review = str(combine_review(doc["reviews"]))
-            es_doc.stemmed_review = str([t.token for t in my_analyzer1.simulate(combine_review(doc["reviews"]))])
-            es_doc.ft_vector = fasttext_encoder.encode(combine_review(doc["reviews"]))
-            es_doc.sbert_vector = sbert_encoder.encode(combine_review(doc["reviews"]))
+            es_doc.review = combine_review(doc["reviews"])
+            es_doc.stemmed_review = str([t.token for t in my_analyzer1.simulate(combine_review(doc["reviews"])).tokens])
+            es_doc.ft_vector = fasttext_encoder.encode([combine_review(doc["reviews"])])
+            es_doc.sbert_vector = sbert_encoder.encode([combine_review(doc["reviews"])])
             yield es_doc
 
     def load(self, docs: Union[Iterator[Dict], Sequence[Dict]]):
@@ -98,8 +91,8 @@ class ESIndex(object):
             ),
         )
     
-def combine_review(reviews: list(dict())):
-    res = set()
+def combine_review(reviews: list(dict())) -> str:
+    res: str = ''
     for review in reviews:
-        res.add(review['review'])
+        res += review['review']
     return res
