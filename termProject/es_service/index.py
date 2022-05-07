@@ -6,7 +6,6 @@ from elasticsearch_dsl import Index
 from elasticsearch_dsl.connections import connections
 from elasticsearch.helpers import bulk
 
-from embedding_service.client import EmbeddingClient
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
 
@@ -53,31 +52,17 @@ class ESIndex(object):
         :return:
         """
         connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
-
-        # embedders
-        sbert_encoder = EmbeddingClient(
-            host="localhost", embedding_type="sbert"
-        )  # connect to the sbert embedding server
-        fasttext_encoder = EmbeddingClient(
-            host="localhost", embedding_type="fasttext"
-        )  # connect to the fasttext embedding server
         
-        # stemmers
-        my_analyzer1 = analyzer(
-            "my_analyzer2",
-            tokenizer="standard",
-            filter=["asciifolding"],
-        )
         
         for i, doc in enumerate(docs):
-            review_str = combine_review(doc["reviews"])
+            # review_str = combine_review(doc["reviews"])
             es_doc = BaseDoc(_id=i)
             es_doc.doc_id = i
             es_doc.title = doc["title"]
-            es_doc.review = review_str
-            es_doc.stemmed_review = " ".join([t.token for t in my_analyzer1.simulate(review_str).tokens])
-            es_doc.ft_vector = fasttext_encoder.encode([review_str])[0]
-            es_doc.sbert_vector = sbert_encoder.encode([review_str])[0]
+            es_doc.review = doc['reviews']
+            es_doc.stemmed_review = doc["stemmed_review"]
+            es_doc.ft_vector = doc["ft_vector"]
+            es_doc.sbert_vector = doc["sbert_vector"]
             yield es_doc
 
     def load(self, docs: Union[Iterator[Dict], Sequence[Dict]]):
