@@ -25,12 +25,17 @@ from pynytimes import NYTAPI                                    # type: ignore
 from googletrans import Translator                              # type: ignore 
 import enchant                                                  # type: ignore 
 
+from embedding_service.client import EmbeddingClient
+from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
+
 dictionary = enchant.Dict("en_US")
 
-
-# TODO
-
-# do dupes as well for elastic search
+def combine_review(reviews: list(dict())) -> str:
+    res: str = ''
+    for review in reviews:
+        res += review['review']
+        res += ' '
+    return res
 
 class Commit:
     ''' A class to generate the final json data. It will generate a json file of movies containing all of
@@ -56,6 +61,19 @@ class Commit:
             to be written to a file with unique movies. '''
         # translator = Translator()
         loader = Loader("Compressing Unique Movie Data...", "All done!", 0.05).start()
+        # embedders
+        sbert_encoder = EmbeddingClient(
+            host="localhost", embedding_type="sbert"
+        )  # connect to the sbert embedding server
+        fasttext_encoder = EmbeddingClient(
+            host="localhost", embedding_type="fasttext"
+        )  # connect to the fasttext embedding server
+        # stemmers
+        my_analyzer1 = analyzer(
+            "my_analyzer2",
+            tokenizer="standard",
+            filter=["asciifolding"],
+        )
         for title in self.movies_set:
             title_list = title.split(' ')
             lang = True
@@ -100,10 +118,16 @@ class Commit:
                                 'src': 'tmdb'
                             }
                             json_obj['reviews'].append(movie_data)
-                json_obj['reviews'] = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
+                reviews = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
+                review_str = combine_review(reviews)
+
+                json_obj['reviews'] = review_str
+                json_obj['stemmed_review'] = " ".join([t.token for t in my_analyzer1.simulate(review_str).tokens])
+                json_obj['ft_vector'] = fasttext_encoder.encode([review_str])[0]
+                json_obj['sbert_vector'] = sbert_encoder.encode([review_str])[0]
                 yield json_obj
         loader.stop()
-        
+    
     def generate_dupe_movie_json(self) -> Generator[Dict, None, None]:
         ''' generator method to yield a json object of an individual movie and review
             to be written to a file with duplicated movies. '''
