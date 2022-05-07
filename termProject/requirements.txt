@@ -1,0 +1,13 @@
+elasticsearch==7.17.2
+elasticsearch_dsl==7.4.0
+googletrans==3.1.0a0
+nltk==3.7
+numpy==1.22.3
+pandas==1.4.1
+pyenchant==3.2.2
+pynytimes==0.8.0
+python-dotenv==0.20.0
+pyzmq==22.3.0
+requests==2.25.1
+sentence_transformers==2.2.0
+tqdm==4.61.2
