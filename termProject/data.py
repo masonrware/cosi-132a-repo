@@ -18,7 +18,7 @@ import pandas as pd                                             # type: ignore
 import csv
 from collections import namedtuple
 
-from animate import Loader
+from utils.animate import Loader
 
 from dotenv import load_dotenv                                  # type: ignore
 from pynytimes import NYTAPI                                    # type: ignore 
@@ -27,6 +27,8 @@ import enchant                                                  # type: ignore
 
 from embedding_service.client import EmbeddingClient
 from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
+from elasticsearch_dsl.connections import connections
+
 
 dictionary = enchant.Dict("en_US")
 
@@ -74,6 +76,7 @@ class Commit:
             tokenizer="standard",
             filter=["asciifolding"],
         )
+        connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
         for title in self.movies_set:
             title_list = title.split(' ')
             lang = True
@@ -123,8 +126,8 @@ class Commit:
 
                 json_obj['reviews'] = review_str
                 json_obj['stemmed_review'] = " ".join([t.token for t in my_analyzer1.simulate(review_str).tokens])
-                json_obj['ft_vector'] = fasttext_encoder.encode([review_str])[0]
-                json_obj['sbert_vector'] = sbert_encoder.encode([review_str])[0]
+                # json_obj['ft_vector'] = fasttext_encoder.encode([review_str])[0]
+                # json_obj['sbert_vector'] = sbert_encoder.encode([review_str])[0]
                 yield json_obj
         loader.stop()
     
@@ -177,7 +180,7 @@ class API:
     def __init__(self) -> None:
         load_dotenv()
         # work in data subdir
-        os.chdir('../data/')
+        os.chdir('./data/')
     
     def nyt_api(self, in_file_path: str, out_file_path: str) -> None:
         # check to make nyt calls
