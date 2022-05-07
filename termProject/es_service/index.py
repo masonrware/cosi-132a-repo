@@ -64,9 +64,9 @@ class ESIndex(object):
         
         # stemmers
         my_analyzer1 = analyzer(
-            "my_analyzer1",
-            tokenizer=tokenizer("trigram", "ngram", min_gram=3, max_gram=3),
-            filter=["lowercase"],
+            "my_analyzer2",
+            tokenizer="standard",
+            filter=["asciifolding"],
         )
         
         for i, doc in enumerate(docs):
@@ -75,8 +75,8 @@ class ESIndex(object):
             es_doc.title = doc["title"]
             es_doc.review = combine_review(doc["reviews"])
             es_doc.stemmed_review = str([t.token for t in my_analyzer1.simulate(combine_review(doc["reviews"])).tokens])
-            es_doc.ft_vector = fasttext_encoder.encode([combine_review(doc["reviews"])])
-            es_doc.sbert_vector = sbert_encoder.encode([combine_review(doc["reviews"])])
+            es_doc.ft_vector = fasttext_encoder.encode([combine_review(doc["reviews"])])[0]
+            es_doc.sbert_vector = sbert_encoder.encode([combine_review(doc["reviews"])])[0]
             yield es_doc
 
     def load(self, docs: Union[Iterator[Dict], Sequence[Dict]]):
@@ -95,4 +95,5 @@ def combine_review(reviews: list(dict())) -> str:
     res: str = ''
     for review in reviews:
         res += review['review']
+        res += ' '
     return res
