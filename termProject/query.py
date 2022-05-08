@@ -15,7 +15,7 @@ import json
 from typing import Any, Tuple
 
 from embedding_service.client import EmbeddingClient
-# from utils import timer
+from utils.utils import timer
 
 from elasticsearch_dsl import Search                                            # type: ignore
 from elasticsearch_dsl.query import MatchAll, Match, Query, ScriptScore         # type: ignore
@@ -53,7 +53,6 @@ class Engine:
                  top_k: int = 50) -> None:
         self.index: str = index
         self.search_type: str = 'rerank'
-        self.eng_ana: bool = False  # probs don't need
         self.vector_name: str = 'sbert_vector'
         self.top_k: int = top_k
         self.raw_query: str = raw_query
@@ -89,7 +88,7 @@ class Engine:
             
         return self.results
     
-    
+# I think this method can be deleted
 def rank(index: str, query: Query, top_k: int) -> list():
     ''' Function to rank documents given a query. '''
     s = Search(using="default", index=index).query(query)[
