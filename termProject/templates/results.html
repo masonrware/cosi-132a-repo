@@ -34,7 +34,7 @@
     {% for doc in doc_results %}
         <a href="{{ url_for('review_data', review_id=doc[0]) }}" style="text-decoration:none;">
         <p style="color:red;font-size:25px;">{{ doc[1] }}</p>
-            <p style="color:white;">{{ doc[2] }}</p>
+            <p style="color:white;">{{ doc[2] | safe }}</p>
         </a>
     {% endfor %}
 </div>

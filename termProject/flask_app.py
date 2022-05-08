@@ -43,17 +43,27 @@ def results():
 
     engine = Engine("wapo_docs_50k", query, 60)
     response = engine.search()
+    doc_results = [hit.doc_id for hit in response]
+
+    curr_doc = []
+    for hit in enumerate(response[0:(min(10, len(response)))]):  # iterate through up to 8 docs
+        curr_doc.append([hit[0], hit[1].title if hit[1].title != "" else "<no title>", hit[1].review[:150]])
+
+    print(curr_doc)
     print(response)
-    temp_data = ["What is a movie?", """The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
+    # surround keywords in <mark> tags to highlight
+    """
+    temp_data = ["What is a movie?", "The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional <mark>animation</mark> techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
                 Before the introduction of digital production, series of still images were recorded on a strip of chemically sensitized celluloid (photographic film stock), usually at the rate of 24 frames per second. The images are transmitted through a movie projector at the same rate as they were recorded, with a Geneva drive ensuring that each frame remains still during its short projection time. A rotating shutter causes stroboscopic intervals of darkness, but the viewer does not notice the interruptions due to flicker fusion. The apparent motion on the screen is the result of the fact that the visual sense cannot discern the individual images at high speeds, so the impressions of the images blend with the dark intervals and are thus linked together to produce the illusion of one moving image. An analogous optical soundtrack (a graphic recording of the spoken words, music and other sounds) runs along a portion of the film exclusively reserved for it, and was not projected.
-                Contemporary"""[:250] + "..."]
+                Contemporary"[:250] + "..."]
+    doc_results = []
     for i in range(10):
         temp = [i]
         temp.extend(temp_data)
         doc_results.append(temp)
-    #print(doc_results)
+    #print(doc_results)"""
 
-    return render_template("results.html", page=2, num_res=100, doc_results=doc_results)
+    return render_template("results.html", page=1, num_res=len(doc_results), doc_results=curr_doc)
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])
