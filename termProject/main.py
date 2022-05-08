@@ -34,75 +34,42 @@ class FlaskApp:
     # home page
     @app.route("/")
     def home():
+        """
+        This is the home page for the website, which has the functionality for searching Washington Post articles.
+        @return: renders the html template for the home page, which creates the search box and submit button.
+        """
         return render_template("home.html")
 
-    # results page
+
+    # result page
     @app.route("/results", methods=["POST"])
     def results():
-        # persisting data
-        global postings_list
-        global stop_words
-        global unknown_words
-        global query_text
-        
-        query_text = request.form["query"]  # Get the raw user query from home page
-        if request.method == 'POST':
-            retr_methods = request.form.getlist('retr_methods')
-        
-        #TODO
-        #still need to undo the search_type param default - i.e. add the checkbox for vector
-        
-        #defaults:
-        seng = Engine(index='wapo_docs_50k', raw_query=query_text,
-                      vector_name='sbert_vector', search_type=retr_methods,
-                      eng_ana=False, top_k=20)
-        res = seng.search()
-        
-        dict_ind = 1
-        for document in res:
-            document = document.to_dict()
-            document['content'] = limit_content(document['content'])     
-        if len(res) == 8:  # limit page length to 8 results
-            pages[dict_ind] = res
-            res = []
-            dict_ind += 1
-        else:
-            while len(res) > 8:
-                pages[dict_ind] = res[:8]
-                res = res[8:]
-                dict_ind += 1
-            pages[dict_ind] = res
-        TOTAL_PAGES = dict_ind
-        if len(res) != 0:
-            return render_template("results.html", response=pages[1], query=query_text, 
-                                    PAGE_NUM=PAGE_NUM, TOTAL_PAGES=TOTAL_PAGES)  # render results on results page
-        else:
-            return render_template("errorResults.html", query=query_text,
-                                    PAGE_NUM=1, TOTAL_PAGES=1)  # render error page
+        global doc_results
+        query = request.form["query"]
+        doc_results = []  # query index based on query, save result ids in doc_results for next page queries
 
-    # previous page
-    @app.route("/results/<int:page_id>/prev", methods=["GET", "POST"])
-    def prev_page(page_id: int) -> str:
-        """previous page to show more results"""
-        PAGE_NUM = page_id
-        return render_template("results.html", response=pages[PAGE_NUM], query=query_text,
-                               PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # render results page with persisting data
+        return render_template("results.html")
 
-    # next page
-    @app.route("/results/<int:page_id>/next", methods=["GET", "POST"])
-    def next_page(page_id: int) -> str:
-        """next page to show more results"""
-        PAGE_NUM = page_id
-        return render_template("results.html", response=pages[PAGE_NUM], query=query_text,
-                               PAGE_NUM=PAGE_NUM, TOTAL_PAGES=len(pages))  # render results page with persisting data
 
-    # get a single doc based on it's id
-    @app.route("/doc_data/<int:doc_id>")
-    def doc_data(doc_id):
-        """individual document page"""
-        result_doc = search_client.search(index="wapo_docs_50k", body={"query": {"terms": { "_id": [ doc_id ]}}})
-        result_doc = (result_doc['hits']['hits'][0]['_source'])
-        return render_template("doc.html", document=result_doc)  # render a document page
+    @app.route("/results/<int:page_id>, query", methods=["POST"])
+    def next_page(page_id):
+        global doc_results
+
+        offset = 10 * (page_id - 1)  # calculate offset for current page
+        docs = doc_results[offset: min(offset + 10, len(doc_results))]  # get next ten result ids
+
+        # get info about the next 10 ideas
+
+        return render_template("results.html")
+
+
+    @app.route("/review_data/<int:review_id>")
+    def review_data(review_id):
+        doc = 0  # query database using review id
+
+        # go through data retrieved and get info to show to user
+
+        return render_template("doc.html")
 
 
 if __name__ == "__main__":
