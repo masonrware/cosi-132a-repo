@@ -13,10 +13,13 @@
 
 from pathlib import Path
 from query import Engine
+from elasticsearch_dsl.connections import connections
 import argparse
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
+
+connections.create_connection(hosts=["localhost"], timeout=100, alias="default")  # create connection
 
 doc_results = []  # list that will contain all relevant docs for a certain query
 

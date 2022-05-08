@@ -49,10 +49,9 @@ def generate_script_score_query(query_vector) -> Query:  #took out vector_name p
         
 class Engine:
     ''' A class to represent an SE user query. '''
-    def __init__(self, index: str, raw_query: str,
-                 top_k: int = 50) -> None:
+    def __init__(self, index: str, raw_query: str, top_k: int = 50) -> None:
         self.index: str = index
-        self.search_type: str = 'rerank'
+        self.search_type: str = 'rerank'  # can be taken out
         self.vector_name: str = 'sbert_vector'
         self.top_k: int = top_k
         self.raw_query: str = raw_query
@@ -73,21 +72,22 @@ class Engine:
             synset = wordnet.synsets(term)
             synonyms += [lemma.name() for lemma in synset[0].lemmas()] if len(synset)>0 else ''
 
-        self.basic_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
-        self.better_query = Match(content = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
+        self.basic_query = Match(review = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
+        self.better_query = Match(review = {"query": self.raw_query + ' ' + ' '.join(synonyms)})
         
         QUERY = self.better_query   # select which query to use
         
         # embed with sbert
         encoder = EmbeddingClient(host="localhost", embedding_type="sbert")
-        self.vector_query = encoder.encode([QUERY.content['query']], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
+        self.vector_query = encoder.encode([QUERY.review['query']], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
         self.vector_query = generate_script_score_query(self.vector_query)
             
         # rerank with sbert
         self.results = re_rank(self.index, QUERY, self.vector_query, self.top_k)
-            
+
         return self.results
-    
+
+
 # I think this method can be deleted
 def rank(index: str, query: Query, top_k: int) -> list():
     ''' Function to rank documents given a query. '''
