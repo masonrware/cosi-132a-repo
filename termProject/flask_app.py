@@ -40,7 +40,10 @@ def results():
                 Before the introduction of digital production, series of still images were recorded on a strip of chemically sensitized celluloid (photographic film stock), usually at the rate of 24 frames per second. The images are transmitted through a movie projector at the same rate as they were recorded, with a Geneva drive ensuring that each frame remains still during its short projection time. A rotating shutter causes stroboscopic intervals of darkness, but the viewer does not notice the interruptions due to flicker fusion. The apparent motion on the screen is the result of the fact that the visual sense cannot discern the individual images at high speeds, so the impressions of the images blend with the dark intervals and are thus linked together to produce the illusion of one moving image. An analogous optical soundtrack (a graphic recording of the spoken words, music and other sounds) runs along a portion of the film exclusively reserved for it, and was not projected.
                 Contemporary"""[:250] + "..."]
     for i in range(10):
-        doc_results.append(temp_data)
+        temp = [i]
+        temp.extend(temp_data)
+        doc_results.append(temp)
+    print(doc_results)
 
     return render_template("results.html", page=2, num_res=100, doc_results=doc_results)
 

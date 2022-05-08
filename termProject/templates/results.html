@@ -26,26 +26,18 @@
       </div>
 </nav>
 
-<!-- search below nav bar
-<div style="text-align:right;margin:0em;">
-    <p style="font-size:18px;margin:0em;"><br>Search again?<br></p>
-    <form action="{{ url_for('results') }}" name="search" method="post" align="right">
-        <input type="text" id="query" name="query" size=30 value="type keywords here...">
-        <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
-    </form>
-</div>
--->
-
 <div style="justify-content:center;padding-top:30px;text-align:center;">
-    <a href="https://imgbb.com/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="180px" height="150px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
+    <a href="/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="180px" height="150px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
 </div>
 
 
 
 <div style="text-align:left;padding-left:375px; padding-right:375px;">
     {% for doc in doc_results %}
-        <p style="color:red;font-size:25px;">{{ doc[0] }}</p>
-        <p>{{ doc[1] }}</p>
+        <a href="{{ url_for('review_data', review_id=doc[0]) }}" style="text-decoration:none;">
+        <p style="color:red;font-size:25px;">{{ doc[1] }}</p>
+            <p style="color:white;">{{ doc[2] }}</p>
+        </a>
     {% endfor %}
 </div>
 
