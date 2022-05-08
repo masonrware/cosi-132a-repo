@@ -35,8 +35,11 @@ dictionary = enchant.Dict("en_US")
 def combine_review(reviews: list(dict())) -> str:
     res: str = ''
     for review in reviews:
-        res += review['review']
-        res += ' '
+        try:
+            res += review['review']
+            res += ' '
+        except:
+            pass
     return res
 
 class Commit:
@@ -122,12 +125,11 @@ class Commit:
                             }
                             json_obj['reviews'].append(movie_data)
                 reviews = [dict(t) for t in {tuple(d.items()) for d in json_obj['reviews']}]
+                json_obj['reviews'] = reviews
                 review_str = combine_review(reviews)
-
-                json_obj['reviews'] = review_str
-                json_obj['stemmed_review'] = " ".join([t.token for t in my_analyzer1.simulate(review_str).tokens])
-                # json_obj['ft_vector'] = fasttext_encoder.encode([review_str])[0]
-                # json_obj['sbert_vector'] = sbert_encoder.encode([review_str])[0]
+                json_obj['stemmed_review'] = list({t.token for t in my_analyzer1.simulate(review_str).tokens})
+                json_obj['sbert_vector'] = sbert_encoder.encode([review_str])[0].tolist()
+                json_obj['ft_vector'] = fasttext_encoder.encode([review_str])[0].tolist()
                 yield json_obj
         loader.stop()
     
@@ -152,10 +154,16 @@ class Commit:
     def write_unique(self, json_objs: Iterable, target_file: str) -> None:
         ''' write a json_obj of a unique movie to a target file. '''
         # ensure that the movie has multiple reviews and that they are unique
+        # with open(target_file, 'w') as outfile:
+        #     for json_obj in json_objs:
+        #         json.dump(json_obj, outfile)
+        #         outfile.write('\n')
+                
         for json_obj in json_objs:
-            if len(json_obj['reviews'])>1:           
+            if len(json_obj['reviews'])>1:     
+                json_obj['reviews']=combine_review(json_obj['reviews'])      
                 # convert into JSON string
-                json_str = json.dumps(json_obj, sort_keys=True)
+                json_str = json.dumps(json_obj)
                 with open(target_file, 'a') as outfile:
                     outfile.write(json_str)
                     outfile.write('\n')
@@ -314,9 +322,6 @@ if __name__=='__main__':
                             mdb_df=mdb_df,
                             nyt_df=nyt_df,
                             tmdb_df=tmdb_df)
-            
-            # TODO
-            # separate commit for dupe movies
             commit.load_data()
             commit.write_unique(commit.generate_movie_json(), unique_target_file) 
     
