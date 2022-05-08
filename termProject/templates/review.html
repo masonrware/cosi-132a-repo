@@ -17,7 +17,11 @@
       <div style="height:30px;font-size:22px;display:table-cell;vertical-align:middle;">
           <a href="/"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="30px" height="28px" style="border:solid;border-color:red;border-width:.8px;"></a>&nbsp&nbsp
           <a style="color:white;text-decoration:none;vertical-align:top;" aria-current="page" href="/">Home</a>&nbsp&nbsp
-          <a style="color:white;text-decoration:none;vertical-align:top;" href="#">SentiMovie</a>
+          <a style="color:white;text-decoration:none;vertical-align:top;" href="#">SentiMovie</a>&nbsp&nbsp
+          <form action="{{ url_for('results') }}" name="search" method="post" style="vertical-align:top;display:inline;">
+              <input type="text" id="query" name="query" size=25 placeholder="search again...">
+              <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
+          </form>
       </div>
 
 </nav>
