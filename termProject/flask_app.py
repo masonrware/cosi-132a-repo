@@ -30,10 +30,11 @@ def home():
 
 
 # result page
-@app.route("/results")  #, methods=["POST"])  # put back after testing
+@app.route("/results", methods=["POST"])  # put back after testing
 def results():
     global doc_results
-    #query = request.form["query"]
+    query = request.form["query"]
+    print(query)
     doc_results = []  # query index based on query, save result ids in doc_results for next page queries
 
     temp_data = ["What is a movie?", """The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
@@ -43,7 +44,7 @@ def results():
         temp = [i]
         temp.extend(temp_data)
         doc_results.append(temp)
-    print(doc_results)
+    #print(doc_results)
 
     return render_template("results.html", page=2, num_res=100, doc_results=doc_results)
 
