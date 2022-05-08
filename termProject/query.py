@@ -15,7 +15,7 @@ import json
 from typing import Any, Tuple
 
 from embedding_service.client import EmbeddingClient
-from utils import timer
+# from utils import timer
 
 from elasticsearch_dsl import Search                                            # type: ignore
 from elasticsearch_dsl.query import MatchAll, Match, Query, ScriptScore         # type: ignore
@@ -28,7 +28,7 @@ nltk.download('wordnet', quiet=True)
 connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
 
 
-def generate_script_score_query(query_vector: List[float]) -> Query:  #took out vector_name param
+def generate_script_score_query(query_vector) -> Query:  #took out vector_name param
     """
     generate an ES query that match all documents based on the cosine similarity
     :param query_vector: query embedding from the encoder
@@ -65,7 +65,7 @@ class Engine:
         self.basic_query: Any     
         self.better_query: Any       
     
-    @timer
+    # @timer
     def search(self) -> list():
         ''' Method to perform searching '''
         parse_query: list = self.raw_query.split(' ')
@@ -82,7 +82,7 @@ class Engine:
         # embed with sbert
         encoder = EmbeddingClient(host="localhost", embedding_type="sbert")
         self.vector_query = encoder.encode([QUERY.content['query']], pooling="mean").tolist()[0]    # get the query embedding and convert it to a list
-        self.vector_query = generate_script_score_query(self.vector_query, "sbert_vector")
+        self.vector_query = generate_script_score_query(self.vector_query)
             
         # rerank with sbert
         self.results = re_rank(self.index, QUERY, self.vector_query, self.top_k)
