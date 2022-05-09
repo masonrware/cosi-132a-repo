@@ -188,7 +188,7 @@ class API:
     def __init__(self) -> None:
         load_dotenv()
         # work in data subdir
-        os.chdir('./data/')
+        os.chdir('./data/input_data')
     
     def nyt_api(self, in_file_path: str, out_file_path: str) -> None:
         # check to make nyt calls
@@ -228,12 +228,12 @@ class API:
         # write to data/tmdb.json
         elif os.path.exists('tmdb_raw.json') and not os.path.exists('tmdb.json'):
             translator = Translator()
-            out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb.json'
+            out_file_path = '/Users/masonware/Desktop/COSI_132A/termProject/data/input_data/tmdb.json'
             
             from animate import Loader
-            loader = Loader("Writing tmdb english data to data/tmdb.json...", "All done!", 0.05).start()
+            loader = Loader("Writing tmdb english data to data/input_data/tmdb.json...", "All done!", 0.05).start()
             
-            with open('/Users/masonware/Desktop/COSI_132A/termProject/data/tmdb_raw.json') as movies:
+            with open('/Users/masonware/Desktop/COSI_132A/termProject/data/input_data/tmdb_raw.json') as movies:
                 for movie in movies:
                     json_dict = json.loads(movie)
                     title = json_dict['original_title']
@@ -251,7 +251,7 @@ class API:
 
     def mdblist_api(self, mdblist_out_file_path: str, tmdb_in_file_path: str) -> None:
         if not os.path.exists('mdblist.json'):
-            loader = Loader("Writing mdblist data to data/mdblist.json...", "All done!", 0.05).start()
+            loader = Loader("Writing mdblist data to data/input_data/mdblist.json...", "All done!", 0.05).start()
                 
             with open(tmdb_in_file_path) as movies:
                 dict1 = json.load(movies)
@@ -274,17 +274,17 @@ class API:
     
 
 if __name__=='__main__':
-    unique_target_file = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/final_unique_movie_data.jl'
-    duplicated_target_file = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/final_dupe_movie_data.json'
+    unique_target_file = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/final_movies.jl'
+    duplicated_target_file = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/final_movies.json'
     
     
-    md = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/movies_metadata.csv'
-    mdb = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/mdblist.json'
-    nyt = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/nyt.json'
-    tmdb = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/tmdb.json'
-    nyt_in_file_path = 'termProject/data/reviews.json'  # deprecated
+    md = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/input_data/movies_metadata.csv'
+    mdb = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/input_data/mdblist.json'
+    nyt = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/input_data/nyt.json'
+    tmdb = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/input_data/tmdb.json'
+    nyt_in_file_path = 'termProject/data/input_data/reviews.json'  # deprecated
     tmdb_url = 'http://files.tmdb.org/p/exports/movie_ids_04_21_2022.json.gz'
-    tmdb_out_file_path = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/tmdb_raw.json'
+    tmdb_out_file_path = '/Users/masonware/Desktop/brandeis_cosi/COSI_132A/termProject/data/input_data/tmdb_raw.json'
     
     
     parser = argparse.ArgumentParser(description="Data Builder For TermProject")
