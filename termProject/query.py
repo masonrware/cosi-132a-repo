@@ -7,6 +7,10 @@
 #Written By: Mason Ware
 
 
+## This module has methods to use for querying the ES index. The retrieval method used is reranking with
+## sentence BERT embeddings + standard analyzer
+
+
 import argparse
 from ast import List
 from concurrent.futures import process
