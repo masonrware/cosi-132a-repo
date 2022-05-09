@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
+    <link rel="icon" href="https://i.ibb.co/f92XCX9/favicon-16x16.png" size="16x16" type="image/png">
+    <title>Movie RealView</title>
+</head>
+
+<body>
+<nav class="navbar">
+      <div style="height:30px;font-size:22px;display:table-cell;vertical-align:middle;">
+         <a href="/"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="30px" height="28px" style="border:solid;border-color:red;border-width:.8px;"></a>&nbsp&nbsp
+          <a style="color:white;text-decoration:none;vertical-align:top;" aria-current="page" href="/">Home</a>&nbsp&nbsp
+          <a style="color:white;text-decoration:none;vertical-align:top;" href="/sentimovie">SentiMovie</a>
+      </div>
+
+</nav>
+
+<div style="justify-content:center;padding-top:80px;">
+    <a href="/"><p style=text-align:center;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" border="4" width="180px" height="150px" style="border:solid;border-color:red;border-width:2px;"></a>
+    <h1 align="center" style="font-size:45px;">Are you ready to find a movie to watch?</h1>
+    <p align="center" style="font-size:18px;">Enter keywords based on what you are planning to see in the movie you want to watch<br></p>
+</div>
+<form action="{{ url_for('results') }}" name="search" method="post" align="center">
+    <input type="text" id="query" name="query" size=50 placeholder="type keywords here..." required="True">
+    <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
+</form>
+
+</body>
+</html>

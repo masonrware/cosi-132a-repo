@@ -1,7 +1,7 @@
 pip3 install -r requirements.txt
 # python3 main.py
 
-# load fasttext embeddings that are trained on wiki news. Each embedding has 300 dimensions
+# load fasttext embeddings that are trained on wiki news. Each embedding has 300 dimensions -- WE DON"T NEED THIS
 python3.9 -m embedding_service.server --embedding fasttext  --model data/wiki-news-300d-1M-subword.vec
 
 # load sentence BERT embeddings that are trained on msmarco. Each embedding has 768 dimensions
