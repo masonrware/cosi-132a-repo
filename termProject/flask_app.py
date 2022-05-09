@@ -73,6 +73,8 @@ def review_data(review_id):
 
     response = engine.general_search(Match(doc_id={"query": review_id})).hits[0]
     title, content = response.title, response.review
+
+    # need better way to split words, also need better way to get stems of words
     content = content.split(" ")
     word_queries = query.split(" ")
     content = " ".join(["<mark>" + word + "</mark>" if word in word_queries else word for word in content])
@@ -88,6 +90,14 @@ def review_data(review_id):
     page_id = 2 """
     # actors? directors?
     return render_template("review.html", content=content, title=title, page_id=page)
+
+@app.route("/sentimovie")
+def sentimovie():
+    """
+    This is the home page for the website, which has the functionality for searching Washington Post articles.
+    @return: renders the html template for the home page, which creates the search box and submit button.
+    """
+    return render_template("sentimovie.html")
 
 
 if __name__ == "__main__":
