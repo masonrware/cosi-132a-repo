@@ -3,7 +3,7 @@ This is the codebase for the following class:
 COSI 132A, Peter Anick, Brandeis Univeristy
 
 
-**Title:** Use the full title of the assignment
+**Title:** COSI 132A Spring 2022 Information Retrieval Final Project: RealView
 
 **Author:** Drew Gottlieb, Jordan Blatter, Mason Ware, and Sarah Kosowsky
 
@@ -32,3 +32,11 @@ conditions or inappropriate input?
 **Team Member Contributions:** which includes a personalized paragraph
 or two from each teammember which describe the parts of the code you were primarily
 responsible for.
+Drew -
+
+Jordan - 
+
+Mason - 
+
+Sarah -
+
