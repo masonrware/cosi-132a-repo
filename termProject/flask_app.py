@@ -25,7 +25,7 @@ connections.create_connection(hosts=["localhost"], timeout=100, alias="default")
 
 pages = {}
 engine = None
-num_per_page = 10
+NUM_PER_PAGE = 10
 num_res = 0
 page = 1
 query = ""
@@ -51,13 +51,15 @@ def results():
 
     pages = {}
     num_res = len(response)
-    num_pages = math.ceil(num_res/ num_per_page)
+    num_pages = math.ceil(num_res/ NUM_PER_PAGE)
 
     for i in range(num_pages):
         pages[i + 1] = [[hit.doc_id, hit.title, hit.review[:250] + "..."] for hit in
-                        response[i * num_per_page: min(num_res, (i * num_per_page) + num_per_page)]]
+                        response[i * NUM_PER_PAGE: min(num_res, (i * NUM_PER_PAGE) + NUM_PER_PAGE)]]
 
-    return render_template("results.html", page=page, num_res=num_res, doc_results=pages[1])
+    curr_page = pages[1] if len(pages) > 0 else []
+
+    return render_template("results.html", page=page, num_res=num_res, doc_results=curr_page)
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])
@@ -79,17 +81,7 @@ def review_data(review_id):
     word_queries = query.split(" ")
     content = " ".join(["<mark>" + word + "</mark>" if word in word_queries else word for word in content])
 
-    # go through data retrieved and get info to show to user
-    """content = The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
-                Before the introduction of digital production, series of still images were recorded on a strip of chemically sensitized celluloid (photographic film stock), usually at the rate of 24 frames per second. The images are transmitted through a movie projector at the same rate as they were recorded, with a Geneva drive ensuring that each frame remains still during its short projection time. A rotating shutter causes stroboscopic intervals of darkness, but the viewer does not notice the interruptions due to flicker fusion. The apparent motion on the screen is the result of the fact that the visual sense cannot discern the individual images at high speeds, so the impressions of the images blend with the dark intervals and are thus linked together to produce the illusion of one moving image. An analogous optical soundtrack (a graphic recording of the spoken words, music and other sounds) runs along a portion of the film exclusively reserved for it, and was not projected.
-                Contemporary films are usually fully digital through the entire process of production, distribution, and exhibition.
-    author = "Wiki Pedia"
-    date = "05/05/2022"
-    title = "What is a movie?"  # title of movie or of review
-    
-    page_id = 2 """
-    # actors? directors?
-    return render_template("review.html", content=content, title=title, page_id=page)
+    return render_template("review.html", content=content, title=title, page_id=page, sentiment=9)
 
 @app.route("/sentimovie")
 def sentimovie():
