@@ -10,6 +10,21 @@
         mark {
             background-color: #FF5733;
         }
+        p:hover span {
+            display: block;
+            text-align: center;
+            color:white;
+            font-size: 14px;
+        }
+        span {
+            display: none;
+            position: fixed;
+            left:23.5%;
+            top: 26%;
+            height:40px;
+            width:250px;
+            border: 1px solid red
+        }
     </style>
     <link rel="icon" href="https://i.ibb.co/f92XCX9/favicon-16x16.png" size="16x16" type="image/png">
     <title>{{ title }} Review</title>
@@ -30,7 +45,7 @@
 </nav>
 <div style="text-align:center;padding-top:50px;padding-left:150px;padding-right:150px;">
     <p style="font-size:75px;display:inline;color:red;">{{ title }}<br></p>
-    <p style="font-size:30px;display:inline;">Sentiment Score</p>
+    <p style="font-size:30px;display:inline;">Sentiment Score<span>A Sentiment Score is a score given to a movie based on its sentiment.</span></p>
     <p style="color:red;font-size:30px;display:inline;">:</p>
     <p style="font-size:30px;display:inline"> {{ sentiment }}</p><br>
     <p style="font-size:30px;display:inline"> {{ date }}</p>
