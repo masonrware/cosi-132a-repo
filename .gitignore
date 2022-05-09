@@ -138,7 +138,7 @@ PA3venv/
 #specific
 .DS_Store
 .DS_Store/
-*.jl
+final_movies.jl
 elasticsearch-7.10.2/
 *.vec
 
