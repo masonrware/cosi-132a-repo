@@ -73,8 +73,9 @@ def review_data(review_id):
 
     response = engine.general_search(Match(doc_id={"query": review_id})).hits[0]
     title, content = response.title, response.review
-
-    #content = [word for word in content]
+    content = content.split(" ")
+    word_queries = query.split(" ")
+    content = " ".join(["<mark>" + word + "</mark>" if word in word_queries else word for word in content])
 
     # go through data retrieved and get info to show to user
     """content = The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.

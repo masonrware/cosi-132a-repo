@@ -7,6 +7,9 @@
             background-color: black;
             color: white;
         }
+        mark {
+            background-color: #FF5733;
+        }
     </style>
     <link rel="icon" href="https://i.ibb.co/f92XCX9/favicon-16x16.png" size="16x16" type="image/png">
     <title>{{ title }} Review</title>
@@ -33,7 +36,7 @@
     <p style="font-size:30px;display:inline;">Date</p>
     <p style="color:red;font-size:30px;display:inline;">:</p>
     <p style="font-size:30px;display:inline"> {{ date }}</p>
-    <p style="font-size:17px">{{ content }}</p>
+    <p style="font-size:17px;mark-background-color:red;">{{ content | safe }}</p>
 </div>
 
 <form action="{{ url_for('next_page', page_id = page_id) }}" name="search" method="post" style="text-align:center;">
