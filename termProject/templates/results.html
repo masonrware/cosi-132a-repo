@@ -28,6 +28,7 @@
 
 <div style="justify-content:center;padding-top:30px;text-align:center;">
     <a href="/"><p style=display:inline;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" width="180px" height="150px"  style="border:solid;border-color:red;border-width:1.5px;"></a>
+    <p>Page {{ page }} of {{ (num_res / 10) | round(0, 'ceil') | int }} for <i>"{{ query }}"</i></p>
 </div>
 
 <div style="text-align:left;padding-left:26%;padding-right:26%;">

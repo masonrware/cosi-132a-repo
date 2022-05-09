@@ -42,7 +42,7 @@ def home():
 # result page
 @app.route("/results", methods=["POST"])  # put back after testing
 def results():
-    global pages, engine, num_res, query
+    global pages, engine, num_res, query, page
     query = request.form["query"]
     print(query)
 
@@ -50,6 +50,7 @@ def results():
     response = engine.search()
 
     pages = {}
+    page = 1
     num_res = len(response)
     num_pages = math.ceil(num_res/ NUM_PER_PAGE)
 
@@ -59,14 +60,14 @@ def results():
 
     curr_page = pages[1] if len(pages) > 0 else []
 
-    return render_template("results.html", page=page, num_res=num_res, doc_results=curr_page)
+    return render_template("results.html", page=page, num_res=num_res, doc_results=curr_page, query=query)
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])
 def next_page(page_id):
-    global pages, num_res, page
+    global pages, num_res, page, query
     page = page_id
-    return render_template("results.html", page=page, num_res=num_res, doc_results=pages[page_id])
+    return render_template("results.html", page=page, num_res=num_res, doc_results=pages[page_id], query=query)
 
 
 @app.route("/review_data/<int:review_id>")
