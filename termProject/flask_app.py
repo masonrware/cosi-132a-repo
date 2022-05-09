@@ -85,6 +85,12 @@ def next_page(page_id):
 
 @app.route("/review_data/<int:review_id>")
 def review_data(review_id):
+    """
+    The review page for the website, which shows a movie review's full content (title, content, and sentiment score).
+    @param doc_id: The document id of the review the user wants to see
+    @return: renders the template for the doc html file, which displays the document, with the searched keywords
+    highlighted, and the review's sentiment score to the user.
+    """
     global engine, page
 
     response = engine.general_search(Match(doc_id={"query": review_id})).hits[0]  # look up info about review
