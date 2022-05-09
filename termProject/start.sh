@@ -11,7 +11,7 @@ python3.9 -m embedding_service.server --embedding sbert  --model msmarco-distilb
 python3.9 load_es_index.py --index_name movie_reviews --path data/final_movies.jl
 
 # use keyword from topic 363 as the query; search over the stemmed_content field from index "wapo_docs_50k" based on BM25 and compute NDCG@20
-python3.9 main.py --index_name movie_reviews --topic_id 363 --query_type kw --use_english_analyzer --top_k 20
+python3.9 query.py --index_name movie_reviews 
 
 # use natural language from topic 363 as the query; search over the stemmed_content field from index "wapo_docs_50k" based on sentence BERT embedding reranking query and compute NDCG@20
 python3.9 evaluate.py --index_name movie_reviews --topic_id 363 --query_type nl --vector_name sbert_vector  --top_k 20  --search_type rerank
