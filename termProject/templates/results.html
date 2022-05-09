@@ -51,7 +51,7 @@
 </div>
 
 <div style="display:inline-block;">
-    {% with more_pages= num_res/page <= 8 %}
+    {% with more_pages= num_res/page <= 10 %}
 
         <form action="{{ url_for('next_page', page_id=page+1, query=query) }}" name="search" method="post">
             <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Next" {% if more_pages %} disabled=True {% endif %}>
