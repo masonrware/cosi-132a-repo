@@ -27,6 +27,8 @@ pages = {}
 engine = None
 num_per_page = 10
 num_res = 0
+page = 1
+query = ""
 
 @app.route("/")
 def home():
@@ -40,67 +42,51 @@ def home():
 # result page
 @app.route("/results", methods=["POST"])  # put back after testing
 def results():
-    global pages, engine, num_res
+    global pages, engine, num_res, query
     query = request.form["query"]
     print(query)
-    pages = {}
-    
+
     engine = Engine("wapo_docs_50k", query, 60)
     response = engine.search()
 
+    pages = {}
     num_res = len(response)
     num_pages = math.ceil(num_res/ num_per_page)
 
     for i in range(num_pages):
         pages[i + 1] = [[hit.doc_id, hit.title, hit.review[:250] + "..."] for hit in
                         response[i * num_per_page: min(num_res, (i * num_per_page) + num_per_page)]]
-    
-    
-    print(pages)
 
-    """
-    curr_doc = []  # global var? so no need to reload? page as global var too?
-    for hit in enumerate(response[0:(min(10, len(response)))]):  # iterate through up to 8 docs
-        curr_doc.append([hit[0], hit[1].title if hit[1].title != "" else "<no title>", hit[1].review[:150]])
-
-    print(curr_doc)
-    print(response)
-    # surround keywords in <mark> tags to highlight
-    
-    temp_data = ["What is a movie?", "The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional <mark>animation</mark> techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
-                Before the introduction of digital production, series of still images were recorded on a strip of chemically sensitized celluloid (photographic film stock), usually at the rate of 24 frames per second. The images are transmitted through a movie projector at the same rate as they were recorded, with a Geneva drive ensuring that each frame remains still during its short projection time. A rotating shutter causes stroboscopic intervals of darkness, but the viewer does not notice the interruptions due to flicker fusion. The apparent motion on the screen is the result of the fact that the visual sense cannot discern the individual images at high speeds, so the impressions of the images blend with the dark intervals and are thus linked together to produce the illusion of one moving image. An analogous optical soundtrack (a graphic recording of the spoken words, music and other sounds) runs along a portion of the film exclusively reserved for it, and was not projected.
-                Contemporary"[:250] + "..."]
-    doc_results = []
-    for i in range(10):
-        temp = [i]
-        temp.extend(temp_data)
-        doc_results.append(temp)
-    #print(doc_results)"""
-
-    return render_template("results.html", page=1, num_res=num_res, doc_results=pages[1])
+    return render_template("results.html", page=page, num_res=num_res, doc_results=pages[1])
 
 
 @app.route("/results/<int:page_id>, query", methods=["POST"])
 def next_page(page_id):
-    global pages, num_res
-
-    return render_template("results.html", page=page_id, num_res=num_res, doc_results=pages[page_id])
+    global pages, num_res, page
+    page = page_id
+    return render_template("results.html", page=page, num_res=num_res, doc_results=pages[page_id])
 
 
 @app.route("/review_data/<int:review_id>")
 def review_data(review_id):
-    doc = review_id  # query database using review id
+    global engine, page
+
+    response = engine.general_search(Match(doc_id={"query": review_id})).hits[0]
+    title, content = response.title, response.review
+
+    #content = [word for word in content]
 
     # go through data retrieved and get info to show to user
-    content = """The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
+    """content = The moving images of a film are created by photographing actual scenes with a motion-picture camera, by photographing drawings or miniature models using traditional animation techniques, by means of CGI and computer animation, or by a combination of some or all of these techniques, and other visual effects.
                 Before the introduction of digital production, series of still images were recorded on a strip of chemically sensitized celluloid (photographic film stock), usually at the rate of 24 frames per second. The images are transmitted through a movie projector at the same rate as they were recorded, with a Geneva drive ensuring that each frame remains still during its short projection time. A rotating shutter causes stroboscopic intervals of darkness, but the viewer does not notice the interruptions due to flicker fusion. The apparent motion on the screen is the result of the fact that the visual sense cannot discern the individual images at high speeds, so the impressions of the images blend with the dark intervals and are thus linked together to produce the illusion of one moving image. An analogous optical soundtrack (a graphic recording of the spoken words, music and other sounds) runs along a portion of the film exclusively reserved for it, and was not projected.
-                Contemporary films are usually fully digital through the entire process of production, distribution, and exhibition."""
+                Contemporary films are usually fully digital through the entire process of production, distribution, and exhibition.
     author = "Wiki Pedia"
     date = "05/05/2022"
     title = "What is a movie?"  # title of movie or of review
-    page_id = 2
+    
+    page_id = 2 """
     # actors? directors?
-    return render_template("review.html", content=content, date=date, author=author, title=title, page_id=page_id)
+    return render_template("review.html", content=content, title=title, page_id=page)
 
 
 if __name__ == "__main__":

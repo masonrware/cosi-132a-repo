@@ -87,6 +87,18 @@ class Engine:
 
         return self.results
 
+    def general_search(self, query: Query):
+        """
+        Searches index based on query
+        @param query: Any user Query object
+        @return a response object of the matches from the index based on the query
+        """
+        # initialize a query and return top result
+        s = Search(using="default", index=self.index).query(query)[:1]
+        response = s.execute()
+
+        return response
+
 
 # I think this method can be deleted
 def rank(index: str, query: Query, top_k: int) -> list():
