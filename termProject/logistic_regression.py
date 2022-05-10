@@ -16,6 +16,10 @@ class LogisticRegression:
         self.n_features = n_features
         self.theta = np.zeros(n_features + 1)  # weights (and bias)
         self.curr_class = int
+        self.aspects = {'plot', 'structure', 'characterization', 'scenes', 'visuals', 'dialogue', 'conflict', 'climax',
+                        'story arc', 'plausibility', 'premise', 'entertainment value', 'theme', 'acting',
+                        'cinematography', 'lighting', 'costumes', 'wardrobe', 'effects', 'editing', 'cgi', 'music',
+                        'soundtrack', 'vfx', 'sfx', 'directing'}
 
     def update_feat_dict(self, data_set):
         feature_idx = self.n_features
@@ -123,6 +127,16 @@ class LogisticRegression:
         vec = self.featurize(doc)
         score = expit(np.dot(vec, self.theta))
         return score
+    
+    def aspect_extractor(self, review):
+    review = review.split('.')
+    aspects = {}
+    for line in review:
+        word_tokenize(line)
+        line = set(line)
+        if bool(line & self.aspects):
+            line = " ".join(list(line))
+            score = self.classify(line)
 
     def evaluate(self, results):
         confusion_matrix = np.zeros((len(self.class_dict), len(self.class_dict)))
