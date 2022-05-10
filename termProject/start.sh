@@ -26,3 +26,11 @@ python3.9 -m embedding_service.server --embedding sbert  --model msmarco-distilb
 
 # To start and host the flask app
 python3.9 flask_app.py --run
+
+# sample queries:
+
+Buddy adventure comedy (exact)
+Heartwarming and uplifting (exact) (edited) 
+A great car chase (sentiment over literal)
+something to laugh about (some misses)
+pretty animation (not effective at all)
