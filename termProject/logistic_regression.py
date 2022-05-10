@@ -196,8 +196,6 @@ class LogisticRegression:
 
 if __name__ == '__main__':
     lr = LogisticRegression(n_features=4)
-    # make sure these point to the right directories
     lr.train('movie_reviews/train', batch_size=3, n_epochs=10, eta=0.1)
-    # lr.train('movie_reviews_small/train', batch_size=3, n_epochs=1, eta=0.1)
     results = lr.test('movie_reviews/dev')
     lr.evaluate(results)
