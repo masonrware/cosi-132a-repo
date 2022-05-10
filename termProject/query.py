@@ -103,15 +103,6 @@ class Engine:
 
         return response
 
-
-# I think this method can be deleted
-def rank(index: str, query: Query, top_k: int) -> list():
-    ''' Function to rank documents given a query. '''
-    s = Search(using="default", index=index).query(query)[
-        :top_k
-    ]
-    response = s.execute()
-    return response
         
 def re_rank(index: str, query: Query, rescore_query: Query, top_k: int) -> list():
     ''' Function to rank and rerank documents given a query. '''
