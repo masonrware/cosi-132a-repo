@@ -104,6 +104,11 @@ We also carefully tested our system by ensuring that our features worked properl
 
 ### Examples of queries/interactions that work over the test subset:
 
+* buddy adventure comedy
+* heartwarming and uplifiting
+* great car chase (sentiment)
+* spy thrillers
+
 * * *
 
 ### Code submitted by:
@@ -119,7 +124,7 @@ Team Member Contributions:
 ### Jordan Blatter
 
 ### Mason Ware
-
+I was responsible for sourcing our data. This included not only collecting data from api calls but also generating the final json data that our es-index is built upon. In addition to the data itself, I was responsible for designing and implementing the entire data pipeline, from source file, to jl file, to es-index. This required me include elasticsearch services tailored to our final movie data. Outside of these tasks, I aided in project management - often setting deadlines and motivating team members. Lastly, I helped maintain any and all documentation for this project including the dependencies and inline code comments.
 
 ### Sarah Kosowsky
 
