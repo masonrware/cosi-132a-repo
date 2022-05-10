@@ -120,6 +120,7 @@ Team Member Contributions:
 -----------
 
 ### Drew Gottlieb
+I was primarily responsible for looking into MongoDB integration for the sentiment analysis scores, and linking up ElasticSearch to feed into MongoDB for faster retrieval. Ultimately, we did not elect to go that route in this release as it was not significantly faster with our data set than just recalculating sentiment scores on the fly. However, we think it would be still worth it to implement fully in later releases. I also cleaned some of the movie data in preprocessing, and explored more advanced classification algorithms than just logistic regression.
 
 ### Jordan Blatter
 
