@@ -52,7 +52,7 @@ def results():
 
     query = request.form["query"]  # get user query
 
-    engine = Engine("wapo_docs_50k", query, 60)
+    engine = Engine("movie_reviews", query, 60)
     response = engine.search()  # query ES index
 
     pages = {}
