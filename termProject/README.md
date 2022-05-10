@@ -94,6 +94,30 @@ We also carefully tested our system by ensuring that our features worked properl
 
 * * *
 
+### Examples of queries/interactions that work over the test subset:
+
+* * *
+
+### Code submitted by:
+Mason Ware
+
+* * *
+
+Team Member Contributions:
+-----------
+
+### Drew Gottlieb
+
+### Jordan Blatter
+
+### Mason Ware
+
+
+### Sarah Kosowsky
+
+ I was primarily responsible for the user interface. I made the flask application to handle user queries. I also edited the query.py code to use reranking with sbert embeddings for querying the ES index. In addition to making the flask routes, I also made all of the html files and spent lots of time trying to make the user experience as seamless as possible. I made “prev” and “next” buttons so that users could go back and forth between the result pages. I also added a navigation bar so that users could easily access the home page. On the review page I added a hover feature for the sentiment score, so that users could hover over the text to learn more about the meaning of a sentiment score. In addition to the html itself, I also used a lot of inline css coding. I also tested the system many times by testing both edge cases and simple queries. I also worked on demo-ing the system for the final presentation. Lastly, I created and designed our team’s logo and I made all of the presentation skeletons.
+
+* * *
 
 _© 2022 MASON WARE_
 
