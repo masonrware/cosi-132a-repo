@@ -20,7 +20,7 @@ This project is intended to serve as a complex movie search engine. It works by 
 
 *THERE ARE NEEDED DOCUMENTS BELOW*
 
-Some documents are too large to push to github (elasticsearch and our final jl data). You can find these documents for download here: (https://drive.google.com/file/d/1wLA4i15IiHSqHbQqp69RPucCFzd8hJpm/view?usp=sharing)
+Some documents are too large to push to github (elasticsearch and our final jl data). You can find these documents for download here: (https://drive.google.com/drive/folders/1IenUta2TFhF8Brb_rkYoIzzeAdy1nWsr?usp=sharing)
 
 ### Engine
 
