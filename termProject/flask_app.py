@@ -16,6 +16,7 @@ from query import Engine
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.query import Match
 from flask import Flask, render_template, request
+from nltk.tokenize import word_tokenize
 import argparse
 import math
 
@@ -52,7 +53,7 @@ def results():
 
     query = request.form["query"]  # get user query
 
-    engine = Engine("wapo_docs_50k", query, 60)
+    engine = Engine("movie_reviews", query, 60)
     response = engine.search()  # query ES index
 
     pages = {}
@@ -96,10 +97,12 @@ def review_data(review_id):
     response = engine.general_search(Match(doc_id={"query": review_id})).hits[0]  # look up info about review
     title, content = response.title, response.review
 
-    # split content and word_queries by space (word), so that highlighting could be done for keywords
-    content = content.split(" ")
-    word_queries = query.split(" ")
-    content = " ".join(["<mark>" + word + "</mark>" if word in word_queries else word for word in content])
+    # split content and word_queries , so that highlighting could be done for keywords
+    content = word_tokenize(content)
+    word_queries = word_tokenize(query)
+    word_queries = [word.lower() for word in word_queries]
+    
+    content = " ".join(["<mark>" + word + "</mark>" if word.lower() in word_queries else word for word in content])
 
     sentiment = 9  # change when mongodb is set up
     return render_template("review.html", content=content, title=title, page_id=page, sentiment=sentiment)

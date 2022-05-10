@@ -10,6 +10,9 @@ python3.9 -m embedding_service.server --embedding sbert  --model msmarco-distilb
 # load movie reviews into the index called "movie_reviews"
 python3.9 load_es_index.py --index_name movie_reviews --path data/final_movies.jl
 
+# (for testing test index only) load movie reviews in test dataset into the index called "movie_reviews"
+python3.9 load_es_index.py --index_name movie_reviews --path data/sample_data/movies.jl
+
 # use keyword from topic 363 as the query; search over the stemmed_content field from index "wapo_docs_50k" based on BM25 and compute NDCG@20
 python3.9 query.py --index_name movie_reviews 
 
