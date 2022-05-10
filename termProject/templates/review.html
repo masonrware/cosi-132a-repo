@@ -15,14 +15,15 @@
             text-align: center;
             color:white;
             font-size: 14px;
+            background-color: black;
         }
         span {
             display: none;
             position: fixed;
-            left:23.5%;
-            top: 26%;
-            height:40px;
-            width:250px;
+            left: 28%;
+            top: 25.5%;
+            height:47px;
+            width:400px;
             border: 1px solid red
         }
     </style>
@@ -45,7 +46,7 @@
 </nav>
 <div style="text-align:center;padding-top:50px;padding-left:150px;padding-right:150px;">
     <p style="font-size:75px;display:inline;color:red;">{{ title }}<br></p>
-    <p style="font-size:30px;display:inline;">Sentiment Score<span>A Sentiment Score is a score given to a movie based on its sentiment.</span></p>
+    <p style="font-size:30px;display:inline;">Sentiment Score<span>This "Sentiment Score" represents the sentiment of all reviews documented for a movie in our corpus! It is on a scale from 0 to 1. The higher the score is, the higher people's opinion on the movie is.</span></p>
     <p style="color:red;font-size:30px;display:inline;">:</p>
     <p style="font-size:30px;display:inline"> {{ sentiment }}</p><br>
     <p style="font-size:30px;display:inline"> {{ date }}</p>
