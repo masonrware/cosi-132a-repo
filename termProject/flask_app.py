@@ -129,6 +129,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # if args.build:
-        # build inverted index here
+    # build inverted index here
     if args.run:
         app.run(debug=True, port=5000)

@@ -129,14 +129,14 @@ class LogisticRegression:
         return score
     
     def aspect_extractor(self, review):
-    review = review.split('.')
-    aspects = {}
-    for line in review:
-        word_tokenize(line)
-        line = set(line)
-        if bool(line & self.aspects):
-            line = " ".join(list(line))
-            score = self.classify(line)
+        review = review.split('.')
+        aspects = {}
+        for line in review:
+            word_tokenize(line)
+            line = set(line)
+            if bool(line & self.aspects):
+                line = " ".join(list(line))
+                score = self.classify(line)
 
     def evaluate(self, results):
         confusion_matrix = np.zeros((len(self.class_dict), len(self.class_dict)))
