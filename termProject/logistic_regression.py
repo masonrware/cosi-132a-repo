@@ -4,10 +4,6 @@ from collections import defaultdict, Counter
 from math import ceil
 from random import Random
 from scipy.special import expit  # logistic (sigmoid) function
-import nltk.sentiment.util
-from nltk.corpus import stopwords
-from nltk.corpus import opinion_lexicon
-from nltk.stem import PorterStemmer
 
 
 class LogisticRegression:
