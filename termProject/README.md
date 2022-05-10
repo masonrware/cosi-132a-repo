@@ -18,6 +18,10 @@ COSI 132A -- Brandeis University
 
 This project is intended to serve as a complex movie search engine. It works by hosting a flask app front end and an elasticsearch backend. Utilizing indexed documents and their vectors, the engine is able to compare the user's query against movie reviews from sources across the internet.
 
+*THERE ARE NEEDED DOCUMENTS BELOW*
+
+Some documents are too large to push to github (elasticsearch and our final jl data). You can find these documents for download here: (https://drive.google.com/file/d/1wLA4i15IiHSqHbQqp69RPucCFzd8hJpm/view?usp=sharing)
+
 ### Engine
 
 * `flask_app.py`
