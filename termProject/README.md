@@ -14,44 +14,44 @@ COSI 132A -- Brandeis University
 
 ### Description
 
+*RealView Movie Search Engine*
 
+This project is intended to serve as a complex movie search engine. It works by hosting a flask app front end and an elasticsearch backend. Utilizing indexed documents and their vectors, the engine is able to compare the user's query against movie reviews from sources across the internet.
 
 ### Engine
 
-* `hw5.py`
+* `flask_app.py`
 
-`hw5.py` implements a flask app so that it can obtain a raw query string and some specifications about which retrieval method to use. Once these attributes are recorded, that are
-used to instantiate the Engine class present in `user_search.py` with the specified arguments. This is then searched upon and it's retrieved, ranked documents are returned and
-rendered in the html files located in the `templates/` subdir, per Flask standards.
+`flask_app.py` implements a flask app so that it can obtain a raw query string that is
+used to instantiate the Engine class present in `query.py` with the specified arguments. This is then searched upon and it's results are retrieved. Using Okami BM25 and reranking based on document sbert vectors, ranked documents are returned and rendered in the html files located in the `templates/` subdir, per Flask standards.
 
 ### Querying
 
-* `user_search.py`
+* `query.py`
 
-As stated earlier, almost all the aspect of `user_search`'s searching and interacting with the elasticsearch instance to retrieve results discussed in the following description holds for `evaluate.py`. The difference comes in output.
+In `query.py`, an Engine instance is created to represent one search instance. Using the kwargs provided, the program runs the `search` method which first generates queries based on the original user query and some enhancements. After this is done, one query is chosen and that query is used for searching against the es-index. Next, sbert embeddings are created and used in rerank.
 
-In `user_search`, an Engine instance is created to represent one search instance. Using the kwargs provided, the program runs the `search` method which first generates queries based on the original user query and some enhancements
-depending on the analyzer they chose. After this is done, one query is chosen and that query is used for searching the index. Next, embeddings are created regardless of the retrieval method depending on the type of vector name provided
-(default is sbert). 
+* `re_rank`
 
-Then, if the user specified a search type, it will be chosen via some logic gates and once that is done, the `rank` or `re_rank` methods are called, depending on the retrieval method.
-  
-* `rank` & `re_rank`
-
-The functions `rank` and `re_rank` are both present in the global space of `user_search.py`. They make use of the `Search()` method provided by the elasticsearch API. Retrieving a full
-response from the es instance, these methods either return it, in the case of `rank`, or they use the `.extra()` modifier to rescore the results according to a provided vector. 
+The function `re_rank` is present in the global space of `query.py`. It makes use of the `Search()` method provided by the elasticsearch API. Retrieving a full response from the es instance, this method uses the `.extra()` modifier to rescore the results according to a provided vector. 
 
 
 ### Dependencies
 
-1. elasticsearch==7.17.1
-2. elasticsearch_dsl==7.4.0
-3. Flask==2.0.2
-4. nltk==3.5
-5. numpy==1.22.3
-6. pyzmq==22.3.0
-7. sentence_transformers==2.2.0
-8. tqdm==4.61.2
+* elasticsearch==7.17.2
+* elasticsearch_dsl==7.4.0
+* googletrans==3.1.0a0
+* nltk==3.7
+* numpy==1.22.3
+* pandas==1.4.1
+* pyenchant==3.2.2
+* pynytimes==0.8.0
+* python-dotenv==0.20.0
+* pyzmq==22.3.0
+* requests==2.25.1
+* sentence_transformers==2.2.0
+* tqdm==4.61.2
+
 
 All dependencies can be found in the `./requirements.txt` file. Moreover, they can be automatically installed using the shell command: `pip install -r requirements.txt` and the most up to date versions of the dependencies can be installed using the shell command: `pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U` .
 
@@ -63,27 +63,28 @@ Build & Run
 
 ### Build Instructions
 
-[!DEPRECATED]In order to build the index and start the services required for interacting with the program, run the command `python3.9 hw5.py --build` while located in the root directory of the project. 
+Navigate to the file: `start.sh` to refer to some boilerplate scripts that start the service's required build.
 
-Alternatively, you can navigate to the file: `scripts/scripts.sh` to refer to some boilerplate scripts that start the service's required build.
+There are multiple services that need localhosting including the flask app itself as well as some sample queries.
 
 ### Run Instructions
 
-In order to run the search engine, enter the command `python3.9 hw5.py --run`. This will start a flask server on you localhost, so check your browser.
+In order to run the search engine, enter the command `python3.9 flask_app.py --run`. This will start a flask server on you localhost, so check your browser.
 
 * * *
 
 ### Testing
 
-To test this program, I wrote unit tests for each major class and utility in the program aside from the database methods (as I am not sure how to test the pymongo methods). These tests are stored in the file: `test_hw5.py` and can be run from the terminal using the command: `python3.9 test_hw5.py`. This will prompt the test suite to run, running all the tests in multiple `unittest.TestCase` instances. If any fail, they will be conveniently displayed in the terminal with the initial exact difference marked.
+In order to test this program, we ran random queries against our test set of documents present at `data/sample_data`. These queries included:
 
-Alternatively, this program is designed to be able to be controlled entirely from within `hw5.py`. Therefore, one can enter the command `python3.9 hw5.py --test` to run the test suite as well.
+* Life Love Happiness
+* Epic Hero Explosions
+* Pretty animation
+* War hardship
+  
+These queries highlight the strengths and weeknesses of our engine, reflected in the idea that there are not a lot of source documents to begin with.
 
 * * *
-
-### Results
-
-A link to the results sheet can be found in the file `results.txt` in the root directory of the project. 
 
 _© 2022 MASON WARE_
 
