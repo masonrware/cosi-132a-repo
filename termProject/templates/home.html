@@ -24,13 +24,23 @@
 
 <div style="justify-content:center;padding-top:80px;">
     <a href="/"><p style=text-align:center;"><img src="https://i.ibb.co/F0C5pY3/RealView.jpg" alt="RealView Logo" border="4" width="180px" height="150px" style="border:solid;border-color:red;border-width:2px;"></a>
-    <h1 align="center" style="font-size:45px;">Are you ready to find a movie to watch?</h1>
+    <h1 align="center" style="font-size:45px;margin:10px;">Are you ready to find a movie to watch?</h1>
     <p align="center" style="font-size:18px;">Enter keywords based on what you are planning to see in the movie you want to watch<br></p>
 </div>
 <form action="{{ url_for('results') }}" name="search" method="post" align="center">
     <input type="text" id="query" name="query" size=50 placeholder="type keywords here..." required="True">
     <input style="border:solid;border-color:red;border-width:1px;" type="submit" value="Search">
 </form>
+
+
+<p style="text-align:center;padding-top:160px;padding-left:200px;padding-right:200px;font-size:13px;">
+    On each review page, you will see a sentiment analysis score.
+    Sentiment analysis, or opinion mining, is a technique in natural language processing used to automatically determine
+    whether a piece of text is positive, negative, and sometimes neutral. RealView's machine learning algorithms analyze
+    the sentiment of all reviews for a movie and create a composite score for each movie. In addition, our patented
+    AspectExtractor analyzes each review's opinion on specific aspects of movies, such as plot, setting, costume design,
+    and animation style. Our sentiment analysis makes it easier for the user to understand the overall opinion on a movie!
+</p>
 
 </body>
 </html>
