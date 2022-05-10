@@ -40,6 +40,7 @@ The function `re_rank` is present in the global space of `query.py`. It makes us
 
 * elasticsearch==7.17.2
 * elasticsearch_dsl==7.4.0
+* Flask==2.0.2
 * googletrans==3.1.0a0
 * nltk==3.7
 * numpy==1.22.3
@@ -49,6 +50,7 @@ The function `re_rank` is present in the global space of `query.py`. It makes us
 * python-dotenv==0.20.0
 * pyzmq==22.3.0
 * requests==2.25.1
+* scipy==1.8.0
 * sentence_transformers==2.2.0
 * tqdm==4.61.2
 

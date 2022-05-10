@@ -19,7 +19,8 @@ from flask import Flask, render_template, request
 from nltk.tokenize import word_tokenize
 import argparse
 import math
-from logistic_regression import classify
+
+from logistic_regression import LogisticRegression
 
 app = Flask(__name__)
 
@@ -105,7 +106,9 @@ def review_data(review_id):
     
     content = " ".join(["<mark>" + word + "</mark>" if word.lower() in word_queries else word for word in content])
 
-    sentiment = classify(title + " " + content)  # change when mongodb is set up
+    # lr_model = LogisticRegression(n_features=4) # ? not sure what num to put here
+    # sentiment = lr_model.classify(title + " " + content)  # change when mongodb is set up
+    sentiment = 9 # arbitrary
     return render_template("review.html", content=content, title=title, page_id=page, sentiment=sentiment)
 
 @app.route("/sentimovie")

@@ -1,20 +1,28 @@
+#############################
+##  The following are some 
+##  commands that need to be 
+##  run before interaction.
+#############################
+
+# ALL CMDS ARE ASSUMING YOU ARE 
+# IN THE ROOT DIR OF THE PROJECT
+
+
+# To install all requirements:
 pip3 install -r requirements.txt
-# python3 main.py
 
-# load fasttext embeddings that are trained on wiki news. Each embedding has 300 dimensions -- WE DON"T NEED THIS
-python3.9 -m embedding_service.server --embedding fasttext  --model data/wiki-news-300d-1M-subword.vec
-
-# load sentence BERT embeddings that are trained on msmarco. Each embedding has 768 dimensions
+# To host the sbert embedding service locally
 python3.9 -m embedding_service.server --embedding sbert  --model msmarco-distilbert-base-v3
 
-# load movie reviews into the index called "movie_reviews"
-python3.9 load_es_index.py --index_name movie_reviews --path data/final_movies.jl
+# To start a local server instance of elasticsearch
+./elasticsearch-7.10.2/bin/elasticsearch
 
-# (for testing test index only) load movie reviews in test dataset into the index called "movie_reviews"
-python3.9 load_es_index.py --index_name movie_reviews --path data/sample_data/movies.jl
+# ONLY ONE OF BELOW TWO:
+    # To build an es index named movie_reviews based on final_movies.jl (needs to be downloaded see README.md)
+    python3.9 load_es_index.py --index_name movie_reviews --path data/final_movies.jl
 
-# use keyword from topic 363 as the query; search over the stemmed_content field from index "wapo_docs_50k" based on BM25 and compute NDCG@20
-python3.9 query.py --index_name movie_reviews 
+    # To build a test es-index for purpose of demoing
+    python3.9 load_es_index.py --index_name movie_reviews --path data/sample_data/movies.jl
 
-# use natural language from topic 363 as the query; search over the stemmed_content field from index "wapo_docs_50k" based on sentence BERT embedding reranking query and compute NDCG@20
-python3.9 evaluate.py --index_name movie_reviews --topic_id 363 --query_type nl --vector_name sbert_vector  --top_k 20  --search_type rerank
+# To start and host the flask app
+python3.9 flask_app.py --run
