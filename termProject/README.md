@@ -90,7 +90,10 @@ In order to test this program, we ran random queries against our test set of doc
   
 These queries highlight the strengths and weeknesses of our engine, reflected in the idea that there are not a lot of source documents to begin with.
 
+We also carefully tested our system by ensuring that our features worked properly. We ensured that the navbar linked to the correct pages and that the search bar in the navbar was functional. We also tested to ensure that users could not search without input. We also made sure that the reviews themselves were clickable and that they brought the user to the correct review. Lastly we checked that the "prev" and "next" buttons were enabled when there were prev/next pages and disabled when there were not.
+
 * * *
+
 
 _© 2022 MASON WARE_
 
