@@ -123,6 +123,9 @@ Team Member Contributions:
 I was primarily responsible for looking into MongoDB integration for the sentiment analysis scores, and linking up ElasticSearch to feed into MongoDB for faster retrieval. Ultimately, we did not elect to go that route in this release as it was not significantly faster with our data set than just recalculating sentiment scores on the fly. However, we think it would be still worth it to implement fully in later releases. I also cleaned some of the movie data in preprocessing, and explored more advanced classification algorithms than just logistic regression.
 
 ### Jordan Blatter
+I was responsible for implementing the logistic regression model in Python to classify sentiment of movie reviews. The reviews were classified on a scale from 0-1. I retrieved the data from the NLTK movie corpus and split it into training, dev, and test sets. After training the model, it can be called on to classify a single review.
+I also implemented the aspect extractor for reviews. This function extracts sentences containing mentions of aspects of movies like acting or visual effects and classifies the sentiment of the sentence containing the aspect word.
+
 
 ### Mason Ware
 I was responsible for sourcing our data. This included not only collecting data from api calls but also generating the final json data that our es-index is built upon. In addition to the data itself, I was responsible for designing and implementing the entire data pipeline, from source file, to jl file, to es-index. This required me include elasticsearch services tailored to our final movie data. Outside of these tasks, I aided in project management - often setting deadlines and motivating team members. Lastly, I helped maintain any and all documentation for this project including the dependencies and inline code comments.
