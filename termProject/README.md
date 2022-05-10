@@ -75,7 +75,15 @@ There are multiple services that need localhosting including the flask app itsel
 
 ### Run Instructions
 
-In order to run the search engine, enter the command `python3.9 flask_app.py --run`. This will start a flask server on you localhost, so check your browser.
+In order to run the search engine, enter the command `python3.9 flask_app.py --run`. This will start a flask server on you localhost, so check your browser (http://127.0.0.1:5000).
+The home page allows the user to search for keywords that they would like to see in a movie review. If users do not provide keywords to the system, then upon pressing the submit button, the system will alert the user to fill out the search box. On the home page, the user could also use the navbar, but it is not as useful on the home page since both the logo and 'home' link to the home page. Search is done by querying the ES index using reranking with sbert embeddings and the standard analyzer.
+
+After searching for keywords, the system returns a result page to the user. Ten results are shown at a time because we did not want a user to have to scroll so much but we also did not want them to have to go through tons of pages. Each result shows the title of the movie review and 250 characters of the review content, so that the user could get a sense of the review before clicking on it. If the user wants to read more about the review, they could click on the title or content to go to the review page. If the user wants to look at more reviews, they could use the 'next' button, which is enabled when there are more results available. After navigating to another page, the user could use the 'prev' button to navigate to the previous page. In total 60 results are retrieved because we do not expect that users would look through more than that many reviews. The user could also use the navbar to naviagte home.
+
+If the user click on a review, they will be directed to the review page, which displays the title, sentiment score, and full content of the review. The sentiment score represents the sentiment of all reviews documented for a movie in our corpus. It is on a scale from 0 to 1. The higher the score is, the higher people's opinion on the movie is. Users can hover over their mouse 'sentiment score' to learn more about what it means. From the review page, users can use the 'back to results' button to navigate back to the results page. They can also use the navbar to navigate back home.
+
+The navbar also has an option to navigate to 'sentimovie', which is a page that we hope to work on in the future. For now, it has a template of the page, with a banner indicating that the feature is coming soon.
+
 
 * * *
 
