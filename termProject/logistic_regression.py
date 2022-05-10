@@ -16,9 +16,6 @@ class LogisticRegression:
         self.n_features = n_features
         self.theta = np.zeros(n_features + 1)  # weights (and bias)
         self.curr_class = int
-        self.stop = set(stopwords.words("english"))
-        self.lexicon = set(opinion_lexicon.words())
-        self.ps = PorterStemmer()
 
     def update_feat_dict(self, data_set):
         feature_idx = self.n_features
@@ -28,11 +25,10 @@ class LogisticRegression:
                     doc = f.read().split()
                     for token in doc:
                         if "train" in root:
-                            if token in self.lexicon:
-                                if token not in self.feature_dict:
-                                    self.feature_dict[token] = feature_idx
-                                    feature_idx += 1
-                                    self.n_features += 1
+                               if token not in self.feature_dict:
+                                  self.feature_dict[token] = feature_idx
+                                  feature_idx += 1
+                                  self.n_features += 1
 
     def load_data(self, data_set):
         filenames = []
